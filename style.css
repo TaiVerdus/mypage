@@ -1,0 +1,269 @@
+/* ============================================================
+   MYPAGE · V1 基础样式
+   原则：先保证"不乱"——统一的配色、字体、页面宽度、区块间距
+   ============================================================ */
+
+/* ---------- 1. 配色与基础变量 ---------- */
+:root {
+  --color-primary: #2563eb;      /* 主色：清爽蓝（求职场景，专业干净） */
+  --color-primary-dark: #1d4ed8; /* 主色 hover 态 */
+  --color-bg: #f8fafc;           /* 页面背景：极浅灰（不用纯白，减少疲劳） */
+  --color-card: #ffffff;         /* 卡片背景 */
+  --color-text: #1f2937;         /* 正文：深灰（不用纯黑） */
+  --color-text-light: #6b7280;   /* 次要文字：中灰 */
+  --color-border: #e5e7eb;       /* 边框：浅灰 */
+  --page-width: 960px;           /* 内容区最大宽度 */
+  --section-gap: 96px;           /* 区块之间的间距 */
+}
+
+/* ---------- 2. 全局基础 ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* 系统无衬线字体，中文优先 */
+body {
+  font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.7;
+}
+
+/* 内容区统一宽度并水平居中 */
+main,
+.nav,
+.hero-content {
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ---------- 3. 导航 ---------- */
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 64px;
+}
+
+.nav-logo {
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--color-primary);
+}
+
+.nav-links {
+  display: flex;
+  gap: 24px;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: var(--color-text-light);
+  font-size: 15px;
+  padding: 6px 4px;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+/* ---------- 4. 首屏 hero ---------- */
+#hero {
+  padding: 80px 0 96px;
+  border-bottom: 1px solid var(--color-border);
+  background: linear-gradient(180deg, #eff6ff 0%, var(--color-bg) 100%);
+}
+
+.hero-content h1 {
+  font-size: 32px;
+  line-height: 1.4;
+}
+
+.highlight {
+  color: var(--color-primary);
+}
+
+.hero-tagline {
+  margin-top: 12px;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.hero-intro {
+  margin-top: 16px;
+  max-width: 560px;
+  color: var(--color-text-light);
+}
+
+.hero-btn {
+  display: inline-block;
+  margin-top: 32px;
+  padding: 10px 28px;
+  background-color: var(--color-primary);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: background-color 0.2s ease;
+}
+
+.hero-btn:hover {
+  background-color: var(--color-primary-dark);
+}
+
+/* ---------- 5. 通用区块 ---------- */
+section {
+  padding-top: calc(var(--section-gap) / 2);
+  scroll-margin-top: 72px; /* 平滑滚动后不被固定导航遮住标题 */
+}
+
+#about,
+#skills,
+#projects,
+#contact {
+  padding-bottom: calc(var(--section-gap) / 2);
+}
+
+.section-title {
+  font-size: 24px;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--color-border);
+}
+
+/* ---------- 6. 关于我 ---------- */
+.about-list {
+  margin-top: 16px;
+  list-style: none;
+}
+
+.about-list li {
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--color-border);
+}
+
+/* ---------- 7. 技能 ---------- */
+.skill-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 两列网格 */
+  gap: 16px;
+}
+
+.skill-item {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.skill-item h3 {
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+
+.skill-item p {
+  font-size: 14px;
+  color: var(--color-text-light);
+}
+
+/* ---------- 8. 作品展示 ---------- */
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 三列卡片 */
+  gap: 16px;
+}
+
+.project-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.project-card h3 {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.project-card p {
+  font-size: 14px;
+  color: var(--color-text-light);
+  flex-grow: 1; /* 让三张卡的链接按钮对齐到底部 */
+}
+
+.project-tags {
+  margin: 12px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.project-tags span {
+  font-size: 12px;
+  color: var(--color-primary);
+  background: #eff6ff;
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+.project-link {
+  font-size: 14px;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.project-link:hover {
+  text-decoration: underline;
+}
+
+/* ---------- 9. 联系我（footer） ---------- */
+#contact {
+  background: var(--color-card);
+  border-top: 1px solid var(--color-border);
+  margin-top: calc(var(--section-gap) / 2);
+  padding: calc(var(--section-gap) / 2) 24px 40px;
+}
+
+#contact .section-title {
+  border-bottom-color: var(--color-primary);
+}
+
+.contact-list {
+  list-style: none;
+  margin: 8px 0 24px;
+}
+
+.contact-list li {
+  padding: 6px 0;
+}
+
+.copyright {
+  font-size: 13px;
+  color: var(--color-text-light);
+}
+
+/* ---------- 10. 移动端适配（窄于 640px 时收成单列） ---------- */
+@media (max-width: 640px) {
+  .skill-list,
+  .project-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nav-links {
+    gap: 12px;
+  }
+
+  .nav-link {
+    font-size: 14px;
+  }
+}
