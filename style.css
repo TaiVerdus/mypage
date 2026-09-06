@@ -1,19 +1,20 @@
 /* ============================================================
-   MYPAGE · V1 基础样式
-   原则：先保证"不乱"——统一的配色、字体、页面宽度、区块间距
+   MYPAGE V1.1 · 王释贤个人主页
+   风格：活跃 · 主色青色 · 移动端优先
    ============================================================ */
 
 /* ---------- 1. 配色与基础变量 ---------- */
 :root {
-  --color-primary: #2563eb;      /* 主色：清爽蓝（求职场景，专业干净） */
-  --color-primary-dark: #1d4ed8; /* 主色 hover 态 */
-  --color-bg: #f8fafc;           /* 页面背景：极浅灰（不用纯白，减少疲劳） */
+  --color-primary: #0d9488;      /* 主色：青 */
+  --color-primary-dark: #0f766e; /* 主色 hover 态 */
+  --color-accent: #06b6d4;       /* 强调亮青 */
+  --color-bg: #f0fdfa;           /* 页面背景：浅青白 */
   --color-card: #ffffff;         /* 卡片背景 */
-  --color-text: #1f2937;         /* 正文：深灰（不用纯黑） */
-  --color-text-light: #6b7280;   /* 次要文字：中灰 */
-  --color-border: #e5e7eb;       /* 边框：浅灰 */
-  --page-width: 960px;           /* 内容区最大宽度 */
-  --section-gap: 96px;           /* 区块之间的间距 */
+  --color-text: #0f172a;         /* 正文深灰 */
+  --color-text-light: #475569;   /* 次要文字 */
+  --color-border: #ccfbf1;       /* 边框浅青 */
+  --page-width: 960px;
+  --section-gap: 88px;
 }
 
 /* ---------- 2. 全局基础 ---------- */
@@ -23,7 +24,6 @@
   box-sizing: border-box;
 }
 
-/* 系统无衬线字体，中文优先 */
 body {
   font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
   background-color: var(--color-bg);
@@ -31,7 +31,6 @@ body {
   line-height: 1.7;
 }
 
-/* 内容区统一宽度并水平居中 */
 main,
 .nav,
 .hero-content {
@@ -52,6 +51,7 @@ main,
   font-weight: 700;
   letter-spacing: 2px;
   color: var(--color-primary);
+  font-size: 14px;
 }
 
 .nav-links {
@@ -76,14 +76,14 @@ main,
 
 /* ---------- 4. 首屏 hero ---------- */
 #hero {
-  padding: 80px 0 96px;
+  padding: 72px 0 88px;
   border-bottom: 1px solid var(--color-border);
-  background: linear-gradient(180deg, #eff6ff 0%, var(--color-bg) 100%);
+  background: linear-gradient(160deg, #ccfbf1 0%, #f0fdfa 60%, #ecfeff 100%);
 }
 
 .hero-content h1 {
-  font-size: 32px;
-  line-height: 1.4;
+  font-size: 34px;
+  line-height: 1.3;
 }
 
 .highlight {
@@ -92,42 +92,44 @@ main,
 
 .hero-tagline {
   margin-top: 12px;
-  font-size: 18px;
-  font-weight: 500;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--color-primary-dark);
 }
 
 .hero-intro {
   margin-top: 16px;
-  max-width: 560px;
+  max-width: 580px;
   color: var(--color-text-light);
 }
 
 .hero-btn {
   display: inline-block;
-  margin-top: 32px;
-  padding: 10px 28px;
-  background-color: var(--color-primary);
+  margin-top: 28px;
+  padding: 12px 30px;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
   color: #fff;
   text-decoration: none;
-  border-radius: 8px;
+  border-radius: 999px;
   font-size: 15px;
-  transition: background-color 0.2s ease;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .hero-btn:hover {
-  background-color: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(13, 148, 136, 0.35);
 }
 
 /* ---------- 5. 通用区块 ---------- */
 section {
   padding-top: calc(var(--section-gap) / 2);
-  scroll-margin-top: 72px; /* 平滑滚动后不被固定导航遮住标题 */
+  scroll-margin-top: 72px;
 }
 
 #about,
-#skills,
-#projects,
-#contact {
+#chat {
   padding-bottom: calc(var(--section-gap) / 2);
 }
 
@@ -138,132 +140,248 @@ section {
   border-bottom: 2px solid var(--color-border);
 }
 
-/* ---------- 6. 关于我 ---------- */
-.about-list {
-  margin-top: 16px;
-  list-style: none;
-}
-
-.about-list li {
-  padding: 10px 0;
-  border-bottom: 1px dashed var(--color-border);
-}
-
-/* ---------- 7. 技能 ---------- */
-.skill-list {
-  list-style: none;
+/* ---------- 6. 关于我：信息卡片 ---------- */
+.info-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 两列网格 */
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
 }
 
-.skill-item {
+.info-card {
   background: var(--color-card);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: 14px;
   padding: 20px;
+  box-shadow: 0 1px 3px rgba(13, 148, 136, 0.08), 0 1px 2px rgba(13, 148, 136, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.skill-item h3 {
+.info-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(13, 148, 136, 0.14);
+}
+
+.info-card h3 {
   font-size: 16px;
-  margin-bottom: 6px;
+  margin-bottom: 10px;
+  color: var(--color-primary-dark);
 }
 
-.skill-item p {
-  font-size: 14px;
-  color: var(--color-text-light);
-}
-
-/* ---------- 8. 作品展示 ---------- */
-.project-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 三列卡片 */
-  gap: 16px;
-}
-
-.project-card {
-  background: var(--color-card);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-}
-
-.project-card h3 {
-  font-size: 16px;
-  margin-bottom: 8px;
-}
-
-.project-card p {
-  font-size: 14px;
-  color: var(--color-text-light);
-  flex-grow: 1; /* 让三张卡的链接按钮对齐到底部 */
-}
-
-.project-tags {
-  margin: 12px 0;
+.tag-list {
+  list-style: none;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.project-tags span {
-  font-size: 12px;
-  color: var(--color-primary);
-  background: #eff6ff;
-  border-radius: 4px;
-  padding: 2px 8px;
-}
-
-.project-link {
+.tag-list li {
   font-size: 14px;
-  color: var(--color-primary);
-  text-decoration: none;
+  background: #ccfbf1;
+  color: var(--color-primary-dark);
+  border-radius: 999px;
+  padding: 4px 14px;
+  font-weight: 500;
 }
 
-.project-link:hover {
-  text-decoration: underline;
-}
-
-/* ---------- 9. 联系我（footer） ---------- */
-#contact {
-  background: var(--color-card);
-  border-top: 1px solid var(--color-border);
-  margin-top: calc(var(--section-gap) / 2);
-  padding: calc(var(--section-gap) / 2) 24px 40px;
-}
-
-#contact .section-title {
-  border-bottom-color: var(--color-primary);
-}
-
-.contact-list {
-  list-style: none;
-  margin: 8px 0 24px;
-}
-
-.contact-list li {
-  padding: 6px 0;
-}
-
-.copyright {
-  font-size: 13px;
+.info-text {
+  font-size: 14px;
   color: var(--color-text-light);
 }
 
-/* ---------- 10. 移动端适配（窄于 640px 时收成单列） ---------- */
+/* ---------- 7. 数字分身聊天区 ---------- */
+.chat-note {
+  font-size: 13px;
+  color: var(--color-text-light);
+  margin-bottom: 16px;
+}
+
+.chat-window {
+  max-width: 640px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(13, 148, 136, 0.08), 0 1px 2px rgba(13, 148, 136, 0.05);
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  color: #fff;
+}
+
+.chat-header small {
+  opacity: 0.85;
+  font-weight: 400;
+}
+
+.chat-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.chat-messages {
+  height: 320px;
+  overflow-y: auto;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #f8fefc;
+}
+
+.msg {
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.6;
+  animation: bubbleIn 0.25s ease-out;
+}
+
+.msg.bot {
+  align-self: flex-start;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-bottom-left-radius: 4px;
+}
+
+.msg.user {
+  align-self: flex-end;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.msg.typing {
+  color: var(--color-text-light);
+  font-style: italic;
+}
+
+@keyframes bubbleIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.chat-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 18px 0;
+}
+
+.quick-btn {
+  font-size: 13px;
+  color: var(--color-primary-dark);
+  background: #ecfeff;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.quick-btn:hover {
+  background: #ccfbf1;
+  transform: translateY(-1px);
+}
+
+.chat-input-row {
+  display: flex;
+  gap: 10px;
+  padding: 12px 18px 16px;
+}
+
+#chatInput {
+  flex: 1;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 16px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#chatInput:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12);
+}
+
+#chatSend {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 22px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #fff;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+#chatSend:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+}
+
+/* ---------- 8. 页脚 ---------- */
+#footer {
+  background: var(--color-card);
+  border-top: 1px solid var(--color-border);
+  text-align: center;
+  padding: 32px 24px 40px;
+  color: var(--color-text-light);
+  font-size: 14px;
+}
+
+.copyright {
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+/* ---------- 9. 移动端适配 ---------- */
 @media (max-width: 640px) {
-  .skill-list,
-  .project-grid {
+  .info-grid {
     grid-template-columns: 1fr;
   }
 
   .nav-links {
-    gap: 12px;
+    gap: 14px;
   }
 
   .nav-link {
     font-size: 14px;
+  }
+
+  .hero-content h1 {
+    font-size: 28px;
+  }
+
+  .chat-messages {
+    height: 280px;
+  }
+
+  .msg {
+    max-width: 90%;
+  }
+}
+
+/* ---------- 10. 减弱动态 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
   }
 }

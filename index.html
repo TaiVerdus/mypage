@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- TODO: 替换为你的真实页面标题，如「李同学 | 前端开发求职主页」 -->
-  <title>我的个人主页</title>
+  <title>王释贤 · 个人主页</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,105 +11,84 @@
   <!-- ========== 区块 1：首屏（导航 + 自我介绍） ========== -->
   <header id="hero">
     <nav class="nav">
-      <span class="nav-logo">MYPAGE</span>
+      <span class="nav-logo">WANG SHIXIAN</span>
       <div class="nav-links">
         <a class="nav-link active" href="#hero">首页</a>
         <a class="nav-link" href="#about">关于我</a>
-        <a class="nav-link" href="#skills">技能</a>
-        <a class="nav-link" href="#projects">作品</a>
-        <a class="nav-link" href="#contact">联系我</a>
+        <a class="nav-link" href="#chat">数字分身</a>
       </div>
     </nav>
     <div class="hero-content">
-      <!-- TODO: 替换姓名、定位、求职意向 -->
-      <h1>你好，我是<span class="highlight">李同学</span></h1>
-      <p class="hero-tagline">一名正在求职前端开发实习生的大学生</p>
-      <p class="hero-intro">我会写一点 HTML、CSS 和 JavaScript，正在通过做项目的方式持续学习。这里是我的个人主页，欢迎了解我。</p>
-      <a class="hero-btn" href="#projects">看看我的作品</a>
+      <h1>你好，我是<span class="highlight">王释贤</span></h1>
+      <p class="hero-tagline">ENFJ · 脑机接口学生 · 关注 AI 前沿科技</p>
+      <p class="hero-intro">正在学 calculus、linear algebra 和 computer programming；课余听音乐、打架子鼓、练书法、打篮球。朋友们说我「内核比较强」——具体是真是假，可以问下方的数字分身。</p>
+      <a class="hero-btn" href="#chat">向我的数字分身提问</a>
     </div>
   </header>
 
   <main>
-    <!-- ========== 区块 2：关于我 ========== -->
+    <!-- ========== 区块 2：关于我（个人信息展示区） ========== -->
     <section id="about">
       <h2 class="section-title">关于我</h2>
-      <!-- TODO: 替换为你的真实简介与教育背景 -->
-      <p>我是一名计算机相关专业的在校学生，对网页开发有浓厚兴趣。喜欢把想法变成能看的、能点的页面，也在学习如何写出结构清晰、方便维护的代码。</p>
-      <ul class="about-list">
-        <li><strong>教育背景：</strong>某某大学 · 某某专业 · 本科在读（2023—2027）</li>
-        <li><strong>求职意向：</strong>前端开发实习生 / Web 开发实习生</li>
-        <li><strong>到岗时间：</strong>可实习 3 个月以上，每周 4-5 天</li>
-      </ul>
+      <div class="info-grid">
+        <div class="info-card">
+          <h3>📚 正在学</h3>
+          <ul class="tag-list">
+            <li>Calculus</li>
+            <li>Linear Algebra</li>
+            <li>Computer Programming</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h3>🎧 兴趣</h3>
+          <ul class="tag-list">
+            <li>听音乐</li>
+            <li>架子鼓</li>
+            <li>书法</li>
+            <li>篮球</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h3>⚡ 记忆点</h3>
+          <p class="info-text">内核比较强——遇到事情稳得住，不容易慌。</p>
+        </div>
+        <div class="info-card">
+          <h3>🔭 关注方向</h3>
+          <p class="info-text">AI 前沿科技，尤其是与脑机接口交叉的部分。</p>
+        </div>
+      </div>
     </section>
 
-    <!-- ========== 区块 3：技能 ========== -->
-    <section id="skills">
-      <h2 class="section-title">技能</h2>
-      <!-- TODO: 替换为你的真实技能与掌握程度 -->
-      <ul class="skill-list">
-        <li class="skill-item">
-          <h3>HTML / CSS</h3>
-          <p>掌握 · 能独立完成语义化结构搭建与常用布局</p>
-        </li>
-        <li class="skill-item">
-          <h3>JavaScript</h3>
-          <p>熟悉 · 能完成常见的交互效果与基础 DOM 操作</p>
-        </li>
-        <li class="skill-item">
-          <h3>Git</h3>
-          <p>入门 · 会用 init / add / commit 管理自己的代码</p>
-        </li>
-        <li class="skill-item">
-          <h3>其他工具</h3>
-          <p>接触过 VS Code、浏览器开发者工具</p>
-        </li>
-      </ul>
-    </section>
-
-    <!-- ========== 区块 4：作品展示 ========== -->
-    <section id="projects">
-      <h2 class="section-title">作品展示</h2>
-      <!-- TODO: 替换为你的真实作品；后续可把「项目链接」指向 GitHub 或在线演示地址 -->
-      <div class="project-grid">
-        <article class="project-card">
-          <h3>示例项目一：个人主页（本站）</h3>
-          <p>用语义化 HTML + CSS + JavaScript 从零搭建的个人主页，支持导航平滑滚动与区块高亮。</p>
-          <div class="project-tags">
-            <span>HTML</span><span>CSS</span><span>JavaScript</span>
+    <!-- ========== 区块 3：数字分身聊天区 ========== -->
+    <section id="chat">
+      <h2 class="section-title">和我的数字分身聊聊</h2>
+      <p class="chat-note">它只知道释贤告诉过它的事，答不上的会老实说不知道。</p>
+      <div class="chat-window">
+        <div class="chat-header">
+          <span class="chat-avatar">贤</span>
+          <div>
+            <strong>释贤的数字分身</strong>
+            <small>· 本地知识库版（离线运行）</small>
           </div>
-          <a class="project-link" href="#" target="_blank">项目链接（待替换）</a>
-        </article>
-        <article class="project-card">
-          <h3>示例项目二：课程笔记小站</h3>
-          <p>把课堂笔记整理成多个网页，含目录导航与返回顶部功能。</p>
-          <div class="project-tags">
-            <span>HTML</span><span>CSS</span>
-          </div>
-          <a class="project-link" href="#" target="_blank">项目链接（待替换）</a>
-        </article>
-        <article class="project-card">
-          <h3>示例项目三：待补充</h3>
-          <p>这里预留了第三个作品位。可以放课程设计、练习项目或参加比赛的作品。</p>
-          <div class="project-tags">
-            <span>待定</span>
-          </div>
-          <a class="project-link" href="#" target="_blank">项目链接（待替换）</a>
-        </article>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-quick" id="chatQuick">
+          <button class="quick-btn">你现在主要在学什么？</button>
+          <button class="quick-btn">你是个什么样的人？</button>
+          <button class="quick-btn">你平时有什么兴趣爱好？</button>
+        </div>
+        <div class="chat-input-row">
+          <input type="text" id="chatInput" placeholder="问点什么……" maxlength="100">
+          <button id="chatSend">发送</button>
+        </div>
       </div>
     </section>
   </main>
 
-  <!-- ========== 区块 5：联系我 ========== -->
-  <footer id="contact">
-    <h2 class="section-title">联系我</h2>
-    <!-- TODO: 替换为你的真实联系方式 -->
-    <p class="contact-tip">如果你觉得我可能适合你的团队，欢迎通过以下方式联系我：</p>
-    <ul class="contact-list">
-      <li>邮箱：example@email.com（待替换）</li>
-      <li>GitHub：github.com/yourname（待替换）</li>
-      <li>期望城市：待替换</li>
-    </ul>
-    <p class="copyright">© 2026 MYPAGE · 本页面为 V1 示例版本，内容均为占位素材</p>
+  <!-- ========== 区块 4：页脚 ========== -->
+  <footer id="footer">
+    <p>© 2026 王释贤 · MYPAGE V1.1</p>
+    <p class="copyright">数字分身为本地预设问答，未接入在线 AI；页面数据不联网上传</p>
   </footer>
 
   <script src="script.js"></script>
