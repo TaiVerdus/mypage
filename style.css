@@ -403,6 +403,46 @@ section {
   }
 }
 
+/* ---------- 13. Marquee 关键词滚动横幅 ---------- */
+.marquee {
+  overflow: hidden;
+  padding: 28px 0;
+  border-top: 1px solid rgba(15, 118, 110, 0.15);
+  border-bottom: 1px solid rgba(15, 118, 110, 0.15);
+}
+
+.marquee-track {
+  display: flex;
+  white-space: nowrap;
+  animation: marquee 25s linear infinite;
+}
+
+.marquee-track span {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--color-primary-dark);
+  padding-right: 48px;
+  letter-spacing: 2px;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (max-width: 640px) {
+  .marquee-track span {
+    font-size: 22px;
+    padding-right: 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}
+
 /* ---------- 12. Scroll Reveal 滚动显现 ---------- */
 .reveal {
   opacity: 0;
