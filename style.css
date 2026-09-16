@@ -435,6 +435,72 @@ section {
   }
 }
 
+/* ---------- 14. 联系我板块 ---------- */
+#contact {
+  text-align: center;
+  padding: 80px 24px;
+}
+
+.contact-title {
+  font-size: 40px;
+  font-weight: 800;
+  color: var(--color-primary-dark);
+  line-height: 1.2;
+}
+
+.contact-subtitle {
+  margin-top: 12px;
+  font-size: 18px;
+  color: var(--color-text-light);
+}
+
+.contact-btn {
+  display: inline-block;
+  margin-top: 32px;
+  padding: 16px 48px;
+  background: #fff;
+  color: var(--color-primary-dark);
+  text-decoration: none;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.contact-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(15, 118, 110, 0.25);
+}
+
+.contact-links {
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+}
+
+.contact-link {
+  font-size: 14px;
+  color: var(--color-primary-dark);
+  text-decoration: none;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.contact-link:hover {
+  opacity: 1;
+}
+
+@media (max-width: 640px) {
+  .contact-title {
+    font-size: 28px;
+  }
+  .contact-links {
+    gap: 20px;
+  }
+}
+
 /* ---------- 13. Marquee 关键词滚动横幅 ---------- */
 .marquee {
   overflow: hidden;
