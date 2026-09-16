@@ -435,6 +435,38 @@ section {
   }
 }
 
+/* ---------- 15. 摄影集（瀑布流） ---------- */
+.masonry {
+  columns: 3;
+  column-gap: 16px;
+  margin-top: 24px;
+}
+
+.photo-item {
+  width: 100%;
+  margin-bottom: 16px;
+  border-radius: 14px;
+  display: block;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.photo-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(15, 118, 110, 0.14);
+}
+
+@media (max-width: 768px) {
+  .masonry {
+    columns: 2;
+  }
+}
+
+@media (max-width: 480px) {
+  .masonry {
+    columns: 1;
+  }
+}
+
 /* ---------- 14. 联系我板块 ---------- */
 #contact {
   text-align: center;
