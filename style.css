@@ -1,0 +1,508 @@
+/* ============================================================
+   MYPAGE V1.1 · 王释贤个人主页
+   风格：活跃 · 主色青色 · 移动端优先
+   ============================================================ */
+
+/* ---------- 1. 配色与基础变量 ---------- */
+:root {
+  --color-primary: #0F766E;      /* 主色：深青 */
+  --color-primary-dark: #115E59; /* 主色 hover 态 */
+  --color-accent: #0D9488;       /* 强调青 */
+  --color-bg: #F0FDFA;           /* 页面背景：浅青白 */
+  --color-card: #ffffff;         /* 卡片背景 */
+  --color-text: #0f172a;         /* 正文深灰 */
+  --color-text-light: #475569;   /* 次要文字 */
+  --color-border: #99F6E4;       /* 边框浅青 */
+  --page-width: 960px;
+  --section-gap: 88px;
+}
+
+/* ---------- 2. 全局基础 ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  background-color: #99F6E4;
+  color: var(--color-text);
+  line-height: 1.7;
+}
+
+main,
+.hero-content {
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ---------- 3. 导航（Sticky + 毛玻璃） ---------- */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 64px;
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: 0 24px;
+  background: rgba(153, 246, 228, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(15, 118, 110, 0.1);
+}
+
+.nav-logo {
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--color-primary);
+  font-size: 14px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 24px;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: var(--color-text-light);
+  font-size: 15px;
+  padding: 6px 4px;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+/* ---------- 4. 首屏 hero ---------- */
+#hero {
+  padding: 100px 0 120px;
+}
+
+.hero-content {
+  text-align: center;
+}
+
+.hero-content h1 {
+  font-size: 48px;
+  line-height: 1.2;
+  animation: heroFadeInUp 0.8s ease-out 0.1s both;
+}
+
+.highlight {
+  color: var(--color-primary);
+}
+
+.hero-tagline {
+  margin-top: 16px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+  animation: heroFadeInUp 0.8s ease-out 0.3s both;
+}
+
+.hero-intro {
+  margin: 20px auto 0;
+  max-width: 580px;
+  color: var(--color-text-light);
+  animation: heroFadeInUp 0.8s ease-out 0.5s both;
+}
+
+.hero-btn {
+  display: inline-block;
+  margin-top: 32px;
+  padding: 12px 32px;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  color: #fff;
+  text-decoration: none;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  animation: heroFadeInUp 0.8s ease-out 0.7s both;
+}
+
+@keyframes heroFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(15, 118, 110, 0.35);
+}
+
+/* ---------- 5. 通用区块 ---------- */
+section {
+  padding-top: calc(var(--section-gap) / 2);
+  scroll-margin-top: 72px;
+}
+
+#about,
+#chat {
+  padding-bottom: calc(var(--section-gap) / 2);
+}
+
+.section-title {
+  font-size: 24px;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--color-border);
+}
+
+/* ---------- 6. 关于我：信息卡片 ---------- */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.info-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(15, 118, 110, 0.08), 0 1px 2px rgba(15, 118, 110, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(15, 118, 110, 0.14);
+}
+
+.info-card h3 {
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: var(--color-primary-dark);
+}
+
+.tag-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-list li {
+  font-size: 14px;
+  background: #CCFBF1;
+  color: var(--color-primary-dark);
+  border-radius: 999px;
+  padding: 4px 14px;
+  font-weight: 500;
+}
+
+.info-text {
+  font-size: 14px;
+  color: var(--color-text-light);
+}
+
+/* ---------- 7. 数字分身聊天区 ---------- */
+.chat-note {
+  font-size: 13px;
+  color: var(--color-text-light);
+  margin-bottom: 16px;
+}
+
+.chat-window {
+  max-width: 640px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(15, 118, 110, 0.08), 0 1px 2px rgba(15, 118, 110, 0.05);
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  color: #fff;
+}
+
+.chat-header small {
+  opacity: 0.85;
+  font-weight: 400;
+}
+
+.chat-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.chat-messages {
+  height: 320px;
+  overflow-y: auto;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #F8FEFC;
+}
+
+.msg {
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.6;
+  animation: bubbleIn 0.25s ease-out;
+}
+
+.msg.bot {
+  align-self: flex-start;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-bottom-left-radius: 4px;
+}
+
+.msg.user {
+  align-self: flex-end;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.msg.typing {
+  color: var(--color-text-light);
+  font-style: italic;
+}
+
+@keyframes bubbleIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.chat-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 18px 0;
+}
+
+.quick-btn {
+  font-size: 13px;
+  color: var(--color-primary-dark);
+  background: #ECFEFF;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.quick-btn:hover {
+  background: #CCFBF1;
+  transform: translateY(-1px);
+}
+
+.chat-input-row {
+  display: flex;
+  gap: 10px;
+  padding: 12px 18px 16px;
+}
+
+#chatInput {
+  flex: 1;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 16px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#chatInput:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+}
+
+#chatSend {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 22px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #fff;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+#chatSend:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.3);
+}
+
+/* ---------- 8. 页脚 ---------- */
+#footer {
+  border-top: 1px solid rgba(15, 118, 110, 0.15);
+  text-align: center;
+  padding: 32px 24px 40px;
+  color: var(--color-primary-dark);
+  font-size: 14px;
+}
+
+.copyright {
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+/* ---------- 9. 移动端适配 ---------- */
+@media (max-width: 640px) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nav-links {
+    gap: 14px;
+  }
+
+  .nav-link {
+    font-size: 14px;
+  }
+
+  .hero-content h1 {
+    font-size: 34px;
+  }
+
+  .chat-messages {
+    height: 280px;
+  }
+
+  .msg {
+    max-width: 90%;
+  }
+}
+
+/* ---------- 13. Marquee 关键词滚动横幅 ---------- */
+.marquee {
+  overflow: hidden;
+  padding: 28px 0;
+  border-top: 1px solid rgba(15, 118, 110, 0.15);
+  border-bottom: 1px solid rgba(15, 118, 110, 0.15);
+}
+
+.marquee-track {
+  display: flex;
+  white-space: nowrap;
+  animation: marquee 25s linear infinite;
+}
+
+.marquee-track span {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--color-primary-dark);
+  padding-right: 48px;
+  letter-spacing: 2px;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (max-width: 640px) {
+  .marquee-track span {
+    font-size: 22px;
+    padding-right: 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}
+
+/* ---------- 12. Scroll Reveal 滚动显现 ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ---------- 11. 自定义光标 ---------- */
+@media (hover: hover) and (pointer: fine) {
+  body {
+    cursor: none;
+  }
+
+  a, button, input, .quick-btn, .info-card {
+    cursor: none;
+  }
+}
+
+.custom-cursor {
+  width: 10px;
+  height: 10px;
+  background: var(--color-primary-dark);
+  border-radius: 50%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.25s ease, height 0.25s ease, background 0.25s ease, border 0.25s ease;
+}
+
+.custom-cursor.hovering {
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: 2px solid var(--color-primary-dark);
+}
+
+@media (hover: none), (pointer: coarse) {
+  .custom-cursor {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
