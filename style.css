@@ -32,19 +32,28 @@ body {
 }
 
 main,
-.nav,
 .hero-content {
   max-width: var(--page-width);
   margin: 0 auto;
   padding: 0 24px;
 }
 
-/* ---------- 3. 导航 ---------- */
+/* ---------- 3. 导航（Sticky + 毛玻璃） ---------- */
 .nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
   display: flex;
   justify-content: space-between;
   align-items: center;
   height: 64px;
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: 0 24px;
+  background: rgba(153, 246, 228, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(15, 118, 110, 0.1);
 }
 
 .nav-logo {
