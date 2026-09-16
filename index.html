@@ -43,31 +43,47 @@
     <!-- ========== 区块 2：关于我（个人信息展示区） ========== -->
     <section id="about">
       <h2 class="section-title reveal">关于我</h2>
-      <div class="info-grid reveal">
-        <div class="info-card">
+      <div class="info-grid bento-grid reveal">
+        <!-- 大卡：正在学 -->
+        <div class="info-card bento-large">
           <h3>📚 正在学</h3>
-          <ul class="tag-list">
-            <li>Calculus</li>
-            <li>Linear Algebra</li>
-            <li>Computer Programming</li>
-          </ul>
+          <div class="bento-items">
+            <div class="bento-item">
+              <strong>Calculus</strong>
+              <p>微积分——理解变化与极限</p>
+            </div>
+            <div class="bento-item">
+              <strong>Linear Algebra</strong>
+              <p>线性代数——向量、矩阵与空间</p>
+            </div>
+            <div class="bento-item">
+              <strong>Computer Programming</strong>
+              <p>编程基础——从零构建东西</p>
+            </div>
+          </div>
         </div>
+
+        <!-- 小卡：兴趣 -->
         <div class="info-card">
           <h3>🎧 兴趣</h3>
           <ul class="tag-list">
-            <li>听音乐</li>
             <li>架子鼓</li>
             <li>书法</li>
             <li>篮球</li>
+            <li>听音乐</li>
           </ul>
         </div>
+
+        <!-- 小卡：记忆点 -->
         <div class="info-card">
           <h3>⚡ 记忆点</h3>
-          <p class="info-text">内核比较强——遇到事情稳得住，不容易慌。</p>
+          <p class="info-text">内核比较强——表面安静，遇到事情稳得住，不容易慌。</p>
         </div>
-        <div class="info-card">
+
+        <!-- 大卡：关注方向 -->
+        <div class="info-card bento-large">
           <h3>🔭 关注方向</h3>
-          <p class="info-text">AI 前沿科技，尤其是与脑机接口交叉的部分。</p>
+          <p class="info-text">AI × 脑机接口交叉——想探索人脑与机器的连接方式，关注这个领域的前沿进展。</p>
         </div>
       </div>
     </section>
@@ -94,6 +110,18 @@
           <input type="text" id="chatInput" placeholder="问点什么……" maxlength="100">
           <button id="chatSend">发送</button>
         </div>
+      </div>
+    </section>
+
+    <!-- ========== 区块：联系我 ========== -->
+    <section id="contact" class="reveal">
+      <h2 class="contact-title">有想法？</h2>
+      <p class="contact-subtitle">聊聊呗，没什么压力。</p>
+      <a href="mailto:wshixian2026@163.com" class="contact-btn">Say Hello</a>
+      <div class="contact-links">
+        <a href="mailto:wshixian2026@163.com" class="contact-link">邮箱</a>
+        <a href="https://github.com/TaiVerdus" class="contact-link" target="_blank">GitHub</a>
+        <span class="contact-link">微信：Cjfgds_Hswlfsds</span>
       </div>
     </section>
   </main>
