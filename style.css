@@ -435,59 +435,35 @@ section {
   }
 }
 
-/* ---------- 15. 摄影集 ---------- */
-.photo-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+/* ---------- 15. 摄影集（瀑布流） ---------- */
+.masonry {
+  columns: 3;
+  column-gap: 16px;
   margin-top: 24px;
 }
 
-.photo-card {
-  background: var(--color-card);
+.photo-item {
+  width: 100%;
+  margin-bottom: 16px;
   border-radius: 14px;
-  overflow: hidden;
+  display: block;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.photo-card:hover {
+.photo-item:hover {
   transform: translateY(-3px);
   box-shadow: 0 6px 18px rgba(15, 118, 110, 0.14);
 }
 
-.photo-tall {
-  grid-row: span 2;
-}
-
-.photo-wide {
-  grid-column: span 2;
-}
-
-.photo-img {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-  display: block;
-}
-
-.photo-tall .photo-img {
-  aspect-ratio: 3 / 4;
-}
-
-.photo-caption {
-  padding: 12px 16px;
-  font-size: 13px;
-  color: var(--color-text-light);
-  margin: 0;
-}
-
 @media (max-width: 768px) {
-  .photo-grid {
-    grid-template-columns: 1fr;
+  .masonry {
+    columns: 2;
   }
-  .photo-tall, .photo-wide {
-    grid-column: span 1;
-    grid-row: span 1;
+}
+
+@media (max-width: 480px) {
+  .masonry {
+    columns: 1;
   }
 }
 
