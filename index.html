@@ -121,9 +121,9 @@
               <p>纯静态 · 无框架 · 自己写的设计系统</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 16 条 + main 分支 2 条（V1.0 / V1.1）
+                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 17 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 截至 2026-09-17 共 18 次提交</p>
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 截至 2026-09-17 共 19 次提交</p>
               <a class="item-link" href="ai-log.html">这个页面是怎么做出来的 →</a>
             </div>
             <div class="bento-item bento-item--project">
@@ -235,7 +235,16 @@
     <p>© 2026 王释贤 · MYPAGE V2.7</p>
     <p><a class="footer-link" href="ai-log.html">AI 使用日志</a></p>
     <p class="copyright">数字分身为本地预设问答，未接入在线 AI；页面数据不联网上传</p>
+    <p class="copyright">环境音由本地脚本合成（纯数学生成、无采样），未使用任何第三方音频素材</p>
   </footer>
+
+  <!-- ========== 环境音开关（默认静音，点击才播） ========== -->
+  <!-- preload="none"：不点就不下载。750 KB 不该让每个访客都白付这份带宽 -->
+  <audio id="bgm" src="audio/ambient-loop.wav" loop preload="none"></audio>
+  <button type="button" class="bgm-toggle" id="bgmToggle" aria-pressed="false" aria-label="播放环境音">
+    <span class="bgm-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span class="bgm-label">环境音</span>
+  </button>
 
   <script src="script.js"></script>
 </body>

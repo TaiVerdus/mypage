@@ -8,8 +8,12 @@
 // ---------- 交互一：导航平滑滚动 ----------
 document.querySelectorAll('.nav-link').forEach(function (link) {
   link.addEventListener('click', function (e) {
+    var href = this.getAttribute('href') || '';
+    // 只接管「页内锚点」。子页（ai-log.html）的导航指向 index.html，
+    // 不判断就会把默认跳转 preventDefault 掉，点上去毫无反应 = 死链
+    if (href.charAt(0) !== '#') return;
     e.preventDefault();
-    var target = document.querySelector(this.getAttribute('href'));
+    var target = document.querySelector(href);
     if (target) {
       target.scrollIntoView({ behavior: 'smooth' });
     }
@@ -423,3 +427,65 @@ window.addEventListener('resize', function () {
     });
   }, 180);
 });
+
+// ---------- 交互十：环境音开关（BGM） ----------
+// 设计取舍：**绝不自动播放**，理由三条——
+//   ① 浏览器本来就拦：没有用户手势不会出声，硬做只会拿到一个失败的控制台报错
+//   ② 别人可能在教室 / 图书馆 / 工位旁边点开这个链接，突然出声是负体验
+//   ③ WCAG 1.4.2：自动播放超过 3 秒的音频必须提供暂停手段
+// 另外**不记住开关状态**：每次进来都是安静的，一次点击才出声。
+// （记住「开」的话，下次加载会因为自动播放限制而失败，反而更糟）
+var bgm = document.getElementById('bgm');
+var bgmBtn = document.getElementById('bgmToggle');
+var BGM_VOLUME = 0.34;      // 背景音要明显压住，不能抢主体
+var FADE_MS = 1200;         // 淡入淡出时长：直接 play() 会「啪」一下开始
+var bgmOn = false;
+var bgmFade = null;
+
+function bgmFadeTo(to, after) {
+  if (bgmFade) { clearInterval(bgmFade); bgmFade = null; }
+  var steps = 24;
+  var from = bgm.volume;
+  var i = 0;
+  bgmFade = setInterval(function () {
+    i++;
+    var v = from + (to - from) * (i / steps);
+    bgm.volume = Math.min(1, Math.max(0, v));
+    if (i >= steps) {
+      clearInterval(bgmFade);
+      bgmFade = null;
+      if (after) after();
+    }
+  }, FADE_MS / steps);
+}
+
+function bgmSetUI(on) {
+  bgmOn = on;
+  bgmBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  bgmBtn.setAttribute('aria-label', on ? '暂停环境音' : '播放环境音');
+  bgmBtn.classList.toggle('is-on', on);
+}
+
+if (bgm && bgmBtn) {
+  bgm.volume = 0;
+  bgmSetUI(false);
+
+  bgmBtn.addEventListener('click', function () {
+    if (!bgmOn) {
+      var played = bgm.play();
+      bgmSetUI(true);
+      bgmFadeTo(BGM_VOLUME);
+      // play() 偶尔会被拒（比如标签页不可见）。被拒就退回关闭态，不骗用户
+      if (played && played['catch']) {
+        played['catch'](function () {
+          if (bgmFade) { clearInterval(bgmFade); bgmFade = null; }
+          bgm.volume = 0;
+          bgmSetUI(false);
+        });
+      }
+    } else {
+      bgmSetUI(false);
+      bgmFadeTo(0, function () { bgm.pause(); });
+    }
+  });
+}
