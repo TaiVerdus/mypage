@@ -269,3 +269,157 @@ if ('IntersectionObserver' in window) {
     el.classList.add('visible');
   });
 }
+
+// ---------- 交互九：逐行入场 ----------
+// 难点：HTML 里没有「行」这个概念，行是浏览器排版后才产生的。
+// 做法是先给每个词/字套一个临时 span，读它们的 offsetTop，顶部坐标相同就属于同一行，
+// 再把这些词重新拼成真正的行。中文按字拆、英文按词拆，避免单词被从中间截断。
+var LINE_STAGGER = 88;   // 每行之间的错开时间（ms），与 CSS 里的 88ms 保持一致
+var LINE_TOKEN = /[A-Za-z0-9][A-Za-z0-9'’.\-+]*|\s+|[\s\S]/g;
+
+// 只拆文本节点；行内元素（比如 h1 里的 .highlight）整块保留，不拆断
+function buildProbes(el) {
+  var probes = [];
+  var frag = document.createDocumentFragment();
+
+  Array.prototype.slice.call(el.childNodes).forEach(function (node) {
+    if (node.nodeType === 3) {
+      (node.textContent.match(LINE_TOKEN) || []).forEach(function (t) {
+        var s = document.createElement('span');
+        s.textContent = t;
+        frag.appendChild(s);
+        probes.push({ el: s, text: t, node: null });
+      });
+    } else if (node.nodeType === 1) {
+      var clone = node.cloneNode(true);
+      frag.appendChild(clone);
+      probes.push({ el: clone, text: null, node: node });
+    }
+  });
+
+  el.textContent = '';
+  el.appendChild(frag);
+  return probes;
+}
+
+function splitIntoLines(el) {
+  // 留一份原始 HTML，窗口尺寸变化后要还原重排
+  if (el.getAttribute('data-html') === null) {
+    el.setAttribute('data-html', el.innerHTML);
+  }
+
+  var probes = buildProbes(el);
+  if (!probes.length) return 0;
+
+  // 按 offsetTop 分组：同一行的探针顶部坐标相同（容差 2px 防亚像素误差）
+  // 纯空格不参与判断——它可能被压缩成零宽，坐标不可靠，让它跟着当前行走
+  var rows = [[]];
+  var lastTop = null;
+
+  probes.forEach(function (p) {
+    var top = p.el.offsetTop;
+    var isSpace = p.node === null && p.text.trim() === '';
+
+    if (!isSpace) {
+      if (lastTop === null) {
+        lastTop = top;
+      } else if (Math.abs(top - lastTop) > 2) {
+        rows.push([]);
+        lastTop = top;
+      }
+    }
+    rows[rows.length - 1].push(p);
+  });
+
+  el.textContent = '';
+  var made = 0;
+
+  rows.forEach(function (row) {
+    var inner = document.createElement('i');
+    var buf = '';
+
+    row.forEach(function (p) {
+      if (p.node) {
+        if (buf) { inner.appendChild(document.createTextNode(buf)); buf = ''; }
+        inner.appendChild(p.node.cloneNode(true));
+      } else {
+        buf += p.text;
+      }
+    });
+    if (buf) inner.appendChild(document.createTextNode(buf));
+
+    if (!inner.textContent.trim()) return;   // 只剩一个空格的空行，丢掉
+
+    var line = document.createElement('span');
+    line.className = 'line';
+    inner.style.setProperty('--i', made);
+    line.appendChild(inner);
+    el.appendChild(line);
+    made++;
+  });
+
+  el.classList.add('lines');
+  return made;
+}
+
+function revealLines(el, animate) {
+  if (!el.classList.contains('lines')) {
+    if (!splitIntoLines(el)) return;
+  }
+  if (!animate) {
+    el.classList.add('is-visible', 'is-done');
+    return;
+  }
+  // 下一帧再挂 is-visible，否则浏览器会把「初始态」和「终态」合并成一次样式计算，动画直接跳过
+  requestAnimationFrame(function () {
+    el.classList.add('is-visible');
+  });
+  var lines = el.querySelectorAll('.line').length;
+  setTimeout(function () {
+    el.classList.add('is-done');
+  }, lines * LINE_STAGGER + 1000);
+}
+
+var lineEls = Array.prototype.slice.call(document.querySelectorAll('[data-lines]'));
+var lineObserver = null;
+
+// 关掉动效就不拆行：文字保持原样直接显示，最省事也最稳
+if (!reduceMotion) {
+  if ('IntersectionObserver' in window) {
+    lineObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          revealLines(entry.target, true);
+          lineObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.2, rootMargin: '0px 0px -60px 0px' });
+
+    lineEls.forEach(function (el) { lineObserver.observe(el); });
+  } else {
+    lineEls.forEach(function (el) { revealLines(el, true); });
+  }
+}
+
+// 换行位置会随宽度变化，所以变宽变窄后要按新的宽度重新拆一次；
+// 只改高度（手机地址栏收起）不重排，避免在移动端来回抖。
+var lastWidth = window.innerWidth;
+var relayoutTimer = null;
+
+window.addEventListener('resize', function () {
+  if (Math.abs(window.innerWidth - lastWidth) < 40) return;
+  lastWidth = window.innerWidth;
+
+  clearTimeout(relayoutTimer);
+  relayoutTimer = setTimeout(function () {
+    lineEls.forEach(function (el) {
+      if (!el.classList.contains('lines')) return;   // 还没入场的不动，等观察器处理
+      var wasVisible = el.classList.contains('is-visible');
+      el.innerHTML = el.getAttribute('data-html') || '';
+      el.classList.remove('lines', 'is-visible', 'is-done');
+      splitIntoLines(el);
+      el.classList.add('is-visible');
+      if (wasVisible) el.classList.add('is-done');   // 已经演完的不再重播
+    });
+  }, 180);
+});
