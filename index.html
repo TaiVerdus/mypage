@@ -182,9 +182,9 @@
               <p>Static · no framework · my own design system</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 27 条 + main 分支 2 条（V1.0 / V1.1）
+                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 28 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 29 commits as of 2026-09-17</p>
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 30 commits as of 2026-09-17</p>
               <a class="item-link" href="ai-log.html">How this page was built →</a>
             </div>
             <div class="bento-item bento-item--project">
@@ -261,54 +261,87 @@
         <p class="section-note reveal">Three artists I keep coming back to. Every sleeve below is an original design drawn for this page — not the labels' artwork.</p>
       </div>
 
-      <div class="album-grid reveal">
-        <article class="album">
-          <div class="album-cover t-1 m-rings"><span class="cover-glyph">陶</span></div>
-          <h3 class="album-title">David Tao</h3>
-          <p class="album-meta">陶喆 · 1997</p>
-        </article>
-        <article class="album">
-          <div class="album-cover t-4 m-bars"><span class="cover-glyph">柳</span></div>
-          <h3 class="album-title">黑色柳丁</h3>
-          <p class="album-meta">陶喆 · 2001</p>
-        </article>
-        <article class="album">
-          <div class="album-cover t-3 m-dots"><span class="cover-glyph">盛</span></div>
-          <h3 class="album-title">太平盛世</h3>
-          <p class="album-meta">陶喆 · 2005</p>
-        </article>
+      <!-- 一组 = 一位歌手 × 4 张专辑 -->
+      <div class="album-groups reveal">
 
-        <article class="album">
-          <div class="album-cover t-5 m-arc"><span class="cover-glyph">意</span></div>
-          <h3 class="album-title">意外</h3>
-          <p class="album-meta">薛之谦 · 2013</p>
-        </article>
-        <article class="album">
-          <div class="album-cover t-2 m-rings"><span class="cover-glyph">渡</span></div>
-          <h3 class="album-title">渡</h3>
-          <p class="album-meta">薛之谦 · 2017</p>
-        </article>
-        <article class="album">
-          <div class="album-cover t-1 m-dots"><span class="cover-glyph">天</span></div>
-          <h3 class="album-title">天外来物</h3>
-          <p class="album-meta">薛之谦 · 2020</p>
-        </article>
+        <div class="artist-group">
+          <h3 class="artist-name">陶喆<span class="artist-en">David Tao</span></h3>
+          <div class="album-grid">
+            <article class="album">
+              <div class="album-cover t-1 m-rings"><span class="cover-glyph">陶</span></div>
+              <h4 class="album-title">David Tao</h4>
+              <p class="album-meta">1997 · 同名专辑</p>
+            </article>
+            <article class="album">
+              <div class="album-cover t-3 m-bars"><span class="cover-glyph">O</span></div>
+              <h4 class="album-title">I'm OK</h4>
+              <p class="album-meta">1999</p>
+            </article>
+            <article class="album">
+              <div class="album-cover t-4 m-dots"><span class="cover-glyph">柳</span></div>
+              <h4 class="album-title">黑色柳丁</h4>
+              <p class="album-meta">2001</p>
+            </article>
+            <article class="album">
+              <div class="album-cover t-5 m-arc"><span class="cover-glyph">盛</span></div>
+              <h4 class="album-title">太平盛世</h4>
+              <p class="album-meta">2005</p>
+            </article>
+          </div>
+        </div>
 
-        <article class="album">
-          <div class="album-cover t-3 m-bars"><span class="cover-glyph">P</span></div>
-          <h3 class="album-title">Purpose</h3>
-          <p class="album-meta">Justin Bieber · 2015</p>
-        </article>
-        <article class="album">
-          <div class="album-cover t-5 m-rings"><span class="cover-glyph">C</span></div>
-          <h3 class="album-title">Changes</h3>
-          <p class="album-meta">Justin Bieber · 2020</p>
-        </article>
-        <article class="album">
-          <div class="album-cover t-4 m-arc"><span class="cover-glyph">J</span></div>
-          <h3 class="album-title">Justice</h3>
-          <p class="album-meta">Justin Bieber · 2021</p>
-        </article>
+        <div class="artist-group">
+          <h3 class="artist-name">薛之谦<span class="artist-en">Joker Xue</span></h3>
+          <div class="album-grid">
+            <article class="album">
+              <div class="album-cover t-2 m-rings"><span class="cover-glyph">歌</span></div>
+              <h4 class="album-title">未完成的歌</h4>
+              <p class="album-meta">2009 · 「深深爱过你」</p>
+            </article>
+            <article class="album">
+              <div class="album-cover t-5 m-bars"><span class="cover-glyph">意</span></div>
+              <h4 class="album-title">意外</h4>
+              <p class="album-meta">2013</p>
+            </article>
+            <article class="album">
+              <div class="album-cover t-1 m-arc"><span class="cover-glyph">渡</span></div>
+              <h4 class="album-title">渡</h4>
+              <p class="album-meta">2017</p>
+            </article>
+            <article class="album">
+              <div class="album-cover t-4 m-rings"><span class="cover-glyph">天</span></div>
+              <h4 class="album-title">天外来物</h4>
+              <p class="album-meta">2020</p>
+            </article>
+          </div>
+        </div>
+
+        <div class="artist-group">
+          <h3 class="artist-name">Justin Bieber</h3>
+          <div class="album-grid">
+            <article class="album">
+              <div class="album-cover t-3 m-dots"><span class="cover-glyph">P</span></div>
+              <h4 class="album-title">Purpose</h4>
+              <p class="album-meta">2015</p>
+            </article>
+            <article class="album">
+              <div class="album-cover t-2 m-bars"><span class="cover-glyph">C</span></div>
+              <h4 class="album-title">Changes</h4>
+              <p class="album-meta">2020</p>
+            </article>
+            <article class="album">
+              <div class="album-cover t-4 m-arc"><span class="cover-glyph">J</span></div>
+              <h4 class="album-title">Justice</h4>
+              <p class="album-meta">2021</p>
+            </article>
+            <article class="album">
+              <div class="album-cover t-1 m-dots"><span class="cover-glyph">S</span></div>
+              <h4 class="album-title">SWAG</h4>
+              <p class="album-meta">2025</p>
+            </article>
+          </div>
+        </div>
+
       </div>
     </section>
 

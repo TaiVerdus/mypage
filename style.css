@@ -1893,9 +1893,36 @@ body {
    靠「5 种渐变处理 × 4 种纹理」组合出差异，而不是新造 9 个颜色。
    约束反而让它更像一套设计过的收藏，而不是九张各行其是的图。 */
 
+/* 一组 = 一位歌手 × 4 张。组与组之间用 64px 拉开，组内 4 列 */
+.artist-group + .artist-group {
+  margin-top: var(--sp-8);
+}
+
+.artist-name {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-4);
+  padding-bottom: var(--sp-3);
+  border-bottom: 1px solid var(--color-line);
+  font-family: var(--font-serif);
+  font-size: var(--fs-h3);
+  font-weight: 500;
+}
+
+/* 英文名做成小字大写 —— 与全站眉题同一套语言 */
+.artist-en {
+  font-family: var(--font-sans);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
 .album-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--sp-5);
 }
 
@@ -1987,5 +2014,9 @@ body {
   .album-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--sp-4);
+  }
+
+  .artist-group + .artist-group {
+    margin-top: var(--sp-7);
   }
 }
