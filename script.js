@@ -65,8 +65,12 @@ var KNOWLEDGE = [
     answer: 'Shixian is a brain–computer interface student. Why this direction? To be honest he never told me the details, so I won’t make anything up — ask him yourself.'
   },
   {
-    keywords: ['interest', 'hobby', 'hobbies', 'music', 'drum', 'drums', 'calligraphy', 'basketball', 'fun', 'free time', 'do for fun'],
+    keywords: ['interest', 'hobby', 'hobbies', 'drum', 'drums', 'calligraphy', 'basketball', 'fun', 'free time', 'do for fun'],
     answer: 'His free time is pretty full: music, drums, calligraphy, and basketball. Loud and quiet both — drums and basketball are the loud, calligraphy is the quiet.'
+  },
+  {
+    keywords: ['music', 'album', 'albums', 'song', 'songs', 'listen', 'listening', 'artist', 'singer', 'favourite', 'favorite', 'david tao', 'joker xue', 'justin bieber', 'bieber'],
+    answer: 'Three artists he keeps coming back to: David Tao (陶喆), Joker Xue (薛之谦) and Justin Bieber. There’s a shelf of his favourite albums further down this page.'
   },
   {
     keywords: ['enfj', 'personality', 'person', 'what kind', 'mbti'],
