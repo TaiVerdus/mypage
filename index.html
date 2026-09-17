@@ -170,9 +170,9 @@
               <p>Static · no framework · my own design system</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 24 条 + main 分支 2 条（V1.0 / V1.1）
+                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 25 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 26 commits as of 2026-09-17</p>
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 27 commits as of 2026-09-17</p>
               <a class="item-link" href="ai-log.html">How this page was built →</a>
             </div>
             <div class="bento-item bento-item--project">
@@ -284,16 +284,7 @@
     <p>© 2026 Wang Shixian · MYPAGE V2.7</p>
     <p><a class="footer-link" href="ai-log.html">AI usage log</a></p>
     <p class="copyright">The digital twin is a local preset Q&amp;A, not connected to any online AI — no data leaves this page</p>
-    <p class="copyright">Ambient audio is synthesized by a local script (pure math, no samples); no third-party audio assets are used</p>
   </footer>
-
-  <!-- ========== 环境音开关（默认静音，点击才播） ========== -->
-  <!-- preload="none"：不点就不下载。750 KB 不该让每个访客都白付这份带宽 -->
-  <audio id="bgm" src="audio/ambient-loop.wav" loop preload="none"></audio>
-  <button type="button" class="bgm-toggle" id="bgmToggle" aria-pressed="false" aria-label="Play ambient audio">
-    <span class="bgm-bars" aria-hidden="true"><i></i><i></i><i></i></span>
-    <span class="bgm-label">Ambient</span>
-  </button>
 
   <script src="script.js"></script>
 </body>
