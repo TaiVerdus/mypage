@@ -69,8 +69,8 @@ var KNOWLEDGE = [
     answer: 'His free time is pretty full: music, drums, calligraphy, and basketball. Loud and quiet both — drums and basketball are the loud, calligraphy is the quiet.'
   },
   {
-    keywords: ['enfj', 'personality', 'person', 'what kind', 'mbti', 'steady', 'pressure', 'calm'],
-    answer: 'Shixian is an ENFJ. His friends describe him as “steady under pressure” — calm when things get hard. To feel it for yourself, just talk to him.'
+    keywords: ['enfj', 'personality', 'person', 'what kind', 'mbti'],
+    answer: 'Shixian is an ENFJ. Beyond the label, I’d rather not put words in his mouth — for a real sense of who he is, talk to him directly.'
   },
   {
     keywords: ['ai', 'frontier', 'tech', 'technology', 'future', 'follow', 'research'],

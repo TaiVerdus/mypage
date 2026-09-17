@@ -1869,3 +1869,35 @@ body {
 .nav-link {
   letter-spacing: .04em;
 }
+
+/* ---------- 20.5 兴趣 ↔ 照片 联动（V2.7 续五） ---------- */
+/* 兴趣标签里的链接：继承 pill 样式，hover 加深 */
+.tag-list a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.tag-list a:hover {
+  color: var(--color-brand-deep);
+}
+
+/* 照片说明里的「兴趣」芯片：和 photo-no 同一个 pill 家族，但用浅青底区分语义 */
+.photo-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: var(--r-pill);
+  background: var(--color-mint);
+  color: var(--color-brand);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+
+/* 从兴趣标签点过来时，照片别被 sticky 导航挡住 */
+.photo-item {
+  scroll-margin-top: 88px;
+}

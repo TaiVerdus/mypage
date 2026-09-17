@@ -50,7 +50,7 @@
       <p class="hero-eyebrow">CST &amp; AI FOUNDATIONS · 2026</p>
       <h1 data-lines>Hi, I'm <span class="highlight">Wang Shixian</span></h1>
       <p class="hero-tagline" data-lines>ENFJ · BCI student · into the AI frontier</p>
-      <p class="hero-intro" data-lines>Studying calculus, linear algebra and computer programming — drums, calligraphy and basketball on the side. Friends say I'm "steady under pressure". Is that true? Ask my digital twin below.</p>
+      <p class="hero-intro" data-lines>Studying calculus, linear algebra and computer programming — drums, calligraphy and basketball on the side. Want to know me better? Ask my digital twin below.</p>
       <a class="btn btn--primary hero-btn" href="#chat">Ask my digital twin</a>
       <ul class="hero-meta">
         <li><span class="meta-k">MBTI</span><span class="meta-v">ENFJ</span></li>
@@ -125,7 +125,7 @@
         <span class="stat-label">Core courses</span>
       </div>
       <div class="stat">
-        <span class="stat-num" data-count="4">4</span>
+        <span class="stat-num" data-count="5">5</span>
         <span class="stat-label">Hobbies</span>
       </div>
       <div class="stat">
@@ -168,9 +168,9 @@
               <p>Static · no framework · my own design system</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 20 条 + main 分支 2 条（V1.0 / V1.1）
+                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 21 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 22 commits as of 2026-09-17</p>
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 23 commits as of 2026-09-17</p>
               <a class="item-link" href="ai-log.html">How this page was built →</a>
             </div>
             <div class="bento-item bento-item--project">
@@ -180,14 +180,15 @@
           </div>
         </div>
 
-        <!-- 小卡：兴趣 -->
+        <!-- 小卡：兴趣（有照片的标签会跳到照片，作为「证据」） -->
         <div class="info-card">
           <h3><span class="card-dot"></span>Interests</h3>
           <ul class="tag-list">
-            <li>Drums</li>
-            <li>Calligraphy</li>
+            <li><a href="#photo-drums" title="See the drum photo">Drums <span aria-hidden="true">↘</span></a></li>
+            <li><a href="#photo-calligraphy" title="See the calligraphy photo">Calligraphy <span aria-hidden="true">↘</span></a></li>
+            <li><a href="#photo-performance" title="See the stage photo">Music <span aria-hidden="true">↘</span></a></li>
+            <li><a href="#photo-photography" title="See the sunset photo">Photography <span aria-hidden="true">↘</span></a></li>
             <li>Basketball</li>
-            <li>Music</li>
           </ul>
         </div>
 
@@ -207,22 +208,23 @@
         <p class="section-note reveal">All photos are mine, except the stage shot, provided by the event organizer.</p>
       </div>
       <div class="photo-grid masonry reveal">
-        <figure class="photo-item">
+        <figure class="photo-item" id="photo-calligraphy">
           <img src="images/1.jpg" alt="A calligraphy class — people practising brush writing at a long table" loading="lazy" decoding="async">
-          <figcaption><span class="photo-no">01</span></figcaption>
+          <figcaption><span class="photo-no">01</span><span class="photo-tag">Calligraphy</span></figcaption>
         </figure>
-        <figure class="photo-item">
+        <figure class="photo-item" id="photo-drums">
           <img src="images/2.jpg" alt="Someone at an electronic drum kit, one hand raised in a gesture" loading="lazy" decoding="async">
-          <figcaption><span class="photo-no">02</span></figcaption>
+          <figcaption><span class="photo-no">02</span><span class="photo-tag">Drums</span></figcaption>
         </figure>
-        <figure class="photo-item">
+        <figure class="photo-item" id="photo-photography">
           <img src="images/3.jpg" alt="Looking out over hills at sunset, city and water in the distance" loading="lazy" decoding="async">
-          <figcaption><span class="photo-no">03</span></figcaption>
+          <figcaption><span class="photo-no">03</span><span class="photo-tag">Photography</span></figcaption>
         </figure>
-        <figure class="photo-item">
+        <figure class="photo-item" id="photo-performance">
           <img src="images/4.jpg" alt="A stage in red light — the silhouette of a performer, arms outstretched" loading="lazy" decoding="async">
           <figcaption>
             <span class="photo-no">04</span>
+            <span class="photo-tag">Music</span>
             <span class="photo-credit">Photo: event organizer</span>
           </figcaption>
         </figure>
