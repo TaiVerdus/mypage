@@ -414,6 +414,14 @@ section {
   text-align: center;
 }
 
+/* 章节说明：补一句口径说明（如照片署名），字号克制，不与标题抢层级 */
+.section-note {
+  margin-top: var(--sp-4);
+  max-width: 52ch;
+  font-size: var(--fs-sm);
+  color: var(--color-muted);
+}
+
 .eyebrow {
   display: inline-block;
   font-size: var(--fs-eyebrow);
@@ -981,15 +989,21 @@ section {
   transform: scale(1.045);
 }
 
-/* 序号胶囊：给照片补一点信息密度，又不编造图片内容 */
+/* 胶囊行：序号在左；非本人拍摄的照片在右标来源（著作权署名） */
 .photo-item figcaption {
   position: absolute;
   left: 12px;
+  right: 12px;
   bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
   pointer-events: none;
 }
 
-.photo-no {
+.photo-no,
+.photo-credit {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1005,6 +1019,13 @@ section {
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   box-shadow: 0 2px 8px rgb(var(--c-brand-rgb) / .18);
+}
+
+/* 署名胶囊：字号与序号一致，颜色改用 ink —— 读起来像说明，而不是标签 */
+.photo-credit {
+  color: var(--color-ink);
+  font-weight: 500;
+  letter-spacing: .02em;
 }
 
 @media (max-width: 768px) {
