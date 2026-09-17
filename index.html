@@ -80,6 +80,16 @@
           <feDisplacementMap in="SourceGraphic" in2="soft" scale="55"
                              xChannelSelector="R" yChannelSelector="G" />
         </filter>
+        <!-- 小放大镜专用：元件小，同样的位移量会显得更夸张，
+             所以波长更密（baseFrequency 更高）、幅度更小 -->
+        <filter id="glassRefractZoom" x="-40%" y="-40%" width="180%" height="180%"
+                color-interpolation-filters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.02 0.026"
+                        numOctaves="2" seed="7" result="noise" />
+          <feGaussianBlur in="noise" stdDeviation="1" result="soft" />
+          <feDisplacementMap in="SourceGraphic" in2="soft" scale="26"
+                             xChannelSelector="R" yChannelSelector="G" />
+        </filter>
       </svg>
 
       <!-- 环形跑马灯：SVG textPath 挂在整圆上（两段 a 圆弧拼成），
@@ -98,12 +108,13 @@
         </svg>
       </div>
 
-      <!-- 一张图拆三片：每片各取画面一段（左：落日与城市 / 中：水面与倒影 / 右：暮色与塔），
-           各自 blob、各自摆动、周期错开。滤镜在 ::before 的静态层上。 -->
+      <!-- 一大块主玻璃装整幅画面，两片小放大镜压在下缘、各露一半在外，
+           里面是同一张图的局部放大（background-size 240% / 320%）。
+           各自摆动、周期错开；滤镜在 ::before 的静态层上。 -->
       <div class="bubble-shards">
-        <div class="shard shard-1"></div>
-        <div class="shard shard-2"></div>
-        <div class="shard shard-3"></div>
+        <div class="shard shard-main"></div>
+        <div class="shard bubble-1"></div>
+        <div class="shard bubble-2"></div>
       </div>
     </div>
 
@@ -170,9 +181,9 @@
               <p>Static · no framework · my own design system</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 25 条 + main 分支 2 条（V1.0 / V1.1）
+                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 26 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 27 commits as of 2026-09-17</p>
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 28 commits as of 2026-09-17</p>
               <a class="item-link" href="ai-log.html">How this page was built →</a>
             </div>
             <div class="bento-item bento-item--project">
