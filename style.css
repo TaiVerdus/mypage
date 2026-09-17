@@ -666,6 +666,25 @@ section {
   font-variant-numeric: tabular-nums;
 }
 
+/* 项目条目里的跳转链接：给「这个页面是怎么做出来的 → AI 使用日志」这类出口用。
+   不做成按钮——它是卡片里的一条路径，不是主行动点 */
+.bento-item .item-link {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: var(--fs-caption);
+  font-weight: 500;
+  color: var(--color-brand);
+  text-decoration: none;
+  border-bottom: 1px solid rgb(var(--c-brand-rgb) / .35);
+  transition: color var(--dur-base) var(--ease-out),
+              border-color var(--dur-base) var(--ease-out);
+}
+
+.bento-item .item-link:hover {
+  color: var(--color-brand-deep);
+  border-bottom-color: var(--color-brand);
+}
+
 .bento-item p {
   font-size: var(--fs-xs);
   color: var(--color-muted);
@@ -872,6 +891,18 @@ section {
   font-size: var(--fs-caption);
   margin-top: 6px;
   color: var(--color-muted);
+}
+
+/* 页脚里的链接：页脚整体已是 brand 色，靠下划线区分「可点」 */
+#footer .footer-link {
+  color: var(--color-brand);
+  text-decoration: none;
+  border-bottom: 1px solid rgb(var(--c-brand-rgb) / .4);
+  transition: border-color var(--dur-base) var(--ease-out);
+}
+
+#footer .footer-link:hover {
+  border-bottom-color: var(--color-brand);
 }
 
 /* ---------- 9. 移动端适配 ---------- */
@@ -1256,5 +1287,306 @@ section {
 
   .custom-cursor {
     display: none;
+  }
+}
+
+/* ---------- 17. AI 日志子页（ai-log.html） ---------- */
+/* 站点的第二个页面。复用同一套 token 与 .nav / #footer，
+   新增的类一律以 .log- 开头，避免和首页的规则互相污染。
+   版式取「宽表格 + 窄正文」：正文控制在 680px（中文约 45 字/行，便于阅读），
+   表格放行到 880px 并支持横向滚动——否则 5 列的交互日志会把页面撑破。 */
+
+.log-main {
+  padding-top: 72px;
+  padding-bottom: var(--sp-7);
+}
+
+/* ---- 页头 ---- */
+.log-head {
+  max-width: 680px;
+}
+
+.log-title {
+  font-size: var(--fs-h2);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: var(--lh-tight);
+}
+
+/* 与首页 .section-title 同一条渐变短线，保证是同一个站 */
+.log-title::after {
+  content: '';
+  display: block;
+  width: 36px;
+  height: 3px;
+  border-radius: 2px;
+  margin-top: var(--sp-4);
+  background: linear-gradient(90deg, var(--color-brand), var(--color-brand-deep));
+}
+
+.log-lead {
+  margin-top: var(--sp-5);
+  font-size: var(--fs-h3);
+  line-height: 1.75;
+  color: var(--color-muted);
+}
+
+/* ---- 三条元信息 ---- */
+.log-meta {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-5);
+  margin-top: var(--sp-6);
+  padding: var(--sp-5) 0;
+  border-top: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.log-meta li {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.log-meta-k {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.log-meta-v {
+  font-size: var(--fs-sm);
+  color: var(--color-ink);
+}
+
+/* ---- 「本页是进行中的记录」说明条 ---- */
+.log-note {
+  margin-top: var(--sp-5);
+  padding: var(--sp-4) var(--sp-5);
+  border-left: 3px solid var(--color-brand);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  background: rgb(var(--c-brand-rgb) / .06);
+  font-size: var(--fs-sm);
+  color: var(--color-ink);
+}
+
+/* ---- 目录 ---- */
+.log-toc {
+  max-width: 880px;
+  margin-top: var(--sp-7);
+  padding: var(--sp-5) var(--sp-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--r-md);
+}
+
+.log-toc-title {
+  font-size: var(--fs-caption);
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--color-brand);
+}
+
+.log-toc ol {
+  list-style: none;
+  margin-top: var(--sp-4);
+  display: grid;
+  gap: 8px;
+}
+
+.log-toc a {
+  color: var(--color-ink);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color var(--dur-base) var(--ease-out);
+}
+
+.log-toc a:hover {
+  color: var(--color-brand);
+  border-bottom-color: rgb(var(--c-brand-rgb) / .5);
+}
+
+/* ---- 正文 ---- */
+.log-body {
+  max-width: 880px;
+  margin-top: var(--sp-7);
+}
+
+/* 正文宽度单独收窄，表格不受影响 */
+.log-body > p,
+.log-body > ul,
+.log-body > ol,
+.log-body > .log-quote {
+  max-width: 680px;
+}
+
+.log-body h2 {
+  /* 介于 --fs-h3(17px) 与 --fs-h2(26px+) 之间的文档级小标题 */
+  font-size: clamp(19px, 2.4vw, 22px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: var(--sp-8) 0 var(--sp-5);
+  padding-top: var(--sp-6);
+  border-top: 1px solid var(--color-line);
+  /* 点目录跳过来时，标题不至于被 sticky 导航盖住 */
+  scroll-margin-top: 88px;
+}
+
+.log-body h2:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.log-body h3 {
+  font-size: var(--fs-h3);
+  font-weight: 500;
+  color: var(--color-brand);
+  margin: var(--sp-6) 0 var(--sp-4);
+  scroll-margin-top: 88px;
+}
+
+.log-body p {
+  margin: var(--sp-4) 0;
+}
+
+.log-body ul,
+.log-body ol {
+  margin: var(--sp-4) 0;
+  padding-left: 1.5em;
+}
+
+.log-body li {
+  margin: 6px 0;
+}
+
+.log-body li::marker {
+  color: var(--color-brand);
+}
+
+.log-body a {
+  color: var(--color-brand);
+}
+
+.log-body strong {
+  font-weight: 700;
+}
+
+.log-body code {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--color-mint);
+  color: var(--color-ink);
+  font-size: .92em;
+  font-family: "JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+
+.log-hr {
+  margin: var(--sp-7) 0;
+  border: none;
+  border-top: 1px solid var(--color-line);
+}
+
+.log-quote {
+  margin: var(--sp-5) 0;
+  padding: var(--sp-2) var(--sp-5) var(--sp-2);
+  border-left: 3px solid rgb(var(--c-brand-rgb) / .45);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  background: rgb(var(--c-brand-rgb) / .05);
+  font-size: var(--fs-sm);
+}
+
+.log-quote > :first-child {
+  margin-top: var(--sp-3);
+}
+
+.log-quote > :last-child {
+  margin-bottom: var(--sp-3);
+}
+
+/* ---- 任务清单 ---- */
+.log-task {
+  list-style: none;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.log-box {
+  flex-shrink: 0;
+  color: var(--color-brand);
+}
+
+/* ---- 表格：宽表格横向滚动，而不是把页面撑破 ---- */
+.log-table-wrap {
+  max-width: 880px;
+  margin: var(--sp-5) 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--r-md);
+}
+
+.log-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-xs);
+}
+
+.log-table th,
+.log-table td {
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.log-table th {
+  background: rgb(var(--c-brand-rgb) / .05);
+  color: var(--color-brand);
+  font-weight: 500;
+}
+
+.log-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* 第一列是编号 / 序号，不要折行 */
+.log-table td:first-child {
+  white-space: nowrap;
+  color: var(--color-brand);
+  font-weight: 500;
+}
+
+.log-back {
+  margin-top: var(--sp-8);
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .log-main {
+    padding-top: 40px;
+  }
+
+  .log-meta {
+    grid-template-columns: 1fr;
+    gap: var(--sp-4);
+  }
+
+  .log-lead {
+    font-size: var(--fs-body);
+  }
+
+  .log-toc {
+    padding: var(--sp-4) var(--sp-5);
+  }
+
+  .log-body h2 {
+    margin-top: var(--sp-7);
   }
 }
