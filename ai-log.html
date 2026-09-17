@@ -1,0 +1,123 @@
+<!-- 本文件由 tools/build-ai-log.py 自动生成，请勿手改。
+     要改内容 → 改 过程证据/AI使用日志.md 后重新运行脚本 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 使用日志 · 王释贤</title>
+  <meta name="description" content="王释贤个人主页的 AI 使用日志：逐条记录每一次 AI 协作、我的判断与修正，以及发现的真实缺陷。带可复现的 git 时间戳。">
+  <meta name="theme-color" content="#0F766E">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="AI 使用日志 · 王释贤">
+  <meta property="og:description" content="逐条记录每一次 AI 协作、我的判断与修正，以及 AI 生成代码里被查出的真实缺陷。">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- 子页导航：只留「回到主页」，不复刻首页那五个锚点 -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a class="nav-logo" href="index.html">WANG SHIXIAN</a>
+      <div class="nav-links">
+        <a class="nav-link" href="index.html">← 返回主页</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="log-main">
+
+    <header class="log-head">
+      <span class="eyebrow">PROCESS EVIDENCE</span>
+      <h1 class="log-title">AI 使用日志</h1>
+      <p class="log-lead">
+        这个主页是在 AI 辅助下做出来的。这份日志把过程如实记下来——
+        <strong>包括翻车、返工，和还没补完的地方</strong>。
+        它是 Vibe Coding 课程要求的过程证据，也是我用来说清「哪些是 AI 做的、哪些是我判断的」的那份材料。
+      </p>
+
+      <ul class="log-meta">
+        <li><span class="log-meta-k">交互条目</span><span class="log-meta-v">20 条，其中 <b>5 条待补</b></span></li>
+        <li><span class="log-meta-k">时间跨度</span><span class="log-meta-v">2026-09-04 → 09-17</span></li>
+        <li><span class="log-meta-k">时间戳来源</span><span class="log-meta-v">git 提交时间，一条命令可复现</span></li>
+      </ul>
+
+      <p class="log-note">
+        <strong>说明：</strong>这是一份<strong>进行中</strong>的记录，标着 <code>🟡</code> 的几条还需要我本人补写判断。
+        另外，源文档中「回填表」一节是我自己的待办清单，属工作草稿，<strong>不随本页发布</strong>；
+        正文里若出现「见回填表」的指引，指的就是那一节。
+      </p>
+    </header>
+
+    <nav class="log-toc" aria-label="目录">
+      <p class="log-toc-title">目录</p>
+      <ol>
+<li class="log-toc-l2"><a href="#sec-1">一、我的 AI 使用自律（对应标准 ⑤ 与 ④）</a></li>
+<li class="log-toc-l2"><a href="#sec-2">二、交互日志</a></li>
+<li class="log-toc-l2"><a href="#sec-7">三、关键决策记录（Critical Evaluation 汇总，标准 ② 与 ③）</a></li>
+<li class="log-toc-l2"><a href="#sec-8">四、待补清单</a></li>
+<li class="log-toc-l2"><a href="#sec-9">五、Git 提交历史（对应 Required Process Evidence 的「主要迭代与版本变化证据」）</a></li>
+<li class="log-toc-l2"><a href="#sec-10">附：这份日志的诚实声明</a></li>
+      </ol>
+    </nav>
+
+    <article class="log-body">
+<blockquote class="log-quote"><p><strong>用途</strong>：对应 Syllabus 中 <strong>AI Compliance（10%）</strong> 的验收要求。五项标准各 2 分： ① AI Usage Log（带时间戳的完整交互日志）② Critical Evaluation（质疑 / 验证 / 纠正 AI） ③ Understanding of AI-Generated Content（能用自己话解释）④ Appropriate Use &amp; Attribution（署名与使用边界） ⑤ Ethical &amp; Privacy Compliance（不上传敏感数据）</p>
+<p><strong>维护方式</strong>：每完成一次改动、每次 git 提交后，在「交互日志」表里补一行。宁可记得糙，不要事后编。</p></blockquote>
+<hr class="log-hr">
+<h2 id="sec-1">一、我的 AI 使用自律（对应标准 ⑤ 与 ④）</h2>
+<ol><li><strong>不向 AI 提供</strong>：任何密码、API key、数据库密钥、他人隐私信息。本项目为纯静态站点，全程未涉及密钥；V3 接入 Supabase 时，<code>service_role / secret key</code> 只留在后台，<strong>不进前端、不进截图、不进对话</strong>。</li><li><strong>AI 生成的内容我要能解释</strong>：每个改动的技术原理我会用自己的话复述一遍，说不清的就不合入。</li><li><strong>AI 负责代码，我负责判断</strong>：需求、审美取舍、范围控制、验收由我决定；AI 不得擅自替换我的姓名、个人信息与既有文案。</li><li><strong>借用别人的设计</strong>只借思路，不复制文字、图片、品牌与源码（对应 V2 课件「Copy the idea, not the assets」）。</li><li><strong>不伪造过程证据</strong>：日志只记真实发生的事，包括翻车和返工。</li></ol>
+<hr class="log-hr">
+<h2 id="sec-2">二、交互日志</h2>
+<blockquote class="log-quote"><p><strong>状态说明</strong> <code>✅ 已验证</code> = 有 git 提交或文件改动可查证 <code>🟡 待我补</code> = 事实已存在，但「我的判断」那一栏需要我用自己的话写／确认（见<strong>回填表</strong>）</p>
+<p><strong>⏱ 关于时间戳</strong> Syllabus 要求「完整的、<strong>带时间戳</strong>的 AI 交互日志」。下表的时间戳<strong>一律取 git 提交时间</strong>（<code>git log --date=format-local:"%Y-%m-%d %H:%M"</code>），<strong>任何人都能复现</strong>——这是硬证据。刻意<strong>不写</strong>「我大概几点做的」，因为回忆无法验证。交互发生的时间会略早于对应提交；<strong>同一提交里并入的多轮交互无法区分先后，这种情况只标到提交级别</strong>。 ⚠️ <strong>2026-09-04 ~ 09-06 那段的原始对话已无法从会话历史里检索</strong>（检索范围只覆盖最近一周），所以那三行只有汇总时间戳（提交 09-06 13:43 / 13:46），没有逐条交互时间。</p></blockquote>
+<h3 id="sec-3">2026-09-04 ~ 09-06 · 立项与 V1</h3>
+<p>（时间戳：提交 <code>395bdd8</code> 09-06 13:43 / <code>57f7ae5</code> 09-06 13:46）</p>
+<div class="log-table-wrap"><table class="log-table"><thead><tr><th>#</th><th>我提出的需求</th><th>AI 的输出</th><th>我的判断与修正</th><th>证据</th></tr></thead><tbody><tr><td>1</td><td>用表单一次性说明项目目标、产出要求、阶段节点，要求 AI 先梳理需求再动手</td><td>需求梳理 + 反问补全细节 + 生成 <code>PROJECT.md</code>（进度记录 / 迭代日志 / 版本说明）</td><td>🟡 待我补：我认为「先让 AI 反问」比「直接让 AI 写」更省返工，理由是需求补全后几乎没大改结构</td><td><code>PROJECT.md</code> 初版 · 09-06 13:43</td></tr><tr><td>2</td><td>基于完整需求生成 V1 原型（5 区块骨架 + 基础样式 + 1-2 个交互）</td><td><code>index.html</code> / <code>style.css</code> / <code>script.js</code> 三文件骨架</td><td>🟡 待我补</td><td><code>MYPAGE</code> 仓库 <code>395bdd8</code>（MYPAGEV1.0）· 09-06 13:43</td></tr><tr><td>3</td><td>替换为真实个人信息 + 数字分身聊天区</td><td>V1.1：真实信息 + 本地知识库问答（6 组关键词规则 + 兜底）</td><td>🟡 待我补：我确认了「作品区先删掉」，因为当时没有真实作品 —— <strong>这一条后来被我自己推翻，见 #14</strong></td><td><code>MYPAGE</code> 仓库 <code>57f7ae5</code>（MYPAGEV1.1）· 09-06 13:46，已推送</td></tr></tbody></table></div>
+<blockquote class="log-quote"><p>⚠️ <strong>这段（09-04 ~ 09-06）的原始问答记录已导出不到</strong>——会话历史里检索不到了。处理方式<strong>只有两条</strong>：① 我从当时的记录里另行导出、补进上表；② 如实标注「原始记录缺失」，那三行只保留可查证的事实（生成物 + 提交时间）。<strong>不会走第三条路</strong>：凭印象编一段原始对话。<strong>不伪造过程证据，本身就是 AI Compliance 的一条。</strong>具体怎么补，见<strong>回填表</strong>。</p></blockquote>
+<h3 id="sec-4">2026-09-16 · V2.0 视觉骨架</h3>
+<p>（时间戳：提交 <code>a8329da</code> 23:24 → <code>25f4567</code> 23:51，集中在当晚半小时内）</p>
+<div class="log-table-wrap"><table class="log-table"><thead><tr><th>#</th><th>我提出的需求</th><th>AI 的输出</th><th>我的判断与修正</th><th>证据</th></tr></thead><tbody><tr><td>4</td><td>参考 serious.business，做居中 Hero + 入场动画 + 滚动显现 + 自定义光标</td><td>首屏重构、<code>reveal</code> 滚动显现、跟随光标</td><td>✅ 我否掉了 AI 最初的 <code>cursor: none</code>（隐藏系统光标）——手机点按场景下点不准也看不清输入位置</td><td><code>a8329da</code> · 09-16 23:24</td></tr><tr><td>5</td><td>加 Sticky 导航 + 毛玻璃</td><td>通栏导航 + <code>backdrop-filter</code></td><td>✅ AI 导航高亮逻辑有 bug：「摄影集 / 联系」会抢走高亮导致全灭，修正为只跟踪真实存在的锚点</td><td><code>057cd05</code> · 09-16 23:25</td></tr><tr><td>6</td><td>参考 betteroff.studio，加 Marquee 关键词横幅</td><td>无限滚动关键词条</td><td>✅ 加了 <code>aria-hidden</code>（纯装饰不应被读屏朗读）</td><td><code>7b1bb41</code> · 09-16 23:27</td></tr><tr><td>7</td><td>「关于我」改成 Bento Grid</td><td>四张大小不一的卡片</td><td>🟡 待我补</td><td><code>13b1a1c</code> · 09-16 23:37</td></tr><tr><td>8</td><td>加联系方式板块 + 摄影集</td><td>联系区（参考 serious.business）+ 摄影集占位图</td><td>✅ 联系区链接加了 <code>flex-wrap</code>，否则窄屏溢出</td><td><code>4726645</code> · 23:42、<code>25f4567</code> · 23:51</td></tr><tr><td>9</td><td>换真实照片，并把布局改成瀑布流</td><td><code>figure</code> + 原始比例自适应</td><td>✅ 否掉了 AI 最初的三列等宽网格——四张照片比例不同，等宽会切掉画面</td><td><code>18e4d3b</code> · 09-17 00:14、<code>949e514</code> · 00:22</td></tr></tbody></table></div>
+<h3 id="sec-5">2026-09-17 · V2.1 → V2.6 设计系统、内容升级与封版</h3>
+<p>（时间戳：<code>a09b6d0</code> 10:14 / <code>25c0d82</code> 11:02 / <code>5549420</code> 16:47 / <code>f6fbf70</code> 16:51 / <code>eaaddc1</code> 17:06。 <strong>#16–#19 同属 V2.6 版本内的多轮 amend</strong>——amend 保留了最初的作者时间，所以这四轮只标到提交级别）</p>
+<div class="log-table-wrap"><table class="log-table"><thead><tr><th>#</th><th>我提出的需求</th><th>AI 的输出</th><th>我的判断与修正</th><th>证据</th></tr></thead><tbody><tr><td>10</td><td>「主页不高级，有点空」——先诊断再动手</td><td>五个根因（首屏留白失衡 / Marquee 透明度 0.32 等于隐形 / 外紧内松 / 字重清一色 600 / 照片无说明）+ 三条改造线</td><td>✅ 我认可诊断，但要求 AI <strong>先讲清判断依据和方案再动手</strong>，从此确立「改视觉前先商量」的工作流</td><td><code>a09b6d0</code> · 10:14</td></tr><tr><td>11</td><td>研究 serious.business，找出差距</td><td>扒其源码与 CSS，发现<strong>全站只有 2 个颜色、0 个深色区块</strong>，起伏靠字号跨度（2.7:1）+ 大留白 + 逐行入场（29 处）</td><td>✅ <strong>我推翻了 AI 上一轮的结论</strong>。AI 原说「纯色页面必须靠深色区块破局」，证据表明不成立 → 改为先做「配色收敛 + 逐行入场」，<strong>深色区块暂缓</strong></td><td>记忆日志、<code>25c0d82</code> · 11:02</td></tr><tr><td>12</td><td>配色收敛</td><td>15 色 → 6 色，其余用透明度派生</td><td>✅ 我选了「收到 6 色」而非更激进的 3 色（个人主页信息量比 agency 站多，3 色撑不住）</td><td><code>25c0d82</code> · 11:02</td></tr><tr><td>13</td><td>逐行入场代替整块淡入</td><td>JS 按实际换行拆行 + 遮罩升起</td><td>✅ 验收时发现 <strong>AI 写的按钮渐变方向错了</strong>：从深青走向浅青，白字压在亮端对比度只有 2.5:1（低于 4.5 门槛）→ 改为走向更深，6.9:1</td><td><code>25c0d82</code> · 11:02</td></tr><tr><td>14</td><td>内容从「声明」升级为「证据」</td><td>研究高人气个人主页（imsyy/home 4.6k star、Brittany Chiang 等），结论 = learning in public</td><td>✅ <strong>我推翻了 AI 早期的一个判断</strong>：「没有作品所以删掉作品区」是误判——这个主页本身就是作品</td><td><code>5549420</code> · 16:47</td></tr><tr><td>15</td><td>把 CarbonBrain 加进页面</td><td>AI <strong>拒绝直接写描述</strong>，先查本地磁盘、GitHub API、网络检索，确认无任何资料</td><td>✅ 我认可这个做法。最终只写我亲口确认的三个事实（课程/比赛项目、已有可演示版本），描述留空待补 —— <strong>宁可少写，不编造</strong></td><td><code>f6fbf70</code> · 16:51</td></tr><tr><td>16</td><td>修页面过时数据</td><td>版本号 / 提交数 / 口径 / <code>og:image</code> 四处修正</td><td>✅ 我要求把「版本号 + 提交数」这行加注释，避免每次发版都要重新发现它过时</td><td><code>eaaddc1</code> · V2.6（17:06）</td></tr><tr><td>17</td><td>核对摄影集照片的著作权归属，要求如实署名</td><td>AI 指出「摄影集」板块名与事实不符（它以为 4 张里只有 1 张是本人拍的），给了「改板块名」/「只留本人作品」两条路</td><td>✅ <strong>我纠正了 AI 的推断</strong>：AI 从「斜后方视角」「手机时间水印」推断 1.jpg / 2.jpg 不是本人拍摄 —— <strong>这是错误的推断方法</strong>，外观特征不能用来断定著作权归属。事实是 1/2/3 均为本人拍摄，仅 4.jpg 由演出方提供 → 板块名保留，只给 4.jpg 加署名 + 区块内补一句口径说明</td><td><code>eaaddc1</code> · V2.6</td></tr><tr><td>18</td><td>「git 提交能不能就放在原来的 MYPAGE 文件夹里？」</td><td>AI 核查两个仓库后确认：两边历史<strong>没有共同祖先</strong>，但内容直接相连（<code>PROJECT.md</code> blob 哈希一致）；给出三条路（进老仓库用分支 / 接成连续历史 / 新建仓库），并指出「把 V2 文件塞进老文件夹」会让 <strong>15 条提交塌成 1 条</strong></td><td>✅ 我选了「进老仓库、用分支区分版本线」。取舍理由：只留一个仓库链接，但<strong>不用 force push、不重写历史</strong>，已记录的 14 个提交哈希继续有效</td><td><code>eaaddc1</code> · V2.6；已推送 <code>github.com/TaiVerdus/mypage</code> 的 <code>v2</code> 分支</td></tr><tr><td>19</td><td>「V2 可以结束了是吧」</td><td>AI 逐项核对后给结论（页面已无已知缺陷，剩余全是「加内容」而非「修问题」）+ 6 项未结清单，并建议封版；同时<strong>发现页面提交数口径不自洽</strong>（15 只算了 V2 线，可版本线写的是 <code>V1 → … → V2.6</code>）</td><td>✅ 我选了「提交数改成 17」+「现在封版」→ 打 tag <code>v2.6</code>、清掉 <code>PROJECT.md</code> 里两行早就做完却仍标「待用户执行」的过期记录、<code>README</code> 增补「仓库与分支」一节。<strong>注</strong>：这次 amend 发生在 <code>v2</code> 已经推送之后，所以用到一次 <code>--force</code> 覆盖 —— 推送前先核对远端仍是上次那个提交，属受控操作</td><td><code>eaaddc1</code> · V2.6；已推送 + tag <code>v2.6</code></td></tr><tr><td>20</td><td>「AI 使用日志可以放在我的主页里，加一个入口能打开」＋「<strong>把 2.0 封版取消了，还是改 2.0</strong>」</td><td>AI 先摆出两件容易被忽略的事：① V2.0 是一小时前<strong>刚由我封版</strong>的 ② 我把 V3 挪进 <code>backups/</code> 之后，已经没有「顺手放进去」的地方了。另外对日志文件做了<strong>发布前的隐私扫描</strong>（密钥 / 邮箱 / 手机号 / 他人隐私 → 均未发现），并给出四条技术路线（前端渲染 Markdown / 直接链 <code>.md</code> / 手抄 HTML / <strong>脚本生成</strong>）与各自代价</td><td>✅ 我选了「<strong>撤销封版，继续改 V2.0</strong>」，并要求日志页<strong>保留 <code>🟡 待补</code> 标记</strong>。封版是我自己定的，撤销也是我定的 —— <strong>决定改了不丢人，但文档必须跟着改</strong>：V2.6 那几条「已封版 / 进入维护状态」的叙述全部改成「曾标记为封版，同日撤销」，<strong>不抹掉这段历史，因为被推翻的决策本身就是过程证据</strong></td><td><code>V2.7</code>（哈希见 <code>git log</code>）；代码在 <code>tools/build-ai-log.py</code> + <code>ai-log.html</code></td></tr></tbody></table></div>
+<h3 id="sec-6">AI 工具层面的坑（也算 critical evaluation）</h3>
+<div class="log-table-wrap"><table class="log-table"><thead><tr><th>#</th><th>问题</th><th>处理</th></tr></thead><tbody><tr><td>A</td><td><strong>并行编辑同一文件会互相覆盖</strong>：5 个 <code>index.html</code> 编辑同时发出，实际只落了 2 个</td><td>改为<strong>同一文件必须串行编辑</strong>，改完复查。已写入项目常驻规范</td></tr><tr><td>B</td><td><code>prefers-reduced-motion: reduce</code> 用 <code>animation: none</code> 会让 <code>fill-mode: both</code> 的入场动画卡在 <code>opacity: 0</code>，<strong>内容直接消失</strong></td><td>改为 <code>animation-duration: .01ms</code>。这是 AI 生成的代码里没被发现的缺陷</td></tr><tr><td>C</td><td>11px 小字用了浅青 <code>#0D9488</code>，对比度 3.3:1 不达 WCAG AA</td><td>统一改为 <code>#0F766E</code>（4.9:1），并把「小字不得用浅青」写进设计系统</td></tr><tr><td>D</td><td>AI 曾把中文 git 提交信息写成乱码</td><td>改为 <code>git commit -F &lt;utf-8 文件&gt; --cleanup=strip</code></td></tr></tbody></table></div>
+<hr class="log-hr">
+<h2 id="sec-7">三、关键决策记录（Critical Evaluation 汇总，标准 ② 与 ③）</h2>
+<p>这几条是「我没有照单全收 AI 建议」的证据，准备在 Demo Day 口头答辩时展开：</p>
+<ol><li><strong>推翻「必须用深色区块」</strong>：AI 的判断被参考站的真实数据推翻，我选择风险更低、收益更高的两条路。</li><li><strong>推翻「没有作品就不用作品区」</strong>：重新定义「作品」= 能证明迭代能力的东西，而不是「有客户的东西」。</li><li><strong>拒绝 AI 编造内容</strong>：CarbonBrain 在没有任何资料的情况下，禁止 AI 推测描述，只写已核实事实。</li><li><strong>发现 AI 代码里的无障碍缺陷</strong>：对比度 2.5:1 的渐变方向、<code>animation: none</code> 导致内容消失、小字对比度不达标 —— 三处都是 AI 生成的代码里真实存在的缺陷。</li><li><strong>设定协作边界</strong>：从「AI 闷头改完给结果」改为「先讲判断依据和方案、给可选方向，我确认后再动手」。</li><li><strong>否掉了 AI 的「外观反推著作权」</strong>：AI 用「斜后方视角」「手机时间水印」推断照片不是本人拍摄，这个推断方法本身就站不住 —— <strong>能从图像推断的只有自己验证过的东西，著作权归属只能问本人</strong>。核实后的事实是 3 张本人拍摄、1 张来自演出方。这条的教训是：AI 的「合理推测」在事实问题上不算证据。</li></ol>
+<p><strong>能用自己话解释的东西</strong>（标准 ③ 自查清单，Demo Day 会问）：</p>
+<ul><li class="log-task"><span class="log-box" aria-hidden="true">☐</span>1px 渐变描边是怎么做出来的？（<code>mask-composite: exclude</code> 抠环，不是三层边框叠加）</li><li class="log-task"><span class="log-box" aria-hidden="true">☐</span>逐行入场为什么必须先拆分再分组？（行是浏览器排版后才产生的，HTML 里没有「行」）</li><li class="log-task"><span class="log-box" aria-hidden="true">☐</span>配色从 15 个减到 6 个，为什么层次反而更清楚？（色相单一，深浅交给透明度）</li><li class="log-task"><span class="log-box" aria-hidden="true">☐</span>为什么渐变要往暗里走？（白字对比度）</li><li class="log-task"><span class="log-box" aria-hidden="true">☐</span>数字分身现在是怎么工作的？有什么局限？（关键词匹配，不是真 AI —— 必须如实说）</li><li class="log-task"><span class="log-box" aria-hidden="true">☐</span>静态网站为什么能保存数据？（静态托管 + 外部后台，V3 内容）</li></ul>
+<hr class="log-hr">
+<h2 id="sec-8">四、待补清单</h2>
+<ul><li class="log-task"><span class="log-box" aria-hidden="true">☐</span><strong>填回填表</strong> ← 这是目前唯一卡住日志质量的事</li><li class="log-task"><span class="log-box" aria-hidden="true">☐</span>导出 2026-09-04 ~ 09-06 的原始对话记录 → 替换第二节那三行的 <code>🟡</code> （<strong>若翻不到，就如实标注「原始记录缺失」，不要补写</strong>）</li><li class="log-task"><span class="log-box" aria-hidden="true">☐</span>用自己的话重写「我的判断与修正」栏 —— <strong>这一栏必须是你的真实想法</strong>，AI 只能提供事实骨架</li><li class="log-task"><span class="log-box" aria-hidden="true">☐</span>每次 git 提交后在第二节补一行（已补到 #20，即 V2.7）</li><li class="log-task"><span class="log-box" aria-hidden="true">☐</span>V3 接入 Supabase 后，记录：密钥如何隔离、RLS 策略谁写的、谁验收的</li><li class="log-task"><span class="log-box" aria-hidden="true">☐</span>Demo Day 前把第三节的自查清单逐条讲一遍</li></ul>
+<hr class="log-hr">
+<h2 id="sec-9">五、Git 提交历史（对应 Required Process Evidence 的「主要迭代与版本变化证据」）</h2>
+<blockquote class="log-quote"><p>用 <code>git log --reverse --pretty=format:"%h %ad %s" --date=short</code> 可复现同一张表。 ⚠️ <strong>第 15 条（V2.6）的哈希不固定</strong>：它经历过 5 次 <code>--amend</code>—— <code>cdf2b95</code> → <code>3242000</code> → <code>4d3be13</code> → <code>0ad3a50</code> → <code>89f6c28</code> → <code>eaaddc1</code>。原因是当时反复往里并补丁（页面文案写着「共 N 次提交」，每多一条提交就立刻过时）。<strong>从 V2.7 起不再用 amend 记账</strong>：分支已经推送过，再 amend 就必须 force push，不值得。 <strong>V1.0 / V1.1 不在这个表里</strong>——它们在同一个仓库 <code>github.com/TaiVerdus/mypage</code> 的 <strong><code>main</code></strong> 分支（2 次提交）。下面这张表的 V2 线推在<strong>同一个仓库的 <code>v2</code> 分支</strong>下。两条分支<strong>没有共同祖先</strong>（V2.0 是 2026-09-16 在新文件夹里重新 <code>git init</code> 的，不是从 V1.1 拉出来的分支）。为什么这么安排、为什么不合并成一条连续历史，见 <code>PROJECT.md</code> 的「仓库分布与分支」一节。</p></blockquote>
+<div class="log-table-wrap"><table class="log-table"><thead><tr><th>#</th><th>哈希</th><th>日期</th><th>提交信息</th></tr></thead><tbody><tr><td>1</td><td><code>a8329da</code></td><td>2026-09-16</td><td>V2.0: Hero居中+入场动画+纯色背景+自定义光标+Scroll Reveal</td></tr><tr><td>2</td><td><code>057cd05</code></td><td>2026-09-16</td><td>V2.0: Sticky导航栏+毛玻璃效果</td></tr><tr><td>3</td><td><code>7b1bb41</code></td><td>2026-09-16</td><td>V2.0: Marquee关键词无限滚动横幅</td></tr><tr><td>4</td><td><code>13b1a1c</code></td><td>2026-09-16</td><td>V2.0: 关于我升级为Bento Grid布局+内容充实</td></tr><tr><td>5</td><td><code>4726645</code></td><td>2026-09-16</td><td>V2.0: 新增联系方式板块（参考serious.business风格）</td></tr><tr><td>6</td><td><code>265ce0a</code></td><td>2026-09-16</td><td>V2.0: 填入真实联系方式（邮箱+微信）</td></tr><tr><td>7</td><td><code>14e98d0</code></td><td>2026-09-16</td><td>V2.0: 添加GitHub链接 https://github.com/TaiVerdus</td></tr><tr><td>8</td><td><code>25f4567</code></td><td>2026-09-16</td><td>V2.0: 新增摄影集板块（Bento网格布局，占位图待替换）</td></tr><tr><td>9</td><td><code>18e4d3b</code></td><td>2026-09-17</td><td>V2.0: 摄影集替换为真实照片（4张）</td></tr><tr><td>10</td><td><code>949e514</code></td><td>2026-09-17</td><td>V2.0: 摄影集改为瀑布流布局，照片按原始比例自适应，去掉标题</td></tr><tr><td>11</td><td><code>a09b6d0</code></td><td>2026-09-17</td><td>V2.2: 质感与密度打磨</td></tr><tr><td>12</td><td><code>25c0d82</code></td><td>2026-09-17</td><td>V2.3: 配色收敛 + 逐行入场</td></tr><tr><td>13</td><td><code>5549420</code></td><td>2026-09-17</td><td>V2.4: 内容升级，从声明到证据</td></tr><tr><td>14</td><td><code>f6fbf70</code></td><td>2026-09-17</td><td>V2.5: 新增 CarbonBrain 项目条目</td></tr><tr><td>15</td><td><code>eaaddc1</code></td><td>2026-09-17</td><td>V2.6: 页面数据校正 + 建立 AI 使用日志 + 仓库整合（曾标记「V2 封版」，tag <code>v2.6</code>，<strong>同日撤销</strong>）</td></tr><tr><td>16</td><td>—</td><td>2026-09-17</td><td>V2.7: 撤销封版 + 新增 AI 使用日志子页 <code>ai-log.html</code> + 首页入口（见 <code>git log</code>）</td></tr></tbody></table></div>
+<p><strong>这张表证明的不是「我提交了很多次」，而是迭代的颗粒度。</strong>每次提交只做一件事、信息写清做了什么，所以能看出这条路径：先搭骨架（1–8）→ 换真实素材（9–10）→ 打磨质感（11）→ 收敛配色与动效（12） → 把声明升级成证据（13–14）→ 回头纠正自己的过时数据（15）→ <strong>撤销封版并补上过程证据页（16）</strong>。对比「一次提交塞进整个 V2」，这张表能让评审看出<strong>我是在哪个节点因为什么改变方向的</strong>——第 16 条尤其能说明这点：我上午刚宣布封版，晚上就自己推翻了它。</p>
+<hr class="log-hr">
+<h2 id="sec-10">附：这份日志的诚实声明</h2>
+<p><strong>时间戳的来源</strong>：第二节的时间戳<strong>一律取自 git 提交时间</strong>，可用 <code>git log --date=format-local:"%Y-%m-%d %H:%M"</code> 复现——<strong>没有任何一条是我回忆出来的</strong>。交互发生的时间会略早于对应提交；同一提交里并入的多轮交互（如 V2.6）无法区分先后，只标到提交级别。</p>
+<p>第二节的<strong>事实</strong>（日期、改动内容、commit 号、发现了哪些缺陷）来自 git 提交历史、 <code>PROJECT.md</code> 迭代日志和当天的记忆记录，可逐条核对。</p>
+<p>第二、三节的<strong>判断题</strong>（我认为哪个方案更好、为什么推翻 AI）目前是 AI 依据实际发生过的事重建的骨架 —— 需要我用自己的话确认或改写后才能作为作业提交（见回填表）。</p>
+<p><strong>已知缺口（如实列出，不掩盖）</strong>：</p>
+<ul><li><strong>2026-09-04 ~ 09-06</strong>：原始问答记录已无法检索。第二节 #1 ~ #3 只有<strong>生成物与提交时间</strong>可查证，「我的判断」栏那几条<strong>尚待我本人补写</strong>。</li><li><strong>2026-09-16 之前没有逐条记录</strong>：那几天的内容来自 <code>PROJECT.md</code> 迭代日志与当天的记忆记录，属<strong>事后整理</strong>，不是原始对话。</li><li>本日志的<strong>维护方式</strong>是「每完成一次改动补一行」，所以颗粒度取决于当时的记录习惯——有些提交做了多件事，就只对应一行，这一点不假装更细。</li></ul>
+    </article>
+
+    <p class="log-back"><a class="btn btn--ghost" href="index.html">← 返回主页</a></p>
+
+  </main>
+
+  <footer id="footer">
+    <p>© 2026 王释贤 · MYPAGE V2.7</p>
+    <p class="copyright">AI 使用日志为课程过程证据，如实记录协作与返工，包括未完成项</p>
+  </footer>
+
+</body>
+</html>
