@@ -57,32 +57,32 @@ updateActiveNav();
 
 var KNOWLEDGE = [
   {
-    keywords: ['学', '课程', 'calculus', '微积分', 'linear', '线性代数', '编程', 'computer', 'program', '上课', '专业课'],
-    answer: '释贤最近主要在学三样：Calculus（微积分）、Linear Algebra（线性代数）和 Computer Programming（计算机编程）。数学和编程两手抓，脑机接口方向的基本功。'
+    keywords: ['study', 'studying', 'course', 'calculus', 'linear', 'algebra', 'program', 'programming', 'major', 'class', 'classes'],
+    answer: 'Shixian is focused on three things right now: Calculus, Linear Algebra, and Computer Programming. Math and coding together — the fundamentals for a brain–computer interface direction.'
   },
   {
-    keywords: ['脑机接口', 'bci', '专业', '身份', '方向', '为什么选'],
-    answer: '释贤是一名脑机接口方向的学生。为什么选这个方向？说实话他没跟我细讲过，我不敢替他编——你可以直接问问他本人。'
+    keywords: ['bci', 'brain', 'major', 'identity', 'focus', 'why', 'direction', 'interface'],
+    answer: 'Shixian is a brain–computer interface student. Why this direction? To be honest he never told me the details, so I won’t make anything up — ask him yourself.'
   },
   {
-    keywords: ['兴趣', '爱好', '喜欢', '音乐', '架子鼓', '鼓', '书法', '篮球', '打球', '业余', '课余'],
-    answer: '释贤的课余生活挺丰富的：听音乐、打架子鼓、练书法、打篮球。动静都全了——鼓和篮球是动，书法是静。'
+    keywords: ['interest', 'hobby', 'hobbies', 'music', 'drum', 'drums', 'calligraphy', 'basketball', 'fun', 'free time', 'do for fun'],
+    answer: 'His free time is pretty full: music, drums, calligraphy, and basketball. Loud and quiet both — drums and basketball are the loud, calligraphy is the quiet.'
   },
   {
-    keywords: ['enfj', '性格', '人格', '什么样的人', '特点', '记忆点', 'mbti', '内核'],
-    answer: '释贤是 ENFJ，朋友们对他的评价是「内核比较强」——遇事稳得住，不容易慌。想更直观地感受？跟他聊聊天就知道了。'
+    keywords: ['enfj', 'personality', 'person', 'what kind', 'mbti', 'steady', 'pressure', 'calm'],
+    answer: 'Shixian is an ENFJ. His friends describe him as “steady under pressure” — calm when things get hard. To feel it for yourself, just talk to him.'
   },
   {
-    keywords: ['ai', '前沿', '科技', '关注', '技术', '未来'],
-    answer: '释贤很关注 AI 前沿科技，尤其是和脑机接口交叉的部分。具体的见解他本人讲得比我好，建议当面聊聊。'
+    keywords: ['ai', 'frontier', 'tech', 'technology', 'future', 'follow', 'research'],
+    answer: 'Shixian follows AI research closely, especially where it meets brain–computer interfaces. He explains his own views far better than I can — ask him directly.'
   },
   {
-    keywords: ['你是谁', '名字', '介绍', '王释贤', '释贤', 'hello', 'hi', '你好', '在吗'],
-    answer: '你好！我是王释贤的数字分身，负责在他不在线的时候招待访客。他的基本信息我都知道：ENFJ、脑机接口学生、关注 AI 前沿科技，欢迎接着问～'
+    keywords: ['who are you', 'name', 'intro', 'wang shixian', 'shixian', 'hello', 'hi', 'hey'],
+    answer: 'Hi! I’m Wang Shixian’s digital twin, greeting visitors while he’s away. The basics: ENFJ, BCI student, into the AI frontier. Ask away.'
   }
 ];
 
-var FALLBACK = '这个我还不知道，可以问我的真人释贤——我只说他告诉过我的事，不能瞎编。';
+var FALLBACK = 'I don’t know that one — ask the real Shixian. I only say what he’s told me, and I don’t make things up.';
 
 var messagesEl = document.getElementById('chatMessages');
 var inputEl = document.getElementById('chatInput');
@@ -118,7 +118,7 @@ function ask(question) {
   addMessage(question, 'user');          // 1. 先显示用户的问题
   inputEl.value = '';                     // 2. 清空输入框
 
-  var typing = addMessage('分身正在输入…', 'bot typing'); // 3. 打字指示
+  var typing = addMessage('typing…', 'bot typing'); // 3. 打字指示
 
   setTimeout(function () {                // 4. 模拟思考延迟后给出回答
     typing.remove();
@@ -145,7 +145,7 @@ quickEl.querySelectorAll('.quick-btn').forEach(function (btn) {
 });
 
 // 开场白：分身先打招呼
-addMessage('嗨，我是释贤的数字分身！可以问我他在学什么、是个什么样的人、有什么爱好——答不上的我会老实说不知道。', 'bot');
+addMessage('Hey, I’m Shixian’s digital twin! Ask what he’s studying, what kind of person he is, or his hobbies — and I’ll be honest when I don’t know.', 'bot');
 
 // ---------- 交互四：自定义光标 ----------
 var cursor = document.getElementById('customCursor');

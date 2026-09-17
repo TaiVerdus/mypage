@@ -1818,3 +1818,54 @@ section {
     padding-right: calc(var(--ring-size) + 48px);
   }
 }
+
+/* ---------- 20. 英文版：编辑感排版（V2.7 续四） ---------- */
+/* 「更高级」不靠加装饰，靠三件事：
+   ① 大标题换衬线（serif）体、字重放轻、字距收紧 —— 编辑感的来源
+   ② 眉题 / 标签统一大写 + 加宽字距 —— 精致的信号
+   ③ 更多留白 + 更松的行高 —— 给文字呼吸
+   字体只用系统自带（本站不上 CDN、不引第三方字体）。 */
+
+:root {
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+               Arial, sans-serif;
+  --font-serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino,
+                Georgia, "Times New Roman", serif;
+  --section-pad: 128px;
+  --lh-body: 1.75;
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+/* 大标题：衬线 + 稍轻字重 + 负字距。衬线放轻比加粗更「高级」 */
+.hero-content h1,
+.section-title,
+.contact-title {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+/* 数字：衬线大数字是编辑排版里的经典记忆点 */
+.stat-num {
+  font-family: var(--font-serif);
+  font-weight: 500;
+}
+
+/* 眉题 / 元信息键 / 数据标签：大写 + 加宽字距 = 精致 */
+.eyebrow,
+.hero-eyebrow,
+.meta-k,
+.stat-label {
+  text-transform: uppercase;
+  letter-spacing: .22em;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+/* 导航：轻微字距，保持易读、不用大写 */
+.nav-link {
+  letter-spacing: .04em;
+}

@@ -94,7 +94,7 @@ def counts_with_pending(check_only):
 # (文件名, 说明, 正则, 替换用的组)
 RULES = [
     ("index.html", "项目条目的提交数",
-     r"(共 )(\d+)( 次提交)",
+     r"(· )(\d+)( commits as of)",
      lambda m, v2, mn: m.group(1) + str(v2 + mn) + m.group(3)),
 
     ("index.html", "注释里的分支条数",
