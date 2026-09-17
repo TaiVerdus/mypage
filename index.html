@@ -3,8 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>王释贤 · 个人主页</title>
+  <title>王释贤 · 脑机接口学生 · 个人主页</title>
+  <meta name="description" content="王释贤的个人主页：脑机接口方向学生，关注 AI 前沿科技。正在学微积分、线性代数与编程，课余打架子鼓、练书法、打篮球。">
+  <meta name="theme-color" content="#0F766E">
+
+  <!-- 社交分享卡片：把链接发给同学 / HR 时会显示标题和缩略图 -->
+  <!-- 部署上线后，记得把 og:image 和 og:url 换成你的真实网址 -->
+  <meta property="og:type" content="profile">
+  <meta property="og:title" content="王释贤 · 个人主页">
+  <meta property="og:description" content="脑机接口学生 · 关注 AI 前沿科技 · ENFJ">
+  <meta property="og:image" content="images/1.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="style.css">
+  <!-- 关掉 JS 时，滚动显现的元素要能正常显示 -->
+  <noscript><style>.reveal{opacity:1 !important;transform:none !important;}</style></noscript>
 </head>
 <body>
 
@@ -12,52 +26,91 @@
   <div class="custom-cursor" id="customCursor"></div>
 
   <!-- ========== Sticky 导航 ========== -->
-  <nav class="nav">
-    <span class="nav-logo">WANG SHIXIAN</span>
-    <div class="nav-links">
-      <a class="nav-link active" href="#hero">首页</a>
-      <a class="nav-link" href="#about">关于我</a>
-      <a class="nav-link" href="#chat">数字分身</a>
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a class="nav-logo" href="#hero">WANG SHIXIAN</a>
+      <div class="nav-links">
+        <a class="nav-link active" href="#hero">首页</a>
+        <a class="nav-link" href="#about">关于我</a>
+        <a class="nav-link" href="#photos">摄影集</a>
+        <a class="nav-link" href="#chat">数字分身</a>
+        <a class="nav-link" href="#contact">联系</a>
+      </div>
     </div>
+    <span class="nav-progress" id="navProgress" aria-hidden="true"></span>
   </nav>
 
   <!-- ========== 区块 1：首屏（自我介绍） ========== -->
   <header id="hero">
+    <div class="hero-grid" aria-hidden="true"></div>
     <div class="hero-content">
+      <p class="hero-eyebrow">CST &amp; AI FOUNDATIONS · 2026</p>
       <h1>你好，我是<span class="highlight">王释贤</span></h1>
       <p class="hero-tagline">ENFJ · 脑机接口学生 · 关注 AI 前沿科技</p>
       <p class="hero-intro">正在学 calculus、linear algebra 和 computer programming；课余听音乐、打架子鼓、练书法、打篮球。朋友们说我「内核比较强」——具体是真是假，可以问下方的数字分身。</p>
-      <a class="hero-btn" href="#chat">向我的数字分身提问</a>
+      <a class="btn btn--primary hero-btn" href="#chat">向我的数字分身提问</a>
+      <ul class="hero-meta">
+        <li><span class="meta-k">MBTI</span><span class="meta-v">ENFJ</span></li>
+        <li><span class="meta-k">方向</span><span class="meta-v">BCI × AI</span></li>
+        <li><span class="meta-k">状态</span><span class="meta-v">大一在读</span></li>
+      </ul>
     </div>
+    <a class="scroll-hint" href="#about" aria-label="向下滚动到关于我"><span class="scroll-hint-rail"><i></i></span></a>
   </header>
 
   <!-- ========== Marquee 关键词滚动横幅 ========== -->
-  <div class="marquee">
+  <div class="marquee" aria-hidden="true">
     <div class="marquee-track">
       <span>BCI · AI · DRUMS · CALLIGRAPHY · BASKETBALL · CALCULUS · LINEAR ALGEBRA · PROGRAMMING · ENFJ · </span>
       <span>BCI · AI · DRUMS · CALLIGRAPHY · BASKETBALL · CALCULUS · LINEAR ALGEBRA · PROGRAMMING · ENFJ · </span>
     </div>
   </div>
 
+  <!-- ========== 数据条：一眼看完关键信息 ========== -->
+  <!-- 不加 reveal：数字滚动本身就是入场动画，叠加淡入会导致数字在看不见时数完 -->
+  <section id="stats">
+    <div class="stats-row">
+      <div class="stat">
+        <span class="stat-num" data-count="3">3</span>
+        <span class="stat-label">正在学的核心课</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num" data-count="4">4</span>
+        <span class="stat-label">课余爱好</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num" data-count="1">1</span>
+        <span class="stat-label">深耕方向</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num" data-count="6">6</span>
+        <span class="stat-label">分身答得上的话题</span>
+      </div>
+    </div>
+  </section>
+
   <main>
     <!-- ========== 区块 2：关于我（个人信息展示区） ========== -->
     <section id="about">
-      <h2 class="section-title reveal">关于我</h2>
+      <div class="section-head reveal">
+        <span class="eyebrow">01 — About</span>
+        <h2 class="section-title">关于我</h2>
+      </div>
       <div class="info-grid bento-grid reveal">
         <!-- 大卡：正在学 -->
         <div class="info-card bento-large">
-          <h3>📚 正在学</h3>
+          <h3><span class="card-dot"></span>正在学</h3>
           <div class="bento-items">
             <div class="bento-item">
-              <strong>Calculus</strong>
+              <strong>Calculus <span class="item-idx">01</span></strong>
               <p>微积分——理解变化与极限</p>
             </div>
             <div class="bento-item">
-              <strong>Linear Algebra</strong>
+              <strong>Linear Algebra <span class="item-idx">02</span></strong>
               <p>线性代数——向量、矩阵与空间</p>
             </div>
             <div class="bento-item">
-              <strong>Computer Programming</strong>
+              <strong>Computer Programming <span class="item-idx">03</span></strong>
               <p>编程基础——从零构建东西</p>
             </div>
           </div>
@@ -65,7 +118,7 @@
 
         <!-- 小卡：兴趣 -->
         <div class="info-card">
-          <h3>🎧 兴趣</h3>
+          <h3><span class="card-dot"></span>兴趣</h3>
           <ul class="tag-list">
             <li>架子鼓</li>
             <li>书法</li>
@@ -76,33 +129,51 @@
 
         <!-- 小卡：记忆点 -->
         <div class="info-card">
-          <h3>⚡ 记忆点</h3>
+          <h3><span class="card-dot"></span>记忆点</h3>
           <p class="info-text">内核比较强——表面安静，遇到事情稳得住，不容易慌。</p>
         </div>
 
         <!-- 大卡：关注方向 -->
         <div class="info-card bento-large">
-          <h3>🔭 关注方向</h3>
+          <h3><span class="card-dot"></span>关注方向</h3>
           <p class="info-text">AI × 脑机接口交叉——想探索人脑与机器的连接方式，关注这个领域的前沿进展。</p>
         </div>
       </div>
     </section>
 
     <!-- ========== 区块：摄影集 ========== -->
-    <section id="photos" class="reveal">
-      <h2 class="section-title">📷 摄影集</h2>
-      <div class="photo-grid masonry">
-        <img src="images/1.jpg" alt="摄影作品" class="photo-item">
-        <img src="images/2.jpg" alt="摄影作品" class="photo-item">
-        <img src="images/3.jpg" alt="摄影作品" class="photo-item">
-        <img src="images/4.jpg" alt="摄影作品" class="photo-item">
+    <section id="photos">
+      <div class="section-head reveal">
+        <span class="eyebrow">02 — Photos</span>
+        <h2 class="section-title">摄影集</h2>
+      </div>
+      <div class="photo-grid masonry reveal">
+        <figure class="photo-item">
+          <img src="images/1.jpg" alt="释贤的摄影作品 1" loading="lazy" decoding="async">
+          <figcaption><span class="photo-no">01</span></figcaption>
+        </figure>
+        <figure class="photo-item">
+          <img src="images/2.jpg" alt="释贤的摄影作品 2" loading="lazy" decoding="async">
+          <figcaption><span class="photo-no">02</span></figcaption>
+        </figure>
+        <figure class="photo-item">
+          <img src="images/3.jpg" alt="释贤的摄影作品 3" loading="lazy" decoding="async">
+          <figcaption><span class="photo-no">03</span></figcaption>
+        </figure>
+        <figure class="photo-item">
+          <img src="images/4.jpg" alt="释贤的摄影作品 4" loading="lazy" decoding="async">
+          <figcaption><span class="photo-no">04</span></figcaption>
+        </figure>
       </div>
     </section>
 
     <!-- ========== 区块 3：数字分身聊天区 ========== -->
     <section id="chat">
-      <h2 class="section-title reveal">和我的数字分身聊聊</h2>
-      <p class="chat-note reveal">它只知道释贤告诉过它的事，答不上的会老实说不知道。</p>
+      <div class="section-head section-head--center reveal">
+        <span class="eyebrow">03 — Digital Twin</span>
+        <h2 class="section-title">和我的数字分身聊聊</h2>
+        <p class="chat-note">它只知道释贤告诉过它的事，答不上的会老实说不知道。</p>
+      </div>
       <div class="chat-window reveal">
         <div class="chat-header">
           <span class="chat-avatar">贤</span>
@@ -119,16 +190,17 @@
         </div>
         <div class="chat-input-row">
           <input type="text" id="chatInput" placeholder="问点什么……" maxlength="100">
-          <button id="chatSend">发送</button>
+          <button id="chatSend" class="btn btn--primary">发送</button>
         </div>
       </div>
     </section>
 
     <!-- ========== 区块：联系我 ========== -->
     <section id="contact" class="reveal">
+      <span class="eyebrow eyebrow--center">04 — Contact</span>
       <h2 class="contact-title">有想法？</h2>
       <p class="contact-subtitle">聊聊呗，没什么压力。</p>
-      <a href="mailto:wshixian2026@163.com" class="contact-btn">Say Hello</a>
+      <a href="mailto:wshixian2026@163.com" class="btn btn--ghost contact-btn">Say Hello</a>
       <div class="contact-links">
         <a href="mailto:wshixian2026@163.com" class="contact-link">邮箱</a>
         <a href="https://github.com/TaiVerdus" class="contact-link" target="_blank">GitHub</a>

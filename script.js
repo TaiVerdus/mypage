@@ -17,22 +17,35 @@ document.querySelectorAll('.nav-link').forEach(function (link) {
 });
 
 // ---------- 交互二：滚动高亮当前区块 ----------
-var sections = document.querySelectorAll('section[id], header[id]');
-var navLinks = document.querySelectorAll('.nav-link');
+// 只跟踪「导航里真实存在」的区块，避免漏加导航项的区块抢走高亮
+var navLinks = Array.prototype.slice.call(document.querySelectorAll('.nav-link'));
+var sections = [];
+navLinks.forEach(function (link) {
+  var sec = document.querySelector(link.getAttribute('href'));
+  if (sec) {
+    sections.push({ id: link.getAttribute('href').slice(1), el: sec, link: link });
+  }
+});
+
+var navEl = document.getElementById('nav');
 
 function updateActiveNav() {
-  var currentId = '';
-  sections.forEach(function (sec) {
-    if (window.scrollY >= sec.offsetTop - 80) {
-      currentId = sec.id;
+  var currentId = sections.length ? sections[0].id : '';
+  sections.forEach(function (item) {
+    if (window.scrollY >= item.el.offsetTop - 80) {
+      currentId = item.id;
     }
   });
   navLinks.forEach(function (link) {
     link.classList.toggle('active', link.getAttribute('href') === '#' + currentId);
   });
+  // 滚动后给导航条加投影，区分层次
+  if (navEl) {
+    navEl.classList.toggle('scrolled', window.scrollY > 8);
+  }
 }
 
-window.addEventListener('scroll', updateActiveNav);
+window.addEventListener('scroll', updateActiveNav, { passive: true });
 updateActiveNav();
 
 // ---------- 交互三：数字分身 ----------
@@ -164,6 +177,72 @@ if (cursor && isDesktop) {
     });
   });
 }
+
+// ---------- 交互六：卡片鼠标光斑 ----------
+// 把鼠标在卡片内的坐标写进 CSS 变量，样式层用它画一个跟随的柔光
+document.querySelectorAll('.info-card').forEach(function (card) {
+  card.addEventListener('mousemove', function (e) {
+    var rect = card.getBoundingClientRect();
+    card.style.setProperty('--mx', (e.clientX - rect.left) + 'px');
+    card.style.setProperty('--my', (e.clientY - rect.top) + 'px');
+  });
+});
+
+// ---------- 交互七：数据条数字滚动 ----------
+var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function countUp(el) {
+  var target = parseInt(el.getAttribute('data-count'), 10);
+  if (isNaN(target)) return;
+
+  if (reduceMotion) {
+    el.textContent = target;
+    return;
+  }
+
+  var duration = 900;
+  var startTime = null;
+
+  function step(now) {
+    if (startTime === null) startTime = now;
+    var p = Math.min((now - startTime) / duration, 1);
+    var eased = 1 - Math.pow(1 - p, 3);      // ease-out cubic
+    el.textContent = Math.round(target * eased);
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+var statNums = document.querySelectorAll('.stat-num');
+
+if ('IntersectionObserver' in window && !reduceMotion) {
+  var statObserver = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        countUp(entry.target);
+        statObserver.unobserve(entry.target);   // 只数一次
+      }
+    });
+  }, { threshold: 0.6 });
+
+  statNums.forEach(function (el) {
+    statObserver.observe(el);
+  });
+}
+
+// ---------- 交互八：顶部阅读进度条 ----------
+var progressEl = document.getElementById('navProgress');
+
+function updateProgress() {
+  if (!progressEl) return;
+  var scrollable = document.documentElement.scrollHeight - window.innerHeight;
+  var ratio = scrollable > 0 ? Math.min(window.scrollY / scrollable, 1) : 0;
+  progressEl.style.width = (ratio * 100) + '%';
+}
+
+window.addEventListener('scroll', updateProgress, { passive: true });
+window.addEventListener('resize', updateProgress);
+updateProgress();
 
 // ---------- 交互五：Scroll Reveal 滚动显现 ----------
 var revealEls = document.querySelectorAll('.reveal');
