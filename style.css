@@ -624,7 +624,37 @@ section {
   font-size: 11px;
   font-weight: 500;
   letter-spacing: .1em;
-  color: var(--color-brand);   /* 11px 小字需要 4.5:1，c-600 只有 3.3:1 不达标 */
+  color: var(--color-brand);   /* 11px 小字要够 4.5:1，不能用更浅的青 */
+  font-variant-numeric: tabular-nums;
+}
+
+/* 「现在在做」的项目条目：这个主页本身就是编程能力的证据，所以单列一条并高亮 */
+.bento-item.bento-item--project {
+  padding: var(--sp-3) 14px;
+  border-radius: var(--r-sm);
+  background: rgb(var(--c-brand-rgb) / .07);
+}
+
+.bento-item--project strong {
+  color: var(--color-brand);
+}
+
+.item-badge {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .08em;
+  color: var(--color-brand);
+  background: rgb(var(--c-brand-rgb) / .16);
+  border-radius: var(--r-pill);
+  padding: 2px 10px;
+}
+
+.bento-item .item-track {
+  margin-top: 6px;
+  font-size: 11px;
+  letter-spacing: .04em;
+  color: var(--color-brand);
   font-variant-numeric: tabular-nums;
 }
 
