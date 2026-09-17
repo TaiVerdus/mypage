@@ -1,0 +1,12 @@
+# 仓库里不放生成物和缓存。
+# 注意：ai-log.html 与 audio/ambient-loop.wav 虽然是生成物，但**要提交**——
+# 站点是纯静态、要能直接打开，不能要求访客先跑脚本。所以它们不在这里忽略。
+
+# Python 运行缓存（tools/ 下有脚本，跑一次就会冒出来）
+__pycache__/
+*.pyc
+
+# 操作系统杂项
+.DS_Store
+Thumbs.db
+desktop.ini
