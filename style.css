@@ -1688,7 +1688,8 @@ section {
    都要用，自定义属性不能横向传递。 */
 #hero {
   --bubble-size: clamp(180px, 21vw, 260px);
-  --ring-size: calc(var(--bubble-size) * 1.42);
+  /* 1.46 而不是 1.42：blob 形状比正圆「胖」一点，环要再往外让一让 */
+  --ring-size: calc(var(--bubble-size) * 1.46);
 }
 
 .hero-bubble {
@@ -1742,61 +1743,71 @@ section {
   to { transform: rotate(360deg); }
 }
 
-/* ---- 玻璃本体 ---- */
-.bubble-glass {
+/* ---- 玻璃碎片：一张图拆三片，各取一段 ---- */
+.bubble-shards {
   position: absolute;
-  /* 泡泡比环形小一圈，文字在玻璃外面绕 */
+  /* 碎片组比环形小一圈，文字在外面绕 */
   inset: calc((var(--ring-size) - var(--bubble-size)) / 2);
-  border-radius: 50%;
+}
+
+.shard {
+  position: absolute;
   overflow: hidden;
-  background-image: url(images/hero-glass.jpg);
-  background-size: cover;
-  background-position: center;
   box-shadow:
-    0 34px 70px -26px rgb(var(--c-brand-rgb) / .5),
-    0 10px 26px -12px rgb(var(--c-brand-rgb) / .3);
+    0 30px 60px -22px rgb(var(--c-brand-rgb) / .5),
+    0 8px 20px -10px rgb(var(--c-brand-rgb) / .3);
 }
 
-.bubble-glass img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* 边缘真折射：同一张图 + 位移滤镜，用径向遮罩只留靠边的一圈。
-   中间不遮的那部分由底层的清晰图负责 —— 这就是「中间透、边缘弯」的透镜观感。
-   滤镜失效时（个别浏览器对 HTML 元素上的 SVG filter 支持不稳），
-   这一层退化成「一圈清晰图」，只是少点扭曲，不会变成空白。 */
-.bubble-glass::before {
+/* 每片自己的图像层：位移滤镜开大，「波纹抖动感」来自这里。
+   内容是静态的 -> 滤镜纹理只算一次；晃动走外层的 transform，不会让它重算 */
+.shard::before {
   content: '';
   position: absolute;
   inset: 0;
   background-image: url(images/hero-glass.jpg);
   background-size: cover;
-  background-position: center;
   filter: url(#glassRefract);
-  -webkit-mask-image: radial-gradient(circle at 50% 50%,
-      transparent 54%, #000 76%, #000 93%, transparent 100%);
-          mask-image: radial-gradient(circle at 50% 50%,
-      transparent 54%, #000 76%, #000 93%, transparent 100%);
 }
 
 /* 玻璃染色 + 高光 + 厚度 */
-.bubble-glass::after {
+.shard::after {
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: 50%;
+  border-radius: inherit;
   background:
-    /* 青色染色：把暖橙的日落拉回站点的冷青调。想还原暖色，删掉这一层即可 */
+    /* 青色染色：把暖橙的落日拉回站点的冷青调。想还原暖色，删掉这一层即可 */
     linear-gradient(rgb(var(--c-brand-rgb) / .26), rgb(var(--c-brand-rgb) / .34)),
     radial-gradient(circle at 32% 26%,
-      rgb(255 255 255 / .62) 0%, rgb(255 255 255 / .14) 20%, transparent 44%);
+      rgb(255 255 255 / .6) 0%, rgb(255 255 255 / .12) 22%, transparent 46%);
   box-shadow:
     inset 0 0 0 1px rgb(255 255 255 / .5),
-    inset 0 -20px 44px rgb(var(--c-brand-rgb) / .22),
-    inset 0 16px 34px rgb(255 255 255 / .3);
+    inset 0 -16px 34px rgb(var(--c-brand-rgb) / .22),
+    inset 0 12px 26px rgb(255 255 255 / .28);
+}
+
+/* 三片的几何与取景：左（落日与城市）/ 中（水面与倒影）/ 右（暮色与塔），
+   blob 形状各不相同，重叠出「碎玻璃」的层次 */
+.shard-1 {
+  left: 0; top: 9%;
+  width: 42%; height: 76%;
+  border-radius: 58% 42% 55% 45% / 52% 60% 40% 48%;
+  background-position: 18% 50%;
+}
+
+.shard-2 {
+  left: 31%; top: 0;
+  width: 44%; height: 88%;
+  border-radius: 44% 56% 48% 52% / 58% 44% 56% 42%;
+  background-position: 52% 50%;
+  z-index: 2;
+}
+
+.shard-3 {
+  left: 62%; top: 12%;
+  width: 38%; height: 74%;
+  border-radius: 52% 48% 58% 42% / 46% 56% 44% 54%;
+  background-position: 86% 50%;
 }
 
 /* ---- 窄屏：泡泡从「绝对定位的右侧」改成「文字下方的一个圆」 ---- */
@@ -1900,4 +1911,33 @@ body {
 /* 从兴趣标签点过来时，照片别被 sticky 导航挡住 */
 .photo-item {
   scroll-margin-top: 88px;
+}
+
+/* ---------- 20.6 三片碎片各自摆动（V2.7 续八） ---------- */
+/* 幅度比上一版大一倍：之前 ±6px / ±1.2° 太轻，「不细看都看不出来」。
+   三片的周期与初相都错开（负 delay），永远不同步，看不出循环。
+   全部走 transform：只动合成器，::before 的滤镜纹理不用重算 */
+
+.shard-1 { animation: shardSwayA 6s ease-in-out infinite alternate; }
+.shard-2 { animation: shardSwayB 8s ease-in-out infinite alternate -2.5s; }
+.shard-3 { animation: shardSwayA 7s ease-in-out infinite alternate -4s; }
+
+@keyframes shardSwayA {
+  from { transform: translateY(-11px) rotate(-2.2deg); }
+  to   { transform: translateY(9px) rotate(1.8deg); }
+}
+
+@keyframes shardSwayB {
+  from { transform: translateY(12px) rotate(2deg); }
+  to   { transform: translateY(-10px) rotate(-1.8deg); }
+}
+
+/* 环形文字自己再上下轻浮，和碎片错开 —— 更像液体 */
+.bubble-ring svg {
+  animation: bubbleFloat 8s ease-in-out infinite alternate -1s;
+}
+
+@keyframes bubbleFloat {
+  from { transform: translateY(7px); }
+  to   { transform: translateY(-7px); }
 }

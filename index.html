@@ -59,26 +59,25 @@
       </ul>
     </div>
 
-    <!-- ========== 首屏右侧：玻璃泡泡 + 环形跑马灯 ==========
+    <!-- ========== 首屏右侧：三片玻璃碎片 + 环形跑马灯 ==========
          灵感来自 CodePen「[SVG][CSS] Marquee Glass Boubble」(Fernando Cohen)，
          但**不是它的代码**——那个 pen 抓不到源码，这里是从机制反推重做的。
-         按课程那四个借鉴层级：只借 Level 1 想法 + Level 2 元素，
-         配色 / 字号 / 构图全部按本站自己的设计系统。
-         图片是本人拍摄的 3.jpg 的 600×600 中心裁切版（35.8 KB）。
-         青色玻璃染色在 CSS 里做，不改原图 —— 想还原暖色删一行就行。 -->
+         一张湖面落日拆成三片不规则玻璃，各取画面的一段；
+         图片是本人拍摄的，1600×744 / 101.7 KB（源 2064×960）。
+         青色玻璃染色在 CSS 里做，不改原图。 -->
     <div class="hero-bubble" aria-hidden="true">
 
       <!-- 折射滤镜：定义一次，CSS 用 filter: url(#glassRefract) 引用。
-           baseFrequency 取很小 → 噪声变化缓慢 → 位移是「缓慢弯折」而不是「抖动」，
-           这才是玻璃透镜的观感。这三个数（baseFrequency / scale / stdDeviation）
-           就是可调的旋钮。 -->
+           scale 调大到 55、baseFrequency 提到 0.009 —— 用户反馈「波纹抖动感太轻」，
+           这两个数就是波纹强度的旋钮。滤镜只加在静态图像层上，晃动走 transform，
+           所以纹理只需算一次，不会每帧重算。 -->
       <svg width="0" height="0" style="position:absolute" focusable="false">
-        <filter id="glassRefract" x="-20%" y="-20%" width="140%" height="140%"
+        <filter id="glassRefract" x="-30%" y="-30%" width="160%" height="160%"
                 color-interpolation-filters="sRGB">
-          <feTurbulence type="fractalNoise" baseFrequency="0.004 0.006"
-                        numOctaves="1" seed="11" result="noise" />
-          <feGaussianBlur in="noise" stdDeviation="2" result="soft" />
-          <feDisplacementMap in="SourceGraphic" in2="soft" scale="30"
+          <feTurbulence type="fractalNoise" baseFrequency="0.009 0.013"
+                        numOctaves="2" seed="11" result="noise" />
+          <feGaussianBlur in="noise" stdDeviation="1.5" result="soft" />
+          <feDisplacementMap in="SourceGraphic" in2="soft" scale="55"
                              xChannelSelector="R" yChannelSelector="G" />
         </filter>
       </svg>
@@ -99,9 +98,12 @@
         </svg>
       </div>
 
-      <div class="bubble-glass">
-        <img src="images/hero-glass.jpg" alt="" width="600" height="600"
-             loading="eager" decoding="async">
+      <!-- 一张图拆三片：每片各取画面一段（左：落日与城市 / 中：水面与倒影 / 右：暮色与塔），
+           各自 blob、各自摆动、周期错开。滤镜在 ::before 的静态层上。 -->
+      <div class="bubble-shards">
+        <div class="shard shard-1"></div>
+        <div class="shard shard-2"></div>
+        <div class="shard shard-3"></div>
       </div>
     </div>
 
@@ -168,9 +170,9 @@
               <p>Static · no framework · my own design system</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 22 条 + main 分支 2 条（V1.0 / V1.1）
+                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 24 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 24 commits as of 2026-09-17</p>
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 26 commits as of 2026-09-17</p>
               <a class="item-link" href="ai-log.html">How this page was built →</a>
             </div>
             <div class="bento-item bento-item--project">
