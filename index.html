@@ -36,6 +36,7 @@
         <a class="nav-link active" href="#hero">Home</a>
         <a class="nav-link" href="#about">About</a>
         <a class="nav-link" href="#photos">Photos</a>
+        <a class="nav-link" href="#music">Music</a>
         <a class="nav-link" href="#chat">Digital Twin</a>
         <a class="nav-link" href="#contact">Contact</a>
       </div>
@@ -146,7 +147,7 @@
         <span class="stat-label">Focus</span>
       </div>
       <div class="stat">
-        <span class="stat-num" data-count="6">6</span>
+        <span class="stat-num" data-count="7">7</span>
         <span class="stat-label">Twin topics</span>
       </div>
     </div>
@@ -181,9 +182,9 @@
               <p>Static · no framework · my own design system</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 26 条 + main 分支 2 条（V1.0 / V1.1）
+                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 27 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 28 commits as of 2026-09-17</p>
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 29 commits as of 2026-09-17</p>
               <a class="item-link" href="ai-log.html">How this page was built →</a>
             </div>
             <div class="bento-item bento-item--project">
@@ -199,7 +200,7 @@
           <ul class="tag-list">
             <li><a href="#photo-drums" title="See the drum photo">Drums <span aria-hidden="true">↘</span></a></li>
             <li><a href="#photo-calligraphy" title="See the calligraphy photo">Calligraphy <span aria-hidden="true">↘</span></a></li>
-            <li><a href="#photo-performance" title="See the stage photo">Music <span aria-hidden="true">↘</span></a></li>
+            <li><a href="#music" title="See the album shelf">Music <span aria-hidden="true">↘</span></a></li>
             <li><a href="#photo-photography" title="See the sunset photo">Photography <span aria-hidden="true">↘</span></a></li>
             <li><a href="#photo-basketball" title="See the basketball photo">Basketball <span aria-hidden="true">↘</span></a></li>
           </ul>
@@ -248,10 +249,73 @@
       </div>
     </section>
 
+    <!-- ========== 区块：音乐（专辑收藏夹） ==========
+         ⚠️ 封面全部是本页**原创的 CSS 设计**，不是唱片公司的原版美术。
+         专辑封面是独立的一层著作权（美术作品），公开网页上用原版封面 = 复制他人作品，
+         课程 Part 7 与 AI Compliance 的 Appropriate Use 正好考这个。
+         这里只把歌手名与专辑名当**文字**使用（标题、短名称不受著作权保护）。 -->
+    <section id="music">
+      <div class="section-head">
+        <span class="eyebrow reveal">03 — Music</span>
+        <h2 class="section-title" data-lines>On repeat</h2>
+        <p class="section-note reveal">Three artists I keep coming back to. Every sleeve below is an original design drawn for this page — not the labels' artwork.</p>
+      </div>
+
+      <div class="album-grid reveal">
+        <article class="album">
+          <div class="album-cover t-1 m-rings"><span class="cover-glyph">陶</span></div>
+          <h3 class="album-title">David Tao</h3>
+          <p class="album-meta">陶喆 · 1997</p>
+        </article>
+        <article class="album">
+          <div class="album-cover t-4 m-bars"><span class="cover-glyph">柳</span></div>
+          <h3 class="album-title">黑色柳丁</h3>
+          <p class="album-meta">陶喆 · 2001</p>
+        </article>
+        <article class="album">
+          <div class="album-cover t-3 m-dots"><span class="cover-glyph">盛</span></div>
+          <h3 class="album-title">太平盛世</h3>
+          <p class="album-meta">陶喆 · 2005</p>
+        </article>
+
+        <article class="album">
+          <div class="album-cover t-5 m-arc"><span class="cover-glyph">意</span></div>
+          <h3 class="album-title">意外</h3>
+          <p class="album-meta">薛之谦 · 2013</p>
+        </article>
+        <article class="album">
+          <div class="album-cover t-2 m-rings"><span class="cover-glyph">渡</span></div>
+          <h3 class="album-title">渡</h3>
+          <p class="album-meta">薛之谦 · 2017</p>
+        </article>
+        <article class="album">
+          <div class="album-cover t-1 m-dots"><span class="cover-glyph">天</span></div>
+          <h3 class="album-title">天外来物</h3>
+          <p class="album-meta">薛之谦 · 2020</p>
+        </article>
+
+        <article class="album">
+          <div class="album-cover t-3 m-bars"><span class="cover-glyph">P</span></div>
+          <h3 class="album-title">Purpose</h3>
+          <p class="album-meta">Justin Bieber · 2015</p>
+        </article>
+        <article class="album">
+          <div class="album-cover t-5 m-rings"><span class="cover-glyph">C</span></div>
+          <h3 class="album-title">Changes</h3>
+          <p class="album-meta">Justin Bieber · 2020</p>
+        </article>
+        <article class="album">
+          <div class="album-cover t-4 m-arc"><span class="cover-glyph">J</span></div>
+          <h3 class="album-title">Justice</h3>
+          <p class="album-meta">Justin Bieber · 2021</p>
+        </article>
+      </div>
+    </section>
+
     <!-- ========== 区块 3：数字分身聊天区 ========== -->
     <section id="chat">
       <div class="section-head section-head--center">
-        <span class="eyebrow reveal">03 — Digital Twin</span>
+        <span class="eyebrow reveal">04 — Digital Twin</span>
         <h2 class="section-title" data-lines>Chat with my digital twin</h2>
         <p class="chat-note reveal">It only knows what I've told it — when it doesn't know, it says so.</p>
       </div>
@@ -278,7 +342,7 @@
 
     <!-- ========== 区块：联系我 ========== -->
     <section id="contact">
-      <span class="eyebrow eyebrow--center reveal">04 — Contact</span>
+      <span class="eyebrow eyebrow--center reveal">05 — Contact</span>
       <h2 class="contact-title" data-lines>Got an idea?</h2>
       <p class="contact-subtitle" data-lines>Let's talk — no pressure.</p>
       <a href="mailto:wshixian2026@163.com" class="btn btn--ghost contact-btn">Say Hello</a>
