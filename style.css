@@ -24,6 +24,7 @@
   /* ---- 派生通道：同一色相配不同透明度，等价于色阶但不新增颜色 ---- */
   --c-brand-rgb: 15 118 110;
   --c-bg-rgb:    240 253 250;
+  --c-ink-rgb:   15 23 42;      /* 专辑封面的暗角 / 颗粒用到；不是新颜色，只是 ink 的通道 */
 
   /* ---- 派生色（不是新颜色，只是透明度不同） ---- */
   --c-line:        rgb(var(--c-brand-rgb) / .14);  /* 默认描边 / 分隔线 */
@@ -1926,14 +1927,26 @@ body {
   gap: var(--sp-5);
 }
 
+/* ---- 封面：四层结构 —— 色场 → 几何母题 → 暗角 → 光源 + 印刷颗粒 ----
+   设计方向：**丝网印刷 / 现代主义唱片封套**（Blue Note / ECM 那一脉的封套语言）。
+   四条纪律：
+   ① 色场取「窄明度带」，不搞大跨度的平涂渐变 —— 高级的表面是「色场安静、光很明确」
+   ② 全组只有一个光源（左上），其余靠渐暗收边，这样 12 张才像一套
+   ③ 几何母题一律偏出画心、靠右上 —— 编辑式构图，不是居中贴花
+   ④ 文字按封套排版放进封面里（年份左上 / 标题左下 + 一道细线），不再是「封面下方贴个标题」 */
 .album-cover {
   position: relative;
   aspect-ratio: 1;
   border-radius: var(--r-md);
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  /* 容器查询单位：封面内的字号跟着「封面自己的宽度」缩放，而不是跟视口走 */
+  container-type: size;
+  --cover-fg: var(--color-brand);   /* 兜底，各色路会覆盖 */
+  /* 三层背景叠在一处，不加多余节点：① 几何母题 ② 暗角 ③ 色场 */
+  background-image:
+    var(--motif),
+    radial-gradient(118% 118% at 18% 8%, transparent 36%, rgb(var(--c-ink-rgb) / .28) 100%),
+    var(--field);
   box-shadow: var(--sh-1);
   transition: transform var(--dur-base) var(--ease-out),
               box-shadow var(--dur-base) var(--ease-out);
@@ -1945,69 +1958,126 @@ body {
   box-shadow: var(--sh-2);
 }
 
-/* 封面上那一个大字：衬线、超大字级，前景色跟着渐变处理走 */
-.cover-glyph {
-  position: relative;
-  z-index: 1;
-  font-family: var(--font-serif);
-  font-size: clamp(46px, 7.5vw, 80px);
-  font-weight: 500;
-  line-height: 1;
-  color: var(--cover-fg, var(--color-brand));
+/* 光源：只在左上。12 张共用同一套光照，是「像一套」的关键 */
+.album-cover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(66% 52% at 15% 5%,
+    rgb(255 255 255 / .28), transparent 64%);
 }
 
-/* ---- 5 种渐变处理（全部来自站点那 6 个颜色） ---- */
-.t-1 { background: linear-gradient(155deg, var(--color-brand-deep), var(--color-ink));   --cover-fg: var(--color-mint); }
-.t-2 { background: linear-gradient(155deg, var(--color-ink), var(--color-brand));        --cover-fg: var(--color-mint); }
-.t-3 { background: linear-gradient(155deg, var(--color-surface), var(--color-mint));     --cover-fg: var(--color-brand); }
-.t-4 { background: linear-gradient(155deg, var(--color-brand), var(--color-brand-deep)); --cover-fg: var(--color-surface); }
-.t-5 { background: linear-gradient(155deg, var(--color-mint), var(--color-brand));       --cover-fg: var(--color-ink); }
-
-/* ---- 4 种纹理：一个 ::after 同时办两件事（纹理 + 内描边），不额外加节点 ---- */
+/* 印刷质感：① 45° 细网线 ② 4px 微网点。两层都极便宜，
+   比一张 feTurbulence 噪点图省得多，远看就是纸与油墨的粗粝感。
+   它是最后一个子元素，会盖在文字上 —— 但这正是印刷该有的样子。 */
 .album-cover::after {
   content: '';
   position: absolute;
   inset: 0;
   pointer-events: none;
   border-radius: inherit;
-  /* 内描边：和全站卡片一个路数 */
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / .22);
+  background-image:
+    repeating-linear-gradient(45deg, rgb(255 255 255 / .035) 0 1px, transparent 1px 3px),
+    radial-gradient(rgb(var(--c-ink-rgb) / .07) .5px, transparent .6px);
+  background-size: auto, 4px 4px;
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / .2),
+    inset 0 1px 0 rgb(255 255 255 / .34);
 }
 
-.m-rings::after {
-  background-image: repeating-radial-gradient(circle at 30% 18%,
-    transparent 0 13%, rgb(255 255 255 / .07) 13% 15%);
+/* ---- 5 种色路：全部是「窄明度带」的色场，只用站点那 6 个颜色 ---- */
+.cw-1 { --field: linear-gradient(160deg, var(--color-ink), var(--color-brand-deep));
+        --cover-fg: var(--color-mint);    --mi: rgb(255 255 255 / .09); }
+.cw-2 { --field: linear-gradient(160deg, var(--color-brand-deep), var(--color-brand));
+        --cover-fg: var(--color-mint);    --mi: rgb(255 255 255 / .10); }
+.cw-3 { --field: linear-gradient(160deg, var(--color-brand), var(--color-brand-deep));
+        --cover-fg: var(--color-surface); --mi: rgb(255 255 255 / .10); }
+.cw-4 { --field: linear-gradient(160deg, var(--color-mint), var(--color-surface));
+        --cover-fg: var(--color-brand);   --mi: rgb(var(--c-brand-rgb) / .16); }
+.cw-5 { --field: linear-gradient(160deg, var(--color-brand) 0 46%, var(--color-brand-deep) 46% 100%);
+        --cover-fg: var(--color-mint);    --mi: rgb(255 255 255 / .08); }
+
+/* ---- 4 种几何母题：墨色由所在色路给（--mi），形状由这里给 ---- */
+.g-rings {
+  --motif: repeating-radial-gradient(circle at 76% 18%,
+    transparent 0 13%, var(--mi) 13% 14.6%);
 }
 
-.m-bars::after {
-  background-image: repeating-linear-gradient(0deg,
-    transparent 0 9px, rgb(255 255 255 / .06) 9px 10px);
+.g-disc {
+  --motif: radial-gradient(circle at 80% 14%, var(--mi) 0 41%, transparent 41.4%);
 }
 
-.m-dots::after {
-  background-image: radial-gradient(rgb(255 255 255 / .16) 1px, transparent 1.6px);
-  background-size: 14px 14px;
+.g-bands {
+  --motif: repeating-linear-gradient(0deg,
+    transparent 0 11%, var(--mi) 11% 22%);
 }
 
-.m-arc::after {
-  background-image: radial-gradient(circle at 50% 118%,
-    transparent 52%, rgb(255 255 255 / .13) 52.5% 56%, transparent 56.5%);
+.g-wedge {
+  --motif: linear-gradient(118deg, transparent 0 56%, var(--mi) 56% 100%);
 }
 
-/* ---- 封面下方的专辑信息 ---- */
-.album-title {
-  margin-top: var(--sp-3);
+/* ---- 封套内的排版：母题与排版的位置固定，只有色路与几何在变 ---- */
+.cover-year {
+  position: absolute;
+  top: var(--sp-4);
+  left: var(--sp-4);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--cover-fg);
+  opacity: .72;
+}
+
+.cover-foot {
+  position: absolute;
+  left: var(--sp-4);
+  right: var(--sp-4);
+  bottom: var(--sp-4);
+  color: var(--cover-fg);
+}
+
+/* 细线用前景色压到 38%：深浅两种底色上都成立，不用额外的颜色变量 */
+.cover-foot::before {
+  content: '';
+  display: block;
+  height: 1px;
+  margin-bottom: var(--sp-2);
+  background: var(--cover-fg);
+  opacity: .38;
+}
+
+.cover-title {
   font-family: var(--font-serif);
-  font-size: var(--fs-h3);
+  font-size: clamp(14px, 7cqw, 18px);
   font-weight: 500;
-  line-height: 1.3;
+  line-height: 1.22;
 }
 
-.album-meta {
-  margin-top: 4px;
-  font-size: var(--fs-caption);
-  color: var(--color-muted);
+.cover-sub {
+  display: block;
+  margin-top: 3px;
+  font-size: clamp(10px, 4.4cqw, 11px);
   letter-spacing: .04em;
+  opacity: .68;
+}
+
+/* 那个大字退成「背景图形」：偏出右下角、只留 14% 的存在感。
+   比居中放大字高级 —— 它成了一个层，而不是一个图标。 */
+.cover-art {
+  position: absolute;
+  right: -6%;
+  bottom: -16%;
+  font-family: var(--font-serif);
+  font-size: 130px;        /* 不支持容器查询单位时的兜底 */
+  font-size: 54cqw;
+  font-weight: 500;
+  line-height: .8;
+  color: var(--cover-fg);
+  opacity: .14;
+  pointer-events: none;
+  user-select: none;
 }
 
 @media (max-width: 768px) {

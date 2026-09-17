@@ -182,9 +182,9 @@
               <p>Static · no framework · my own design system</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 28 条 + main 分支 2 条（V1.0 / V1.1）
+                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 29 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 30 commits as of 2026-09-17</p>
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 31 commits as of 2026-09-17</p>
               <a class="item-link" href="ai-log.html">How this page was built →</a>
             </div>
             <div class="bento-item bento-item--project">
@@ -261,31 +261,51 @@
         <p class="section-note reveal">Three artists I keep coming back to. Every sleeve below is an original design drawn for this page — not the labels' artwork.</p>
       </div>
 
-      <!-- 一组 = 一位歌手 × 4 张专辑 -->
+      <!-- 一组 = 一位歌手 × 4 张专辑。
+           封面是「丝网印刷风」的原创设计：一个色场 + 一个几何母题 + 单一光源 + 印刷颗粒，
+           文字按编辑排版放进封套内（年份左上、标题左下、上方一道细分隔线）。
+           色场用 5 种色路（cw-1..5），母题用 4 种几何（g-rings / g-disc / g-bands / g-wedge）。 -->
       <div class="album-groups reveal">
 
         <div class="artist-group">
           <h3 class="artist-name">陶喆<span class="artist-en">David Tao</span></h3>
           <div class="album-grid">
             <article class="album">
-              <div class="album-cover t-1 m-rings"><span class="cover-glyph">陶</span></div>
-              <h4 class="album-title">David Tao</h4>
-              <p class="album-meta">1997 · 同名专辑</p>
+              <div class="album-cover cw-2 g-rings">
+                <span class="cover-art" aria-hidden="true">陶</span>
+                <span class="cover-year">1997</span>
+                <div class="cover-foot">
+                  <h4 class="cover-title">David Tao</h4>
+                  <span class="cover-sub">同名专辑</span>
+                </div>
+              </div>
             </article>
             <article class="album">
-              <div class="album-cover t-3 m-bars"><span class="cover-glyph">O</span></div>
-              <h4 class="album-title">I'm OK</h4>
-              <p class="album-meta">1999</p>
+              <div class="album-cover cw-4 g-disc">
+                <span class="cover-art" aria-hidden="true">O</span>
+                <span class="cover-year">1999</span>
+                <div class="cover-foot">
+                  <h4 class="cover-title">I'm OK</h4>
+                </div>
+              </div>
             </article>
             <article class="album">
-              <div class="album-cover t-4 m-dots"><span class="cover-glyph">柳</span></div>
-              <h4 class="album-title">黑色柳丁</h4>
-              <p class="album-meta">2001</p>
+              <div class="album-cover cw-1 g-bands">
+                <span class="cover-art" aria-hidden="true">柳</span>
+                <span class="cover-year">2001</span>
+                <div class="cover-foot">
+                  <h4 class="cover-title">黑色柳丁</h4>
+                </div>
+              </div>
             </article>
             <article class="album">
-              <div class="album-cover t-5 m-arc"><span class="cover-glyph">盛</span></div>
-              <h4 class="album-title">太平盛世</h4>
-              <p class="album-meta">2005</p>
+              <div class="album-cover cw-3 g-wedge">
+                <span class="cover-art" aria-hidden="true">盛</span>
+                <span class="cover-year">2005</span>
+                <div class="cover-foot">
+                  <h4 class="cover-title">太平盛世</h4>
+                </div>
+              </div>
             </article>
           </div>
         </div>
@@ -294,24 +314,41 @@
           <h3 class="artist-name">薛之谦<span class="artist-en">Joker Xue</span></h3>
           <div class="album-grid">
             <article class="album">
-              <div class="album-cover t-2 m-rings"><span class="cover-glyph">歌</span></div>
-              <h4 class="album-title">未完成的歌</h4>
-              <p class="album-meta">2009 · 「深深爱过你」</p>
+              <div class="album-cover cw-5 g-rings">
+                <span class="cover-art" aria-hidden="true">歌</span>
+                <span class="cover-year">2009</span>
+                <div class="cover-foot">
+                  <h4 class="cover-title">未完成的歌</h4>
+                  <span class="cover-sub">「深深爱过你」</span>
+                </div>
+              </div>
             </article>
             <article class="album">
-              <div class="album-cover t-5 m-bars"><span class="cover-glyph">意</span></div>
-              <h4 class="album-title">意外</h4>
-              <p class="album-meta">2013</p>
+              <div class="album-cover cw-1 g-disc">
+                <span class="cover-art" aria-hidden="true">意</span>
+                <span class="cover-year">2013</span>
+                <div class="cover-foot">
+                  <h4 class="cover-title">意外</h4>
+                </div>
+              </div>
             </article>
             <article class="album">
-              <div class="album-cover t-1 m-arc"><span class="cover-glyph">渡</span></div>
-              <h4 class="album-title">渡</h4>
-              <p class="album-meta">2017</p>
+              <div class="album-cover cw-3 g-bands">
+                <span class="cover-art" aria-hidden="true">渡</span>
+                <span class="cover-year">2017</span>
+                <div class="cover-foot">
+                  <h4 class="cover-title">渡</h4>
+                </div>
+              </div>
             </article>
             <article class="album">
-              <div class="album-cover t-4 m-rings"><span class="cover-glyph">天</span></div>
-              <h4 class="album-title">天外来物</h4>
-              <p class="album-meta">2020</p>
+              <div class="album-cover cw-2 g-wedge">
+                <span class="cover-art" aria-hidden="true">天</span>
+                <span class="cover-year">2020</span>
+                <div class="cover-foot">
+                  <h4 class="cover-title">天外来物</h4>
+                </div>
+              </div>
             </article>
           </div>
         </div>
@@ -320,24 +357,40 @@
           <h3 class="artist-name">Justin Bieber</h3>
           <div class="album-grid">
             <article class="album">
-              <div class="album-cover t-3 m-dots"><span class="cover-glyph">P</span></div>
-              <h4 class="album-title">Purpose</h4>
-              <p class="album-meta">2015</p>
+              <div class="album-cover cw-4 g-bands">
+                <span class="cover-art" aria-hidden="true">P</span>
+                <span class="cover-year">2015</span>
+                <div class="cover-foot">
+                  <h4 class="cover-title">Purpose</h4>
+                </div>
+              </div>
             </article>
             <article class="album">
-              <div class="album-cover t-2 m-bars"><span class="cover-glyph">C</span></div>
-              <h4 class="album-title">Changes</h4>
-              <p class="album-meta">2020</p>
+              <div class="album-cover cw-2 g-disc">
+                <span class="cover-art" aria-hidden="true">C</span>
+                <span class="cover-year">2020</span>
+                <div class="cover-foot">
+                  <h4 class="cover-title">Changes</h4>
+                </div>
+              </div>
             </article>
             <article class="album">
-              <div class="album-cover t-4 m-arc"><span class="cover-glyph">J</span></div>
-              <h4 class="album-title">Justice</h4>
-              <p class="album-meta">2021</p>
+              <div class="album-cover cw-1 g-wedge">
+                <span class="cover-art" aria-hidden="true">J</span>
+                <span class="cover-year">2021</span>
+                <div class="cover-foot">
+                  <h4 class="cover-title">Justice</h4>
+                </div>
+              </div>
             </article>
             <article class="album">
-              <div class="album-cover t-1 m-dots"><span class="cover-glyph">S</span></div>
-              <h4 class="album-title">SWAG</h4>
-              <p class="album-meta">2025</p>
+              <div class="album-cover cw-5 g-disc">
+                <span class="cover-art" aria-hidden="true">S</span>
+                <span class="cover-year">2025</span>
+                <div class="cover-foot">
+                  <h4 class="cover-title">SWAG</h4>
+                </div>
+              </div>
             </article>
           </div>
         </div>
