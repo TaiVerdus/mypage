@@ -12,6 +12,9 @@
   <meta property="og:type" content="profile">
   <meta property="og:title" content="王释贤 · 个人主页">
   <meta property="og:description" content="脑机接口学生 · 关注 AI 前沿科技 · ENFJ">
+  <!-- TODO(V3)：og:image 与 og:url 必须是「绝对地址」才会生效。现在写的是相对路径
+       images/1.jpg，分享到微信 / 社交平台时抓不到缩略图。部署到 GitHub Pages 后改成
+       https://<账号>.github.io/<仓库名>/images/1.jpg ，并补一条 <meta property="og:url"> -->
   <meta property="og:image" content="images/1.jpg">
   <meta name="twitter:card" content="summary_large_image">
 
@@ -72,7 +75,7 @@
     <div class="stats-row">
       <div class="stat">
         <span class="stat-num" data-count="3">3</span>
-        <span class="stat-label">正在学的核心课</span>
+        <span class="stat-label">核心课程</span>
       </div>
       <div class="stat">
         <span class="stat-num" data-count="4">4</span>
@@ -116,7 +119,11 @@
             <div class="bento-item bento-item--project">
               <strong>MYPAGE · 个人主页 <span class="item-badge">在做</span></strong>
               <p>纯静态 · 无框架 · 自己写的设计系统</p>
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.3 · 12 次提交</p>
+              <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
+                   用日期锚定，这样数字永远不会因为后续提交而过时。
+                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 15 条 + main 分支 2 条（V1.0 / V1.1）
+                   （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.6 · 截至 2026-09-17 共 17 次提交</p>
             </div>
             <div class="bento-item bento-item--project">
               <strong>CarbonBrain <span class="item-badge">在做</span></strong>
@@ -155,23 +162,27 @@
       <div class="section-head">
         <span class="eyebrow reveal">02 — Photos</span>
         <h2 class="section-title" data-lines>摄影集</h2>
+        <p class="section-note reveal">除舞台演出照由演出方提供外，其余均为本人拍摄。</p>
       </div>
       <div class="photo-grid masonry reveal">
         <figure class="photo-item">
-          <img src="images/1.jpg" alt="释贤的摄影作品 1" loading="lazy" decoding="async">
+          <img src="images/1.jpg" alt="书法课上，几个人在长桌前练毛笔字" loading="lazy" decoding="async">
           <figcaption><span class="photo-no">01</span></figcaption>
         </figure>
         <figure class="photo-item">
-          <img src="images/2.jpg" alt="释贤的摄影作品 2" loading="lazy" decoding="async">
+          <img src="images/2.jpg" alt="坐在电子鼓前的人，抬手比出手势" loading="lazy" decoding="async">
           <figcaption><span class="photo-no">02</span></figcaption>
         </figure>
         <figure class="photo-item">
-          <img src="images/3.jpg" alt="释贤的摄影作品 3" loading="lazy" decoding="async">
+          <img src="images/3.jpg" alt="山丘上望向落日，远处是城市与水面" loading="lazy" decoding="async">
           <figcaption><span class="photo-no">03</span></figcaption>
         </figure>
         <figure class="photo-item">
-          <img src="images/4.jpg" alt="释贤的摄影作品 4" loading="lazy" decoding="async">
-          <figcaption><span class="photo-no">04</span></figcaption>
+          <img src="images/4.jpg" alt="红色灯光下的舞台，演出者张开双臂的剪影" loading="lazy" decoding="async">
+          <figcaption>
+            <span class="photo-no">04</span>
+            <span class="photo-credit">摄影：演出方</span>
+          </figcaption>
         </figure>
       </div>
     </section>
@@ -220,7 +231,7 @@
 
   <!-- ========== 区块 4：页脚 ========== -->
   <footer id="footer">
-    <p>© 2026 王释贤 · MYPAGE V2.0</p>
+    <p>© 2026 王释贤 · MYPAGE V2.6</p>
     <p class="copyright">数字分身为本地预设问答，未接入在线 AI；页面数据不联网上传</p>
   </footer>
 
