@@ -1674,3 +1674,147 @@ section {
     padding: 0 12px;
   }
 }
+
+/* ---------- 19. 首屏玻璃泡泡 + 环形跑马灯 ---------- */
+/* 灵感来自 CodePen「[SVG][CSS] Marquee Glass Boubble」(Fernando Cohen)。
+   借的是 Level 1 想法 + Level 2 元素（textPath 环形跑马灯），
+   配色 / 字号 / 构图全部按本站设计系统来 —— 没有沿用它的米白 + 纯黑版式。
+
+   性能要点：**SVG 折射滤镜只加在静态的图片层上，不加在旋转的环形文字上**。
+   这样浏览器可以把滤镜结果缓存成一张纹理，只在首次渲染算一遍；
+   挂在旋转元素上就会变成每帧逐像素重算。
+
+   变量挂在 #hero 上，因为 .hero-content（要让出的内边距）和 .hero-bubble（实际尺寸）
+   都要用，自定义属性不能横向传递。 */
+#hero {
+  --bubble-size: clamp(180px, 21vw, 260px);
+  --ring-size: calc(var(--bubble-size) * 1.42);
+}
+
+.hero-bubble {
+  position: absolute;
+  top: 50%;
+  /* 右边缘对齐到 1080px 内容区，而不是贴窗口边 */
+  right: max(24px, calc(50% - var(--page-width) / 2 + 24px));
+  width: var(--ring-size);
+  height: var(--ring-size);
+  pointer-events: none;
+  /* 入场动画自带 translateY(-50%)，不能用会覆盖 transform 的关键帧，
+     否则 fill-mode: both 会把垂直居中改掉 */
+  animation: bubbleIn 1s ease-out 0.45s both;
+}
+
+@keyframes bubbleIn {
+  from { opacity: 0; transform: translateY(calc(-50% + 22px)) scale(.94); }
+  to   { opacity: 1; transform: translateY(-50%) scale(1); }
+}
+
+@keyframes bubbleInFlat {
+  from { opacity: 0; transform: translateY(22px) scale(.94); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---- 环形跑马灯 ---- */
+.bubble-ring {
+  position: absolute;
+  inset: 0;
+  animation: bubbleSpin 36s linear infinite;
+  transform-origin: 50% 50%;
+}
+
+.bubble-ring svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.bubble-ring-text {
+  font-family: inherit;
+  font-size: 15px;          /* SVG 用户单位，会随 viewBox 缩放 */
+  font-weight: 500;
+  letter-spacing: .02em;
+  fill: var(--color-brand);
+  dominant-baseline: middle; /* 让文字沿路径居中，不然会浮在路径上方 */
+}
+
+@keyframes bubbleSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---- 玻璃本体 ---- */
+.bubble-glass {
+  position: absolute;
+  /* 泡泡比环形小一圈，文字在玻璃外面绕 */
+  inset: calc((var(--ring-size) - var(--bubble-size)) / 2);
+  border-radius: 50%;
+  overflow: hidden;
+  background-image: url(images/hero-glass.jpg);
+  background-size: cover;
+  background-position: center;
+  box-shadow:
+    0 34px 70px -26px rgb(var(--c-brand-rgb) / .5),
+    0 10px 26px -12px rgb(var(--c-brand-rgb) / .3);
+}
+
+.bubble-glass img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 边缘真折射：同一张图 + 位移滤镜，用径向遮罩只留靠边的一圈。
+   中间不遮的那部分由底层的清晰图负责 —— 这就是「中间透、边缘弯」的透镜观感。
+   滤镜失效时（个别浏览器对 HTML 元素上的 SVG filter 支持不稳），
+   这一层退化成「一圈清晰图」，只是少点扭曲，不会变成空白。 */
+.bubble-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url(images/hero-glass.jpg);
+  background-size: cover;
+  background-position: center;
+  filter: url(#glassRefract);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%,
+      transparent 54%, #000 76%, #000 93%, transparent 100%);
+          mask-image: radial-gradient(circle at 50% 50%,
+      transparent 54%, #000 76%, #000 93%, transparent 100%);
+}
+
+/* 玻璃染色 + 高光 + 厚度 */
+.bubble-glass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    /* 青色染色：把暖橙的日落拉回站点的冷青调。想还原暖色，删掉这一层即可 */
+    linear-gradient(rgb(var(--c-brand-rgb) / .26), rgb(var(--c-brand-rgb) / .34)),
+    radial-gradient(circle at 32% 26%,
+      rgb(255 255 255 / .62) 0%, rgb(255 255 255 / .14) 20%, transparent 44%);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / .5),
+    inset 0 -20px 44px rgb(var(--c-brand-rgb) / .22),
+    inset 0 16px 34px rgb(255 255 255 / .3);
+}
+
+/* ---- 窄屏：泡泡从「绝对定位的右侧」改成「文字下方的一个圆」 ---- */
+@media (max-width: 1099px) {
+  #hero {
+    --bubble-size: min(230px, 58vw);
+  }
+
+  .hero-bubble {
+    position: static;
+    margin: var(--sp-6) auto 0;
+    animation: bubbleInFlat .8s ease-out .3s both;
+  }
+}
+
+/* ---- 宽屏：正文让出右侧空间给泡泡，文字仍在自己的区域内居中 ---- */
+@media (min-width: 1100px) {
+  .hero-content {
+    padding-right: calc(var(--ring-size) + 48px);
+  }
+}
