@@ -1688,7 +1688,8 @@ section {
    都要用，自定义属性不能横向传递。 */
 #hero {
   --bubble-size: clamp(180px, 21vw, 260px);
-  --ring-size: calc(var(--bubble-size) * 1.42);
+  /* 1.46 而不是 1.42：blob 形状比正圆「胖」一点，环要再往外让一让 */
+  --ring-size: calc(var(--bubble-size) * 1.46);
 }
 
 .hero-bubble {
@@ -1900,4 +1901,37 @@ body {
 /* 从兴趣标签点过来时，照片别被 sticky 导航挡住 */
 .photo-item {
   scroll-margin-top: 88px;
+}
+
+/* ---------- 20.6 泡泡改不规则形 + 晃动（V2.7 续七） ---------- */
+/* 学习 pen 的「有机气泡」风格。两条规矩不能破：
+   ① 形状换成不规则 blob（border-radius 八值），但**不做逐帧形状渐变**——
+      形状一变，::before 的 SVG 折射滤镜就得每帧重算（§19 立过的规矩）
+   ② 晃动全部用 transform 动画：只动合成器、不触发重绘，滤镜纹理照样缓存。
+      灵动感和性能，这里选了都要 */
+
+.bubble-glass {
+  border-radius: 46% 54% 42% 58% / 56% 44% 52% 48%;
+  transform-origin: 50% 60%;   /* 稍微偏下的支点，摆起来像吊着的水滴 */
+  animation: bubbleSway 7s ease-in-out infinite alternate;
+}
+
+/* 高光层跟着 blob 的形状走，不然玻璃「厚度」会露馅 */
+.bubble-glass::after {
+  border-radius: inherit;
+}
+
+@keyframes bubbleSway {
+  from { transform: translateY(-6px) rotate(-1.2deg); }
+  to   { transform: translateY(6px) rotate(1.2deg); }
+}
+
+/* 环形文字自己再上下轻浮一下，和玻璃的摆动错开相位 —— 更像液体 */
+.bubble-ring svg {
+  animation: bubbleFloat 9s ease-in-out infinite alternate;
+}
+
+@keyframes bubbleFloat {
+  from { transform: translateY(4px); }
+  to   { transform: translateY(-4px); }
 }
