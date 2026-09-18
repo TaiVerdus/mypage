@@ -204,7 +204,8 @@ if (fxCanvas && fxCanHover && !fxReduced && fxCanvas.getContext) {
   // 不必在 HTML 里改十几处。只列「文字直接落在页面底上」的容器 ——
   // 卡片自己有底色（--c-surface），不需要让位。
   var FX_MASK_SELECTOR = '.section-head, .playlist-head, .track-list, ' +
-                         '.contact-title, .contact-subtitle, .contact-links, footer';
+                         '.contact-title, .contact-subtitle, .contact-links, ' +
+                         '.glass-panel, footer';
 
   // ---- 色板：用 pen 原版那套彩色（用户 2026-09-18 明确要「彩色 + 黑底，像这个一样」） ----
   // ⚠️ 这**破了本站原来那条「全站只有 6 个颜色」的规矩** —— 是用户自己的决定：
