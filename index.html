@@ -182,9 +182,9 @@
               <p>Static · no framework · my own design system</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 31 条 + main 分支 2 条（V1.0 / V1.1）
+                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 32 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 33 commits as of 2026-09-17</p>
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 34 commits as of 2026-09-17</p>
               <a class="item-link" href="ai-log.html">How this page was built →</a>
             </div>
             <div class="bento-item bento-item--project">
@@ -249,174 +249,210 @@
       </div>
     </section>
 
-    <!-- ========== 区块：音乐（专辑收藏夹） ==========
-         ⚠️ 封面全部是本页**原创的 CSS 设计**，不是唱片公司的原版美术。
-         专辑封面是独立的一层著作权（美术作品），公开网页上用原版封面 = 复制他人作品，
-         课程 Part 7 与 AI Compliance 的 Appropriate Use 正好考这个。
-         这里只把歌手名与专辑名当**文字**使用（标题、短名称不受著作权保护）。
+    <!-- ========== 区块：音乐（歌单） ==========
+         ⚠️ 版权口径：曲目名、专辑名、年份是**事实**，可以列；
+         唱片公司的**美术作品**是另一件事，不复制。每一行都链接到正版平台 ——
+         让「听」这件事发生在有授权的地方，页面一个字节都不复制。
 
-         用户 2026-09-17 曾要求「尽量复刻唱片公司的原版封面美术」——没有照做，理由两条：
-         ① 复刻属于演绎作品，复制的正是受保护的那部分（构图 / 图形 / 摄影 / 字体排布）
-         ② 实际收益为负：CSS 临摹照片型封面只会得到「像它但远不如它」的图，
-            却要在课程最看重版权的那 10% 上冒风险
-         最终用户选择：**强化页面上的原创声明**（即下方 section-note），而不是复刻。 -->
+         为什么不做「封面墙」：封面本身是独立的一层著作权（美术作品），
+         照搬不行、临摹也只是「像它但不如它」；而歌单里的**事实信息**是干净的，
+         并且更接近「我在听什么」这件事本身。
+
+         两个诚实的选择：
+         ① **不填时长** —— 15 首的秒数没法逐首核实，列空着好过列假的
+         ② **不做假播放** —— 静态站点没有授权音源，所以点击 = 跳去正版平台，
+            选中态只是本地视觉反馈，不假装在放歌 -->
     <section id="music">
       <div class="section-head">
         <span class="eyebrow reveal">03 — Music</span>
         <h2 class="section-title" data-lines>On repeat</h2>
-        <p class="section-note reveal">Three artists I keep coming back to. Every sleeve below is drawn from scratch in code — deliberately <em>not</em> the labels' artwork, which carries its own copyright separate from the music. Names, titles and years are facts; the artwork isn't mine to copy, so I designed my own.</p>
+        <p class="section-note reveal">Three artists I keep coming back to — as playlists rather than cover art. Track and album names are facts; the labels' artwork is someone else's, so it isn't reproduced. Each row links out to the licensed platform, which is where the listening happens. No runtimes — I won't invent numbers I can't verify.</p>
       </div>
 
-      <!-- 一组 = 一位歌手 × 4 张专辑。
-           封面是「丝网印刷风」的原创设计：一个色场 + 一个几何母题 + 单一光源 + 印刷颗粒，
-           文字按编辑排版放进封套内（年份左上、标题左下、上方一道细分隔线）。
-           色场用 5 种色路（cw-1..5），母题用 4 种几何（g-rings / g-disc / g-bands / g-wedge）。
+      <div class="playlists reveal">
 
-           整张封套是一个链接，指向 QQ 音乐——这是「让原版封面出现」的合法做法：
-           访客一点就在正版平台看到原版美术，而我们一个字节都没有复制。
-           地址用 QQ 音乐的规范搜索地址（y.qq.com/n/ryqq_v2/search?w=...）：
-           专辑直链是随机 ID、推不出来，猜一个就会是死链。 -->
-      <div class="album-groups reveal">
+        <!-- ---------- 歌单 1：陶喆 ---------- -->
+        <section class="playlist">
+          <header class="playlist-head">
+            <h3 class="playlist-name">陶喆<span class="playlist-en">David Tao</span></h3>
+            <p class="playlist-meta">5 tracks · 1997–2005</p>
+            <a class="playlist-link" href="https://y.qq.com/n/ryqq_v2/search?w=陶喆" target="_blank" rel="noopener">Listen all <span aria-hidden="true">↗</span></a>
+          </header>
+          <ol class="track-list">
+            <li>
+              <a class="track" href="https://y.qq.com/n/ryqq_v2/search?w=陶喆%20爱很简单" target="_blank" rel="noopener">
+                <span class="track-no" aria-hidden="true">1</span>
+                <span class="track-main">
+                  <span class="track-title">爱很简单</span>
+                  <span class="track-sub">陶喆 · David Tao</span>
+                </span>
+                <span class="track-year">1997</span>
+              </a>
+            </li>
+            <li>
+              <a class="track" href="https://y.qq.com/n/ryqq_v2/search?w=陶喆%20飞机场的十点半" target="_blank" rel="noopener">
+                <span class="track-no" aria-hidden="true">2</span>
+                <span class="track-main">
+                  <span class="track-title">飞机场的10:30</span>
+                  <span class="track-sub">陶喆 · David Tao</span>
+                </span>
+                <span class="track-year">1997</span>
+              </a>
+            </li>
+            <li>
+              <a class="track" href="https://y.qq.com/n/ryqq_v2/search?w=陶喆%20普通朋友" target="_blank" rel="noopener">
+                <span class="track-no" aria-hidden="true">3</span>
+                <span class="track-main">
+                  <span class="track-title">普通朋友</span>
+                  <span class="track-sub">陶喆 · I'm OK</span>
+                </span>
+                <span class="track-year">1999</span>
+              </a>
+            </li>
+            <li>
+              <a class="track" href="https://y.qq.com/n/ryqq_v2/search?w=陶喆%20黑色柳丁" target="_blank" rel="noopener">
+                <span class="track-no" aria-hidden="true">4</span>
+                <span class="track-main">
+                  <span class="track-title">黑色柳丁</span>
+                  <span class="track-sub">陶喆 · 黑色柳丁</span>
+                </span>
+                <span class="track-year">2001</span>
+              </a>
+            </li>
+            <li>
+              <a class="track" href="https://y.qq.com/n/ryqq_v2/search?w=陶喆%20就是爱你" target="_blank" rel="noopener">
+                <span class="track-no" aria-hidden="true">5</span>
+                <span class="track-main">
+                  <span class="track-title">就是爱你</span>
+                  <span class="track-sub">陶喆 · 太平盛世</span>
+                </span>
+                <span class="track-year">2005</span>
+              </a>
+            </li>
+          </ol>
+        </section>
 
-        <div class="artist-group">
-          <h3 class="artist-name">陶喆<span class="artist-en">David Tao</span></h3>
-          <div class="album-grid">
-            <article class="album">
-              <a class="album-cover cw-2 g-rings" href="https://y.qq.com/n/ryqq_v2/search?w=陶喆%20David%20Tao" target="_blank" rel="noopener" aria-label="Listen to David Tao on QQ Music">
-                <span class="cover-art" aria-hidden="true">陶</span>
-                <span class="cover-year">1997</span>
-                <span class="cover-link" aria-hidden="true">↗</span>
-                <div class="cover-foot">
-                  <h4 class="cover-title">David Tao</h4>
-                  <span class="cover-sub">同名专辑</span>
-                </div>
+        <!-- ---------- 歌单 2：薛之谦 ---------- -->
+        <section class="playlist">
+          <header class="playlist-head">
+            <h3 class="playlist-name">薛之谦<span class="playlist-en">Joker Xue</span></h3>
+            <p class="playlist-meta">5 tracks · 2006–2020</p>
+            <a class="playlist-link" href="https://y.qq.com/n/ryqq_v2/search?w=薛之谦" target="_blank" rel="noopener">Listen all <span aria-hidden="true">↗</span></a>
+          </header>
+          <ol class="track-list">
+            <li>
+              <a class="track" href="https://y.qq.com/n/ryqq_v2/search?w=薛之谦%20认真的雪" target="_blank" rel="noopener">
+                <span class="track-no" aria-hidden="true">1</span>
+                <span class="track-main">
+                  <span class="track-title">认真的雪</span>
+                  <span class="track-sub">薛之谦 · 薛之谦</span>
+                </span>
+                <span class="track-year">2006</span>
               </a>
-            </article>
-            <article class="album">
-              <a class="album-cover cw-4 g-disc" href="https://y.qq.com/n/ryqq_v2/search?w=陶喆%20I'm%20OK" target="_blank" rel="noopener" aria-label="Listen to I'm OK on QQ Music">
-                <span class="cover-art" aria-hidden="true">O</span>
-                <span class="cover-year">1999</span>
-                <span class="cover-link" aria-hidden="true">↗</span>
-                <div class="cover-foot">
-                  <h4 class="cover-title">I'm OK</h4>
-                </div>
+            </li>
+            <li>
+              <a class="track" href="https://y.qq.com/n/ryqq_v2/search?w=薛之谦%20深深爱过你" target="_blank" rel="noopener">
+                <span class="track-no" aria-hidden="true">2</span>
+                <span class="track-main">
+                  <span class="track-title">深深爱过你</span>
+                  <span class="track-sub">薛之谦 · 未完成的歌</span>
+                </span>
+                <span class="track-year">2009</span>
               </a>
-            </article>
-            <article class="album">
-              <a class="album-cover cw-1 g-bands" href="https://y.qq.com/n/ryqq_v2/search?w=陶喆%20黑色柳丁" target="_blank" rel="noopener" aria-label="Listen to 黑色柳丁 on QQ Music">
-                <span class="cover-art" aria-hidden="true">柳</span>
-                <span class="cover-year">2001</span>
-                <span class="cover-link" aria-hidden="true">↗</span>
-                <div class="cover-foot">
-                  <h4 class="cover-title">黑色柳丁</h4>
-                </div>
+            </li>
+            <li>
+              <a class="track" href="https://y.qq.com/n/ryqq_v2/search?w=薛之谦%20丑八怪" target="_blank" rel="noopener">
+                <span class="track-no" aria-hidden="true">3</span>
+                <span class="track-main">
+                  <span class="track-title">丑八怪</span>
+                  <span class="track-sub">薛之谦 · 意外</span>
+                </span>
+                <span class="track-year">2013</span>
               </a>
-            </article>
-            <article class="album">
-              <a class="album-cover cw-3 g-wedge" href="https://y.qq.com/n/ryqq_v2/search?w=陶喆%20太平盛世" target="_blank" rel="noopener" aria-label="Listen to 太平盛世 on QQ Music">
-                <span class="cover-art" aria-hidden="true">盛</span>
-                <span class="cover-year">2005</span>
-                <span class="cover-link" aria-hidden="true">↗</span>
-                <div class="cover-foot">
-                  <h4 class="cover-title">太平盛世</h4>
-                </div>
+            </li>
+            <li>
+              <a class="track" href="https://y.qq.com/n/ryqq_v2/search?w=薛之谦%20演员" target="_blank" rel="noopener">
+                <span class="track-no" aria-hidden="true">4</span>
+                <span class="track-main">
+                  <span class="track-title">演员</span>
+                  <span class="track-sub">薛之谦 · 绅士</span>
+                </span>
+                <span class="track-year">2015</span>
               </a>
-            </article>
-          </div>
-        </div>
+            </li>
+            <li>
+              <a class="track" href="https://y.qq.com/n/ryqq_v2/search?w=薛之谦%20天外来物" target="_blank" rel="noopener">
+                <span class="track-no" aria-hidden="true">5</span>
+                <span class="track-main">
+                  <span class="track-title">天外来物</span>
+                  <span class="track-sub">薛之谦 · 天外来物</span>
+                </span>
+                <span class="track-year">2020</span>
+              </a>
+            </li>
+          </ol>
+        </section>
 
-        <div class="artist-group">
-          <h3 class="artist-name">薛之谦<span class="artist-en">Joker Xue</span></h3>
-          <div class="album-grid">
-            <article class="album">
-              <a class="album-cover cw-5 g-rings" href="https://y.qq.com/n/ryqq_v2/search?w=薛之谦%20未完成的歌" target="_blank" rel="noopener" aria-label="Listen to 未完成的歌 on QQ Music">
-                <span class="cover-art" aria-hidden="true">歌</span>
-                <span class="cover-year">2009</span>
-                <span class="cover-link" aria-hidden="true">↗</span>
-                <div class="cover-foot">
-                  <h4 class="cover-title">未完成的歌</h4>
-                  <span class="cover-sub">「深深爱过你」</span>
-                </div>
+        <!-- ---------- 歌单 3：Justin Bieber ---------- -->
+        <section class="playlist">
+          <header class="playlist-head">
+            <h3 class="playlist-name">Justin Bieber</h3>
+            <p class="playlist-meta">5 tracks · 2015–2025</p>
+            <a class="playlist-link" href="https://y.qq.com/n/ryqq_v2/search?w=Justin%20Bieber" target="_blank" rel="noopener">Listen all <span aria-hidden="true">↗</span></a>
+          </header>
+          <ol class="track-list">
+            <li>
+              <a class="track" href="https://y.qq.com/n/ryqq_v2/search?w=Justin%20Bieber%20What%20Do%20You%20Mean%3F" target="_blank" rel="noopener">
+                <span class="track-no" aria-hidden="true">1</span>
+                <span class="track-main">
+                  <span class="track-title">What Do You Mean?</span>
+                  <span class="track-sub">Justin Bieber · Purpose</span>
+                </span>
+                <span class="track-year">2015</span>
               </a>
-            </article>
-            <article class="album">
-              <a class="album-cover cw-1 g-disc" href="https://y.qq.com/n/ryqq_v2/search?w=薛之谦%20意外" target="_blank" rel="noopener" aria-label="Listen to 意外 on QQ Music">
-                <span class="cover-art" aria-hidden="true">意</span>
-                <span class="cover-year">2013</span>
-                <span class="cover-link" aria-hidden="true">↗</span>
-                <div class="cover-foot">
-                  <h4 class="cover-title">意外</h4>
-                </div>
+            </li>
+            <li>
+              <a class="track" href="https://y.qq.com/n/ryqq_v2/search?w=Justin%20Bieber%20Sorry" target="_blank" rel="noopener">
+                <span class="track-no" aria-hidden="true">2</span>
+                <span class="track-main">
+                  <span class="track-title">Sorry</span>
+                  <span class="track-sub">Justin Bieber · Purpose</span>
+                </span>
+                <span class="track-year">2015</span>
               </a>
-            </article>
-            <article class="album">
-              <a class="album-cover cw-3 g-bands" href="https://y.qq.com/n/ryqq_v2/search?w=薛之谦%20渡" target="_blank" rel="noopener" aria-label="Listen to 渡 on QQ Music">
-                <span class="cover-art" aria-hidden="true">渡</span>
-                <span class="cover-year">2017</span>
-                <span class="cover-link" aria-hidden="true">↗</span>
-                <div class="cover-foot">
-                  <h4 class="cover-title">渡</h4>
-                </div>
+            </li>
+            <li>
+              <a class="track" href="https://y.qq.com/n/ryqq_v2/search?w=Justin%20Bieber%20Yummy" target="_blank" rel="noopener">
+                <span class="track-no" aria-hidden="true">3</span>
+                <span class="track-main">
+                  <span class="track-title">Yummy</span>
+                  <span class="track-sub">Justin Bieber · Changes</span>
+                </span>
+                <span class="track-year">2020</span>
               </a>
-            </article>
-            <article class="album">
-              <a class="album-cover cw-2 g-wedge" href="https://y.qq.com/n/ryqq_v2/search?w=薛之谦%20天外来物" target="_blank" rel="noopener" aria-label="Listen to 天外来物 on QQ Music">
-                <span class="cover-art" aria-hidden="true">天</span>
-                <span class="cover-year">2020</span>
-                <span class="cover-link" aria-hidden="true">↗</span>
-                <div class="cover-foot">
-                  <h4 class="cover-title">天外来物</h4>
-                </div>
+            </li>
+            <li>
+              <a class="track" href="https://y.qq.com/n/ryqq_v2/search?w=Justin%20Bieber%20Daisies" target="_blank" rel="noopener">
+                <span class="track-no" aria-hidden="true">4</span>
+                <span class="track-main">
+                  <span class="track-title">Daisies</span>
+                  <span class="track-sub">Justin Bieber · SWAG</span>
+                </span>
+                <span class="track-year">2025</span>
               </a>
-            </article>
-          </div>
-        </div>
-
-        <div class="artist-group">
-          <h3 class="artist-name">Justin Bieber</h3>
-          <div class="album-grid">
-            <article class="album">
-              <a class="album-cover cw-4 g-bands" href="https://y.qq.com/n/ryqq_v2/search?w=Justin%20Bieber%20Purpose" target="_blank" rel="noopener" aria-label="Listen to Purpose on QQ Music">
-                <span class="cover-art" aria-hidden="true">P</span>
-                <span class="cover-year">2015</span>
-                <span class="cover-link" aria-hidden="true">↗</span>
-                <div class="cover-foot">
-                  <h4 class="cover-title">Purpose</h4>
-                </div>
+            </li>
+            <li>
+              <a class="track" href="https://y.qq.com/n/ryqq_v2/search?w=Justin%20Bieber%20Yukon" target="_blank" rel="noopener">
+                <span class="track-no" aria-hidden="true">5</span>
+                <span class="track-main">
+                  <span class="track-title">Yukon</span>
+                  <span class="track-sub">Justin Bieber · SWAG</span>
+                </span>
+                <span class="track-year">2025</span>
               </a>
-            </article>
-            <article class="album">
-              <a class="album-cover cw-2 g-disc" href="https://y.qq.com/n/ryqq_v2/search?w=Justin%20Bieber%20Changes" target="_blank" rel="noopener" aria-label="Listen to Changes on QQ Music">
-                <span class="cover-art" aria-hidden="true">C</span>
-                <span class="cover-year">2020</span>
-                <span class="cover-link" aria-hidden="true">↗</span>
-                <div class="cover-foot">
-                  <h4 class="cover-title">Changes</h4>
-                </div>
-              </a>
-            </article>
-            <article class="album">
-              <a class="album-cover cw-1 g-wedge" href="https://y.qq.com/n/ryqq_v2/search?w=Justin%20Bieber%20Justice" target="_blank" rel="noopener" aria-label="Listen to Justice on QQ Music">
-                <span class="cover-art" aria-hidden="true">J</span>
-                <span class="cover-year">2021</span>
-                <span class="cover-link" aria-hidden="true">↗</span>
-                <div class="cover-foot">
-                  <h4 class="cover-title">Justice</h4>
-                </div>
-              </a>
-            </article>
-            <article class="album">
-              <a class="album-cover cw-5 g-disc" href="https://y.qq.com/n/ryqq_v2/search?w=Justin%20Bieber%20SWAG" target="_blank" rel="noopener" aria-label="Listen to SWAG on QQ Music">
-                <span class="cover-art" aria-hidden="true">S</span>
-                <span class="cover-year">2025</span>
-                <span class="cover-link" aria-hidden="true">↗</span>
-                <div class="cover-foot">
-                  <h4 class="cover-title">SWAG</h4>
-                </div>
-              </a>
-            </article>
-          </div>
-        </div>
+            </li>
+          </ol>
+        </section>
 
       </div>
     </section>
