@@ -1,11 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<!-- ⚠️ data-theme="dark" 就是「整站深色主题」的总开关（V2.7 续二十一，用户要求）。
+     它是**唯一**需要动的地方 —— 想要浅色版：删掉这个属性即可，浅色方案仍完整留在 style.css。
+     为什么非得连主题一起换：形状场画布铺黑底 = 全站底色变黑，
+     深墨正文在纯黑上会看不见。详见 style.css 的 §1.5。 -->
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Wang Shixian · BCI Student · Personal Site</title>
   <meta name="description" content="Wang Shixian's personal site — a brain–computer interface student following the AI frontier. Studying calculus, linear algebra and programming; drums, calligraphy and basketball on the side.">
-  <meta name="theme-color" content="#0F766E">
+  <meta name="theme-color" content="#000000">
 
   <!-- 社交分享卡片：把链接发给同学 / HR 时会显示标题和缩略图 -->
   <!-- 部署上线后，记得把 og:image 和 og:url 换成你的真实网址 -->
@@ -189,9 +193,9 @@
               <p>Static · no framework · my own design system</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 36 条 + main 分支 2 条（V1.0 / V1.1）
+                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 37 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 38 commits as of 2026-09-17</p>
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 39 commits as of 2026-09-17</p>
               <a class="item-link" href="ai-log.html">How this page was built →</a>
             </div>
             <div class="bento-item bento-item--project">
