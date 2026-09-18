@@ -2043,3 +2043,90 @@ body {
     padding: var(--sp-3) var(--sp-2);
   }
 }
+
+/* ---------- 22. 液态玻璃面板（V2.7 续二十二） ----------
+   机制来源：Abdughafur 的 GitHub 卡片（用户 2026-09-18 把源码贴了过来）。
+   **借机制、不搬代码** —— 项目说明里写着「自己写代码，只借鉴思路不复制素材 / 代码」，
+   而且那份代码本身有几处会咬人的地方（拖拽改 left/top 触发布局、滤镜挂在会动的层上、
+   全站没有 focus-visible、按钮 28px、body 上 user-select:none 把整页选字关掉了），
+   照搬等于把它的坑一起搬进来。
+
+   **它真正新的东西**：`backdrop-filter` + 位移滤镜 —— 折射**元素背后的真实页面内容**，
+   而不是像首屏泡泡那样只折射自己装的那一张图。
+
+   ⚠️ 两个必须知道的坑（这次都踩到了）：
+   ① **祖先层不能有 transform / filter / opacity / isolation** ——
+      那些会形成「背景根」，backdrop-filter 就只在那棵子树里取样，折射不到后面的形状场。
+      本站最阴的一个来源是 `.reveal.visible` 的 `transform: translateY(0)`：**它不是 none**。
+      所以这块玻璃不能套 .reveal，也不能为了「隔离层位」给它加 isolation ——
+      那会把自己变成背景根，玻璃就只剩一片空白。
+   ② **背景是每帧在动的 canvas** —— 这层滤镜每帧都要重算。
+      所以尺寸有上限（max-width 560px）= 重算面积有上限。
+      **觉得卡：删掉 `.glass-panel::after` 里的 `filter: url(#panelRefract)`，
+      退化成纯模糊玻璃，观感仍有八成，代价归零。** */
+.glass-panel {
+  position: relative;
+  max-width: 560px;
+  margin: var(--sp-7) auto 0;
+  padding: var(--sp-5) var(--sp-6);
+  border-radius: 24px;
+  overflow: hidden;          /* 位移会把像素推出去，裁掉才有干净的边 */
+}
+
+/* 玻璃本体：模糊 + 位移折射背后的页面内容。
+   层位用 z-index: 0 / 1 排（不用负 z-index，也就不用 isolation —— 见上面 ①） */
+.glass-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background: rgb(255 255 255 / .04);   /* 极淡一层，让面板「有面」而不是一团模糊 */
+  backdrop-filter: blur(8px) saturate(1.3);
+  -webkit-backdrop-filter: blur(8px) saturate(1.3);
+  filter: url(#panelRefract);           /* ← 觉得卡就删这一行 */
+  pointer-events: none;
+}
+
+/* 玻璃的边与高光：亮边 + 一道斜向反光，让它读起来是「一块」而不是一团雾 */
+.glass-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  border: 1px solid rgb(255 255 255 / .16);
+  background-image: linear-gradient(135deg, rgb(255 255 255 / .07), transparent 46%);
+  pointer-events: none;
+}
+
+/* 内容抬到玻璃之上 */
+.glass-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* 链接搬进面板后，原来的上外边距归零（间距交给面板的 padding） */
+.glass-panel .contact-links {
+  margin-top: 0;
+}
+
+/* 玻璃上的字号小，透明度压一点更清楚（原来的 .7 在玻璃上偏虚） */
+.glass-panel .contact-link {
+  opacity: .88;
+}
+
+/* 不支持 backdrop-filter（部分 Firefox / 老浏览器）：
+   给一块实心底，否则面板会透明，文字直接飘在黑底上 */
+@supports not (backdrop-filter: blur(2px)) {
+  .glass-panel::after {
+    background: rgb(255 255 255 / .07);
+  }
+}
+
+/* 「减少动效」：留模糊，去掉位移 —— 背景在动，这层滤镜每帧重算，能不烧就不烧 */
+@media (prefers-reduced-motion: reduce) {
+  .glass-panel::after {
+    filter: none;
+  }
+}
