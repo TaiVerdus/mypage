@@ -25,8 +25,15 @@
 </head>
 <body>
 
-  <!-- 自定义光标 -->
-  <div class="custom-cursor" id="customCursor"></div>
+  <!-- ========== 全屏形状场（光标效果，替换原来的青色圆环） ==========
+       机制参考 CodePen「Shape Wave」(Stijn Van Minnebruggen)，但**不是它的代码** ——
+       那个 pen 抓不到（直接打开 404、oEmbed 也 Not Found），所以是按用户截图里
+       可见的结构重做的：一个形状网格（圆 + 胶囊）+ 波函数 + 鼠标做波源。
+
+       z-index: -1 是关键 —— 压在「内容之下、body 底色之上」：
+       ① 不盖住任何正文 ② 不挡点击（再加 pointer-events: none 双保险）
+       颜色全部取自站点那 6 个色（青 / 深青 / 墨蓝 / 灰蓝），**没有新增色值**。 -->
+  <canvas class="fx-field" id="fxField" aria-hidden="true"></canvas>
 
   <!-- ========== Sticky 导航 ========== -->
   <nav class="nav" id="nav">
@@ -182,9 +189,9 @@
               <p>Static · no framework · my own design system</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 33 条 + main 分支 2 条（V1.0 / V1.1）
+                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 34 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 35 commits as of 2026-09-17</p>
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 36 commits as of 2026-09-17</p>
               <a class="item-link" href="ai-log.html">How this page was built →</a>
             </div>
             <div class="bento-item bento-item--project">
