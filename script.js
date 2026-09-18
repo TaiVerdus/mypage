@@ -151,39 +151,187 @@ quickEl.querySelectorAll('.quick-btn').forEach(function (btn) {
 // 开场白：分身先打招呼
 addMessage('Hey, I’m Shixian’s digital twin! Ask what he’s studying, what kind of person he is, or his hobbies — and I’ll be honest when I don’t know.', 'bot');
 
-// ---------- 交互四：自定义光标 ----------
-var cursor = document.getElementById('customCursor');
-var isDesktop = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+// ---------- 交互四：全屏形状场（光标效果） ----------
+// 机制参考 CodePen「Shape Wave」(Stijn Van Minnebruggen)，但**不是它的代码**：
+// 那个 pen 抓不到（直接打开 404、oEmbed 也 Not Found），这里按截图里可见的结构重做 ——
+// 一个形状网格（圆 + 胶囊），尺寸被波函数调制，鼠标是波源。
+//
+// 四条工程约束：
+// ① 不挡东西：画布 z-index:-1（写在样式里）+ pointer-events:none
+// ② 不拖慢页面：格子全部用离屏精灵 drawImage（比逐帧 arc() 快一个量级）、
+//    DPR 封顶 2、格数按视口压到 ~1000 以内、切到后台就停
+// ③ 不该动的人不动：触屏 / 系统「减少动效」→ 直接不启动
+// ④ 颜色不新增：色板全部取自站点那 6 个色
+var fxCanvas = document.getElementById('fxField');
+var fxReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var fxCanHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
-if (cursor && isDesktop) {
-  var mouseX = 0, mouseY = 0;
-  var cursorX = 0, cursorY = 0;
+if (fxCanvas && fxCanHover && !fxReduced && fxCanvas.getContext) {
+  var fxCtx = fxCanvas.getContext('2d');
 
-  document.addEventListener('mousemove', function (e) {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-  });
+  // 色板：**没有一个新色值**。青（#0F766E）与墨蓝（#0F172A）是两个不同色相，
+  // 所以「别都用一个颜色」不用破配色规矩就能做到。
+  // 谁出现得多靠数组里重复几次控制 —— 比写权重公式直白，以后想调也不用换算。
+  var FX_COLORS = [
+    '#0F766E', '#0F766E', '#0F766E',   // 青（主色，占多数）
+    '#0F6562', '#0F6562',              // 深青
+    '#0F172A', '#0F172A',              // 墨蓝（重音：跟青拉开色相）
+    '#475569'                          // 灰蓝（零星点缀）
+  ];
+  var FX_INFLUENCE = 320;   // 鼠标的影响半径（px）
+  var FX_MAX_R = 3.4;       // 形状最大半径 —— 再大就开始抢正文了
 
-  // 平滑跟随（lerp 插值）
-  function animateCursor() {
-    cursorX += (mouseX - cursorX) * 0.2;
-    cursorY += (mouseY - cursorY) * 0.2;
-    cursor.style.left = cursorX + 'px';
-    cursor.style.top = cursorY + 'px';
-    requestAnimationFrame(animateCursor);
+  var fxW = 0, fxH = 0, fxCells = [], fxSprites = [];
+  var fxPointer = { x: -1e4, y: -1e4, on: false };
+  var fxClock = 0, fxLast = 0, fxRaf = null;
+
+  // 伪随机：同一个格子每次重建都长一样，resize 之后不会「洗牌」
+  function fxHash(x, y) {
+    return Math.abs(x * 73856093 ^ y * 19349663) % 100000;
   }
-  animateCursor();
 
-  // hover 到可交互元素时放大
-  var interactiveEls = document.querySelectorAll('a, button, input, .quick-btn, .info-card');
-  interactiveEls.forEach(function (el) {
-    el.addEventListener('mouseenter', function () {
-      cursor.classList.add('hovering');
+  // 精灵：每种颜色预渲染一张「圆」和一张「竖胶囊」。
+  // 形状比例照 pen：胶囊宽约 size*0.48、高约 size（即 1:2 的竖条）
+  function fxMakeSprite(color, size, isPill) {
+    var c = document.createElement('canvas');
+    var aspect = isPill ? 2 : 1;
+    c.width = Math.max(2, Math.ceil(size));
+    c.height = Math.max(2, Math.ceil(size * aspect));
+    var g = c.getContext('2d');
+    g.fillStyle = color;
+    g.translate(c.width / 2, c.height / 2);
+    g.beginPath();
+    if (isPill) {
+      var hw = size * 0.24, hh = size * 0.5;
+      if (g.roundRect) g.roundRect(-hw, -hh, hw * 2, hh * 2, hw);
+      else g.rect(-hw, -hh, hw * 2, hh * 2);
+    } else {
+      g.arc(0, 0, size / 2, 0, Math.PI * 2);
+    }
+    g.fill();
+    return { el: c, aspect: aspect };
+  }
+
+  function fxBuild() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);   // DPR 封顶 2
+    fxW = window.innerWidth;
+    fxH = window.innerHeight;
+    fxCanvas.width = Math.round(fxW * dpr);
+    fxCanvas.height = Math.round(fxH * dpr);
+    fxCtx.setTransform(dpr, 0, 0, dpr, 0, 0);   // 之后一律用 CSS 像素坐标
+
+    // 间距跟着视口放大：把总格数压在 ~1000 以内，大屏也不会拖慢
+    var gap = Math.max(40, Math.sqrt(fxW * fxH / 900));
+    var cols = Math.ceil(fxW / gap) + 1;
+    var rows = Math.ceil(fxH / gap) + 1;
+
+    fxCells = [];
+    for (var iy = 0; iy < rows; iy++) {
+      for (var ix = 0; ix < cols; ix++) {
+        var h = fxHash(ix, iy);
+        fxCells.push({
+          x: ix * gap + (h % 11) - 5,                  // 抖 ±5px：打散网格感
+          y: iy * gap + ((h >> 4) % 11) - 5,
+          base: 0.28 + ((h >> 8) % 100) / 100 * 0.34,  // 基础尺寸 0.28 ~ 0.62
+          pill: (h >> 3) % 9 === 0,                    // 约 1/9 是胶囊
+          c: (h >> 5) % FX_COLORS.length,
+          phase: ((h >> 11) % 100) / 100 * Math.PI * 2  // 初始相位，避免整齐划一
+        });
+      }
+    }
+
+    // 精灵按最大尺寸预渲染：画得比用到的更大，缩放下来更锐
+    var spriteSize = Math.ceil(FX_MAX_R * 2 * dpr) + 2;
+    fxSprites = [];
+    FX_COLORS.forEach(function (color) {
+      fxSprites.push(fxMakeSprite(color, spriteSize, false));
+      fxSprites.push(fxMakeSprite(color, spriteSize, true));
     });
-    el.addEventListener('mouseleave', function () {
-      cursor.classList.remove('hovering');
-    });
+  }
+
+  function fxFrame(now) {
+    // 用累加而不是绝对时间：切后台再回来，波纹不会「瞬移」
+    if (!fxLast) fxLast = now;
+    fxClock += Math.min((now - fxLast) / 1000, 0.05);
+    fxLast = now;
+    var t = fxClock;
+
+    fxCtx.clearRect(0, 0, fxW, fxH);
+
+    for (var i = 0; i < fxCells.length; i++) {
+      var cell = fxCells[i];
+
+      // 环境波：鼠标不动时整片也在缓慢呼吸 —— 「全屏形状场」该有的样子
+      var ambient = Math.sin(cell.x * 0.014 + cell.y * 0.011 + t * 1.15 + cell.phase);
+
+      // 鼠标涟漪：越近越强，超出影响半径归零。
+      // 平方衰减 = 近处明显、远处几乎无，涟漪才有「一圈」的感觉
+      var f = 0, ripple = 0;
+      if (fxPointer.on) {
+        var dx = cell.x - fxPointer.x;
+        var dy = cell.y - fxPointer.y;
+        var d = Math.sqrt(dx * dx + dy * dy);
+        if (d < FX_INFLUENCE) {
+          f = 1 - d / FX_INFLUENCE;
+          f = f * f;
+          ripple = Math.sin(d * 0.05 - t * 3.4);
+        }
+      }
+
+      var r = FX_MAX_R * cell.base * (0.62 + 0.38 * ambient + 0.85 * f * (0.5 + 0.5 * ripple));
+      if (r < 0.12) continue;                      // 太小就不画，省一次 drawImage
+
+      var alpha = 0.05 + 0.09 * (0.5 + 0.5 * ambient) + 0.28 * f;
+      if (alpha > 0.5) alpha = 0.5;                // 封顶：再深就抢正文了
+
+      var sp = fxSprites[cell.c * 2 + (cell.pill ? 1 : 0)];
+      var w = r * 2;
+      fxCtx.globalAlpha = alpha;
+      fxCtx.drawImage(sp.el, cell.x - w / 2, cell.y - (w * sp.aspect) / 2, w, w * sp.aspect);
+    }
+
+    fxCtx.globalAlpha = 1;
+    fxRaf = requestAnimationFrame(fxFrame);
+  }
+
+  function fxStart() {
+    if (fxRaf === null) {
+      fxLast = 0;                                  // 重设基准，避免累加出一大跳
+      fxRaf = requestAnimationFrame(fxFrame);
+    }
+  }
+
+  function fxStop() {
+    if (fxRaf !== null) {
+      cancelAnimationFrame(fxRaf);
+      fxRaf = null;
+    }
+  }
+
+  window.addEventListener('mousemove', function (e) {
+    fxPointer.x = e.clientX;
+    fxPointer.y = e.clientY;
+    fxPointer.on = true;
+  }, { passive: true });
+
+  // 鼠标离开窗口：涟漪收回，只留环境波
+  document.addEventListener('mouseleave', function () {
+    fxPointer.on = false;
   });
+
+  // 切到后台就停 —— 没人看的时候不该烧 CPU
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) fxStop(); else fxStart();
+  });
+
+  var fxResizeTimer = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(fxResizeTimer);
+    fxResizeTimer = setTimeout(fxBuild, 200);
+  });
+
+  fxBuild();
+  fxStart();
 }
 
 // ---------- 交互六：卡片鼠标光斑 ----------

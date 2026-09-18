@@ -1242,32 +1242,27 @@ section {
   }
 }
 
-/* ---------- 11. 自定义光标 ---------- */
-/* 自定义光标改成「跟随光晕」：保留系统原生光标（可用性优先），只做视觉点缀 */
-.custom-cursor {
-  width: 26px;
-  height: 26px;
-  background: rgb(var(--c-brand-rgb) / 0.18);
-  border: 1px solid rgb(var(--c-brand-rgb) / 0.35);
-  border-radius: 50%;
+/* ---------- 18. 全屏形状场（光标效果） ---------- */
+/* 编号按「加入顺序」给，物理位置不按编号 —— 历史原因，不为对齐而重排（只会产生无意义的 diff）。
+   这一块**替换了原来的青色圆环**（旧的 §11 自定义光标整节已删，标题不该再留着）。
+   三条工程约束都写在样式里：
+   ① **z-index: -1** —— 压在「内容之下、body 底色之上」。
+      这是全屏画布唯一的正确层位：浮在上面会盖住正文，只有负 z-index 才能
+      既铺满视口、又不干扰任何文字与点击。
+   ② **pointer-events: none** —— 双保险，绝不拦事件。
+   ③ 触屏设备与系统「减少动效」下直接不显示（JS 那边也不会启动）。 */
+.fx-field {
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
+  z-index: -1;
+  display: block;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
-  z-index: 9999;
-  transform: translate(-50%, -50%);
-  transition: width 0.25s ease, height 0.25s ease, background 0.25s ease, border-color 0.25s ease;
 }
 
-.custom-cursor.hovering {
-  width: 46px;
-  height: 46px;
-  background: rgb(var(--c-brand-rgb) / 0.10);
-  border-color: rgb(var(--c-brand-rgb) / 0.55);
-}
-
-@media (hover: none), (pointer: coarse) {
-  .custom-cursor {
+@media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .fx-field {
     display: none;
   }
 }
@@ -1283,10 +1278,6 @@ section {
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
     scroll-behavior: auto !important;
-  }
-
-  .custom-cursor {
-    display: none;
   }
 }
 
