@@ -184,45 +184,71 @@ var fxCanHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches
 if (fxCanvas && fxCanHover && !fxReduced && fxCanvas.getContext) {
   var fxCtx = fxCanvas.getContext('2d');
 
-  // ---- 校音旋钮 ----
-  var FX_REST_SCALE = 0.34;   // 静止时占最大尺寸的比例
-  var FX_MIN_SCALE  = 1.0;    // 悬停放大倍数下限（照 pen：1~3）
-  var FX_MAX_SCALE  = 3.0;    // 上限
-  var FX_INFLUENCE  = 320;    // 鼠标影响半径（px）
-  var FX_BASE_R     = 3.4;    // 形状基准半径 —— 再大就开始抢正文了
-  var FX_WAVE_SPEED = 1200;   // 点击波的扩散速度（px/秒，照 pen）
-  var FX_WAVE_WIDTH = 180;    // 波峰宽度（照 pen）
-  var FX_IN_SEC     = 0.30;   // 放大到位的时间（pen 是 speedIn 0.5）
-  var FX_OUT_SEC    = 0.42;   // 缩回去的时间（pen 是 speedOut 0.6）
+  // ---- 校音旋钮（尺寸口径整体照 pen：静止是一颗小点，扫过时鼓起来） ----
+  var FX_REST_SCALE = 0.09;       // 静止时的大小（照 pen 的 restScale）
+  var FX_MIN_SCALE  = 1.0;        // 扫过时放大倍数下限（照 pen：1~3）
+  var FX_MAX_SCALE  = 3.0;        // 上限
+  var FX_BASE_RATIO = 0.38;       // 基准半径 = 格距 × 这个比例（照 pen）
+  var FX_INFLUENCE  = 300;        // 鼠标影响半径（px，照 pen 的 30vmin 量级）
+  var FX_ACTIVITY_DECAY = 0.955;  // 鼠标停下后涟漪衰减（照 pen 的 activity，但更慢一点）
+  var FX_WAVE_SPEED = 1200;       // 点击波的扩散速度（px/秒，照 pen）
+  var FX_WAVE_WIDTH = 180;        // 波峰宽度（照 pen）
+  var FX_IN_SEC     = 0.30;       // 放大到位的时间（pen 是 speedIn 0.5）
+  var FX_OUT_SEC    = 0.42;       // 缩回去的时间（pen 是 speedOut 0.6）
 
-  // ---- 色板：**没有一个新色值** ----
-  // 青（#0F766E）与墨蓝（#0F172A）本来就不是一个色相，
-  // 所以「别都用一个颜色」不用破配色规矩就能做到。
-  // 数组里重复几次 = 出现概率，比写权重公式直白；
-  // gradient 档用青的**透明度**派生明暗（pen 的渐变填充机制）。
+  // 内容让位：这些区块下面的形状**不允许鼓起来** —— 就是 pen 的 [data-shape-mask] 机制。
+  // ⚠️ 这里只做「不让膨胀」，不做「让形状消失」。原因：静止的小点本来就只有 3 像素左右，
+  //    压不着字；真正会压字的是鼠标扫过时鼓到几十像素的那一下。
+  //    所以卡住膨胀就够了 —— 正文同样清楚，背景的质感还连得上。
+  // 原 pen 靠给元素加 data-shape-mask 属性标注；这里收成一个常量，只调这一处就够，
+  // 不必在 HTML 里改十几处。只列「文字直接落在页面底上」的容器 ——
+  // 卡片自己有底色（--c-surface），不需要让位。
+  var FX_MASK_SELECTOR = '.section-head, .playlist-head, .track-list, ' +
+                         '.contact-title, .contact-subtitle, .contact-links, footer';
+
+  // ---- 色板：用 pen 原版那套彩色（用户 2026-09-18 明确要「彩色 + 黑底，像这个一样」） ----
+  // ⚠️ 这**破了本站原来那条「全站只有 6 个颜色」的规矩** —— 是用户自己的决定：
+  //    他同时把背景换成了纯黑（见样式表 §1.5 的深色主题）。**规矩是被改掉的，不是被忽略的**；
+  //    浅色主题那一套仍然完好，删掉 <html data-theme="dark"> 就能切回去。
+  // 数组里重复几次 = 出现概率；10 个纯色 + 7 组渐变，顺序照 pen 原样。
   var FX_COLORS = [
-    { type: 'solid', value: '#0F766E' },                                            // 青（主色）
-    { type: 'solid', value: '#0F766E' },
-    { type: 'solid', value: '#0F6562' },                                            // 深青 = --c-brand-deep
-    { type: 'gradient', from: 'rgba(15,118,110,.90)', to: 'rgba(15,118,110,.34)' },  // 青的明暗渐变
-    { type: 'solid', value: '#0F172A' },                                            // 墨蓝（重音）
-    { type: 'solid', value: '#475569' }                                             // 灰蓝（零星）
+    { type: 'solid', value: '#22c55e' },
+    { type: 'solid', value: '#06b6d4' },
+    { type: 'solid', value: '#f97316' },
+    { type: 'solid', value: '#ef4444' },
+    { type: 'solid', value: '#facc15' },
+    { type: 'solid', value: '#ec4899' },
+    { type: 'solid', value: '#9ca3af' },
+    { type: 'solid', value: '#a78bfa' },
+    { type: 'solid', value: '#60a5fa' },
+    { type: 'solid', value: '#34d399' },
+    { type: 'gradient', from: '#6366f1', to: '#3b82f6' },
+    { type: 'gradient', from: '#06b6d4', to: '#6366f1' },
+    { type: 'gradient', from: '#22c55e', to: '#06b6d4' },
+    { type: 'gradient', from: '#f97316', to: '#ef4444' },
+    { type: 'gradient', from: '#8b5cf6', to: '#06b6d4' },
+    { type: 'gradient', from: '#3b82f6', to: '#8b5cf6' },
+    { type: 'gradient', from: '#34d399', to: '#3b82f6' }
   ];
 
   // ---- 形状：圆 / 竖胶囊 / 星 ----
   // 星形预渲染 5 款（角数与内径不同），扫过时换一款 —— 就是 pen 里「形状在变」的手感。
-  // 比例：星只占 ~1/6（pen 是 50%，放本站偏闹）。想更热闹把 'star' 多写几次。
-  var FX_KINDS = ['circle', 'circle', 'pill', 'pill', 'pill', 'star'];
+  // 比例照 pen：**星占一半**（它原来是 ['circle','pill','star','star']）
+  var FX_KINDS = ['circle', 'pill', 'star', 'star'];
   var FX_STARS = 5;          // 预渲染几款星
   var FX_STAR_FIRST = 2;     // 形状表里星形的起始下标（0 = 圆，1 = 胶囊）
 
-  // 精灵按**最大尺寸**渲染，缩放下来更锐
-  var FX_SPRITE_R = FX_BASE_R * FX_MAX_SCALE;
-  var FX_SPRITE_SIDE = Math.ceil(FX_SPRITE_R * 4);
+  // 精灵按一个**固定的参考半径**渲染（比实际用到的最大半径还大一点），缩放下来更锐；
+  // 用固定值是为了换视口尺寸时不必重建精灵
+  var FX_SPRITE_R = 60;
+  var FX_SPRITE_SIDE = Math.ceil(FX_SPRITE_R * 2) + 2;
 
   var fxW = 0, fxH = 0, fxCells = [], fxSprites = [];
   var fxPointer = { x: -1e4, y: -1e4, on: false };
   var fxWaves = [];
+  var fxMasks = [];            // 正文区块的位置（文档坐标），压在下面的形状要让位
+  var fxActivity = 0;          // 鼠标动量的衰减值 —— 光停在原地不动，涟漪会自己收回去
+  var fxBaseR = 12;            // 基准半径，每次 fxBuild 按格距算
   var fxClock = 0, fxLast = 0, fxRaf = null;
 
   // 伪随机：同一个格子每次重建都长一样，resize 之后不会「洗牌」
@@ -302,6 +328,7 @@ if (fxCanvas && fxCanHover && !fxReduced && fxCanvas.getContext) {
 
     // 间距跟着视口放大：把总格数压在 ~1000 以内，大屏也不会拖慢
     var gap = Math.max(40, Math.sqrt(fxW * fxH / 900));
+    fxBaseR = gap * FX_BASE_RATIO;          // 形状基准半径按格距走（照 pen）
     var cols = Math.ceil(fxW / gap) + 1;
     var rows = Math.ceil(fxH / gap) + 1;
 
@@ -313,7 +340,7 @@ if (fxCanvas && fxCanHover && !fxReduced && fxCanvas.getContext) {
         fxCells.push({
           x: ix * gap + (h % 11) - 5,                    // 抖 ±5px：打散网格感
           y: iy * gap + ((h >> 4) % 11) - 5,
-          base: 0.30 + ((h >> 8) % 100) / 100 * 0.34,    // 基础尺寸 0.30 ~ 0.64
+          base: 0.84 + ((h >> 8) % 100) / 100 * 0.32,    // 尺寸微差 0.84 ~ 1.16（pen 是统一大小，这里留一点手气）
           shape: kind === 'circle' ? 0 : (kind === 'pill' ? 1 : fxStarIndex()),
           c: (h >> 5) % FX_COLORS.length,
           angle: ((h >> 13) % 100) / 100 * Math.PI * 2,   // 初始角度（照 pen：每个形状随机转）
@@ -326,6 +353,21 @@ if (fxCanvas && fxCanHover && !fxReduced && fxCanvas.getContext) {
     }
   }
 
+  // 读一遍正文区块的位置，换算成**文档坐标**存起来。
+  // 只在布局可能变的时候调用（加载、resize、滚动节流），不在每帧里读 ——
+  // getBoundingClientRect 会强制同步布局，逐帧读是性能大坑。
+  function fxReadMasks() {
+    var sx = window.scrollX || window.pageXOffset || 0;
+    var sy = window.scrollY || window.pageYOffset || 0;
+    var els = document.querySelectorAll(FX_MASK_SELECTOR);
+    fxMasks = [];
+    for (var i = 0; i < els.length; i++) {
+      var r = els[i].getBoundingClientRect();
+      if (!r.width || !r.height) continue;         // 藏起来的不算
+      fxMasks.push({ l: r.left + sx, t: r.top + sy, r: r.right + sx, b: r.bottom + sy });
+    }
+  }
+
   function fxFrame(now) {
     // 用累加而不是绝对时间：切后台再回来，波纹不会「瞬移」
     if (!fxLast) fxLast = now;
@@ -334,12 +376,16 @@ if (fxCanvas && fxCanHover && !fxReduced && fxCanvas.getContext) {
     fxLast = now;
     var t = fxClock;
 
-    fxCtx.clearRect(0, 0, fxW, fxH);   // 不填底色 —— 让页面自己的浅底透上来
+    fxCtx.clearRect(0, 0, fxW, fxH);   // 不填底色 —— 底色交给页面的深色主题
 
     // 缓动系数：pen 的 durationToFactor 是按 60fps 推的，
     // 这里按**真实帧间隔**算 —— 120Hz 屏上速度才不会翻倍
     var kIn  = 1 - Math.pow(0.05, dt / FX_IN_SEC);
     var kOut = 1 - Math.pow(0.05, dt / FX_OUT_SEC);
+
+    // 鼠标的「动量」衰减（照 pen 的 activity）：手停住，涟漪会自己收回去，
+    // 页面回到一片安静的小点 —— 「一会儿热闹、一会儿安静」的节奏就是从这来的
+    fxActivity *= Math.pow(FX_ACTIVITY_DECAY, dt * 60);
 
     // 过期的点击波先扔掉，别越积越多
     if (fxWaves.length) {
@@ -348,20 +394,24 @@ if (fxCanvas && fxCanHover && !fxReduced && fxCanvas.getContext) {
       fxWaves = fxWaves.filter(function (w) { return t - w.t < life; });
     }
 
+    // 掩膜用**文档坐标**存，每帧只要把格子的视口 y 加上 scrollY 就能比 ——
+    // 比 pen 那样每 10 帧读一遍 getBoundingClientRect（会触发布局）便宜得多
+    var docScrollY = window.scrollY || window.pageYOffset || 0;
+
     for (var i = 0; i < fxCells.length; i++) {
       var cell = fxCells[i];
 
       // 环境波：鼠标不动时整片也在缓慢呼吸 —— 「全屏形状场」该有的样子
       var ambient = Math.sin(cell.x * 0.014 + cell.y * 0.011 + t * 1.15 + cell.phase);
 
-      // ① 鼠标：越近越强，平方衰减 —— 近处明显、远处几乎无，涟漪才有「一圈」的感觉
+      // ① 鼠标：越近越强，平方衰减，再乘上动量 —— 只有「手在动」的时候才鼓起来
       var hover = 0;
-      if (fxPointer.on) {
+      if (fxPointer.on && fxActivity > 0.01) {
         var dx = cell.x - fxPointer.x, dy = cell.y - fxPointer.y;
         var d = Math.sqrt(dx * dx + dy * dy);
         if (d < FX_INFLUENCE) {
           var q = 1 - d / FX_INFLUENCE;
-          hover = q * q;
+          hover = q * q * fxActivity;
         }
       }
 
@@ -388,15 +438,26 @@ if (fxCanvas && fxCanHover && !fxReduced && fxCanvas.getContext) {
 
       // 目标大小 = 静止 + 两者取更强的那个（pen：target = max(pointerTarget, waveTarget)）
       var peak = Math.max(hover, ring);
+
+      // ③ 压在正文下面的形状不让位「膨胀」—— pen 的 [data-shape-mask] 机制（见上面的说明）
+      if (peak > 0 && fxMasks.length) {
+        var cy = cell.y + docScrollY;
+        for (var mi = 0; mi < fxMasks.length; mi++) {
+          var m = fxMasks[mi];
+          if (cell.x >= m.l && cell.x <= m.r && cy >= m.t && cy <= m.b) { peak = 0; break; }
+        }
+      }
+
       var target = (FX_REST_SCALE + peak * (cell.maxScale - FX_REST_SCALE))
                  * (1 + 0.10 * ambient);                 // 静止时叠一层呼吸，不是死板的一片
       cell.scale += (target - cell.scale) * (target > cell.scale ? kIn : kOut);
 
-      var r = FX_BASE_R * cell.base * cell.scale;
+      var r = fxBaseR * cell.base * cell.scale;
       if (r < 0.14) continue;                            // 太小就不画，省一次 drawImage
 
-      var alpha = 0.06 + 0.10 * (0.5 + 0.5 * ambient) + 0.30 * peak;
-      if (alpha > 0.52) alpha = 0.52;                    // 封顶：再深就抢正文了
+      // 黑底上要「彩色得起来」：静止的小点也看得出颜色，扫过时接近满不透明
+      var alpha = 0.55 + 0.45 * peak;
+      if (alpha > 1) alpha = 1;
 
       var spr = fxSprites[cell.shape][cell.c];
       var drawSide = FX_SPRITE_SIDE * (r / FX_SPRITE_R);
@@ -435,6 +496,7 @@ if (fxCanvas && fxCanHover && !fxReduced && fxCanvas.getContext) {
     fxPointer.x = e.clientX;
     fxPointer.y = e.clientY;
     fxPointer.on = true;
+    fxActivity = 1;                    // 手一动就重新点亮动量（照 pen 的 onMove）
   }, { passive: true });
 
   // 点击 → 从落点发出一圈扩散的波（照 pen 的 triggerWave）。
@@ -457,11 +519,26 @@ if (fxCanvas && fxCanHover && !fxReduced && fxCanvas.getContext) {
   var fxResizeTimer = null;
   window.addEventListener('resize', function () {
     clearTimeout(fxResizeTimer);
-    fxResizeTimer = setTimeout(fxBuild, 200);   // 精灵与视口无关，不必重建
+    fxResizeTimer = setTimeout(function () {
+      fxBuild();
+      fxReadMasks();                              // 视口变了，正文位置也变了
+    }, 200);                                      // 精灵与视口无关，不必重建
   });
+
+  // 掩膜存的是**文档坐标**，所以滚动本身不需要重算；
+  // 但页面高度会变（聊天在长、照片在加载），所以还是节流重读一下兜底
+  var fxScrollTimer = null;
+  window.addEventListener('scroll', function () {
+    if (fxScrollTimer) return;
+    fxScrollTimer = setTimeout(function () {
+      fxScrollTimer = null;
+      fxReadMasks();
+    }, 300);
+  }, { passive: true });
 
   fxBuildSprites();
   fxBuild();
+  fxReadMasks();
   fxStart();
   // 开场先来一圈波 —— 一眼看出这东西是活的
   fxWaves.push({ x: fxW / 2, y: fxH * 0.42, t: 0 });
