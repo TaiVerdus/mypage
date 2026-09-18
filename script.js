@@ -432,28 +432,4 @@ window.addEventListener('resize', function () {
   }, 180);
 });
 
-// ---------- 交互十：歌单选中 ----------
-// 只做「标记选中」这一件事，**不做假播放**：
-// 静态站点没有授权音源，点击的实质是跳到正版平台去听。
-// 选中态的意义 = 回到这一页时还看得见「我刚才点的是哪一首」。
-// 用事件委托（列表是静态的，但委托的扩展成本更低）。
-document.addEventListener('click', function (e) {
-  if (!e.target || !e.target.closest) return;
-  var track = e.target.closest('.track');
-  if (!track) return;
-
-  // 同一个歌单内部保持单选
-  var list = track.closest('.track-list');
-  if (list) {
-    list.querySelectorAll('.track.is-active').forEach(function (el) {
-      el.classList.remove('is-active');
-      el.removeAttribute('aria-current');
-    });
-  }
-
-  track.classList.add('is-active');
-  track.setAttribute('aria-current', 'true');   // 语义上也标出「当前项」
-  // 不 preventDefault：让浏览器照常打开新标签去正版平台
-});
-
 

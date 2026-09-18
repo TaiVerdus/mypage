@@ -1884,12 +1884,14 @@ body {
 }
 
 
-/* ---------- 21. 音乐：歌单（V2.7 续十六） ---------- */
-/* 从「封面墙」改成「歌单」。两条诚实的选择就写在代码里：
+/* ---------- 21. 音乐：歌单（V2.7 续十七） ---------- */
+/* 从「封面墙」改成「歌单」，再收敛成**纯静态列表**。三条诚实的选择都在这里：
    ① **不填时长** —— 秒数没法逐首核实，列空着好过列假的
-   ② **不做假播放** —— 静态站点没有授权音源，点击 = 跳去正版平台去听；
-      选中态只是本地视觉反馈，不假装在放歌
-   曲目名 / 专辑名 / 年份是事实，可以列；唱片公司的美术作品不复制。 */
+   ② **不做播放键** —— 静态站点没有授权音源，做一个按不响的播放键就是演
+   ③ **不做跳转链接** —— 用户明确不要外链；于是这一块只剩事实信息
+      （曲名 / 歌手 / 专辑 / 年份），版权上最干净的一种呈现
+   行悬停只做「整行浅底」这一件事：那是扫读时对齐三列的辅助，
+   **不是可点击的暗示** —— 所以没有光标变化、没有图标、没有曲名变色。 */
 
 .playlists {
   display: grid;
@@ -1928,36 +1930,16 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* 推到最右，和左侧的名字落在同一条基线上 */
-.playlist-link {
-  margin-left: auto;
-  font-size: var(--fs-caption);
-  font-weight: 600;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--color-brand);
-  text-decoration: none;
-  transition: color var(--dur-fast) var(--ease-out);
-}
-
-.playlist-link:hover {
-  color: var(--color-brand-deep);
-}
-
-.playlist-link:focus-visible {
-  outline: 2px solid var(--color-brand);
-  outline-offset: 3px;
-}
-
 /* ---- 曲目行：序号 | 曲名 + 歌手·专辑 | 年份 ----
-   用 grid 而不是 table：列宽可控、移动端好降级、整行可以当链接 */
+   用 grid 而不是 table：列宽可控、移动端好降级。
+   注意：这里**不是**链接、也**没有播放键** —— 见文件顶部 §21 的说明 */
 .track-list {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.track-list li + li .track {
+.track-list li + li {
   border-top: 1px solid var(--color-line);
 }
 
@@ -1968,57 +1950,23 @@ body {
   gap: var(--sp-3);
   padding: var(--sp-3);
   border-radius: var(--r-sm);
-  color: inherit;
-  text-decoration: none;
   transition: background var(--dur-fast) var(--ease-out);
 }
 
-/* 悬停 / 键盘聚焦：底色 + 曲名变品牌色 */
-.track:hover,
-.track:focus-visible {
+/* 悬停只做一件事：整行浅底。
+   这是「扫读时对齐左中右三列」的辅助，**不是可点击的暗示** ——
+   所以不做曲名变色、不做光标变化、不做行内图标。
+   三列布局没有行悬停时，眼睛很难把曲名和右边的年份对上。 */
+.track:hover {
   background: rgb(var(--c-brand-rgb) / .06);
 }
 
-.track:hover .track-title,
-.track:focus-visible .track-title {
-  color: var(--color-brand);
-}
-
-.track:focus-visible {
-  outline: 2px solid var(--color-brand);
-  outline-offset: -2px;
-}
-
-/* 序号：悬停时换成播放三角 —— 只说「这行可以听」，不假装正在放 */
+/* 序号：纯数字，不做悬停变形 —— 没有播放键 */
 .track-no {
-  position: relative;
   font-size: var(--fs-caption);
   color: var(--color-muted);
   text-align: center;
   font-variant-numeric: tabular-nums;
-}
-
-.track-no::after {
-  content: '\25B6\FE0E';        /* FE0E = 强制文本呈现，别变成 emoji */
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 9px;
-  color: var(--color-brand);
-  opacity: 0;
-  transition: opacity var(--dur-fast) var(--ease-out);
-}
-
-.track:hover .track-no,
-.track:focus-visible .track-no {
-  color: transparent;
-}
-
-.track:hover .track-no::after,
-.track:focus-visible .track-no::after {
-  opacity: 1;
 }
 
 .track-main {
@@ -2031,7 +1979,6 @@ body {
   font-size: var(--fs-h3);
   font-weight: 500;
   line-height: 1.3;
-  transition: color var(--dur-fast) var(--ease-out);
 }
 
 .track-sub {
@@ -2048,27 +1995,9 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* ---- 选中态：本地反馈，不是「正在播放」 ---- */
-.track.is-active {
-  background: var(--color-mint);
-}
-
-.track.is-active .track-title {
-  color: var(--color-brand-deep);
-}
-
-.track.is-active .track-no {
-  color: var(--color-brand);
-}
-
 @media (max-width: 640px) {
   .playlists {
     gap: var(--sp-7);
-  }
-
-  /* 曲目数挤到第二行时，「全部收听」别浮在右边 */
-  .playlist-link {
-    margin-left: 0;
   }
 
   .track {
