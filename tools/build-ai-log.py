@@ -250,7 +250,7 @@ PAGE = u"""<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI 使用日志 · 王释贤</title>
+  <title data-i18n="log.doc.title">AI 使用日志 · 王释贤</title>
   <meta name="description" content="王释贤个人主页的 AI 使用日志：逐条记录每一次 AI 协作、我的判断与修正，以及发现的真实缺陷。带可复现的 git 时间戳。">
   <meta name="theme-color" content="#0F766E">
 
@@ -269,7 +269,18 @@ PAGE = u"""<!DOCTYPE html>
     <div class="nav-inner">
       <a class="nav-logo" href="index.html">WANG SHIXIAN</a>
       <div class="nav-links">
-        <a class="nav-link" href="index.html">← 返回主页</a>
+        <a class="nav-link" href="index.html" data-i18n="log.back">← 返回主页</a>
+      </div>
+
+      <!-- 语言开关：与主页同一个组件、**同一个 localStorage key** ——
+           在哪一页切换，另一页打开时也跟着变（V2.7 续二十七）。
+           ⚠️ 两个语言名故意不参与翻译 —— 想切到英文的人要能看到 English，
+           翻译了反而找不到。用 aria-pressed 表示当前是哪个。 -->
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" class="lang-btn" id="langZh" data-lang="zh"
+                aria-label="中文" aria-pressed="true"><span aria-hidden="true">中</span></button>
+        <button type="button" class="lang-btn" id="langEn" data-lang="en"
+                aria-label="English" aria-pressed="false"><span aria-hidden="true">EN</span></button>
       </div>
     </div>
   </nav>
@@ -277,29 +288,36 @@ PAGE = u"""<!DOCTYPE html>
   <main class="log-main">
 
     <header class="log-head">
-      <span class="eyebrow">PROCESS EVIDENCE</span>
-      <h1 class="log-title">AI 使用日志</h1>
-      <p class="log-lead">
+      <span class="eyebrow" data-i18n="log.eyebrow">过程证据</span>
+      <h1 class="log-title" data-i18n="log.title">AI 使用日志</h1>
+      <p class="log-lead" data-i18n="log.lead">
         这个主页是在 AI 辅助下做出来的。这份日志把过程如实记下来——
         <strong>包括翻车、返工，和还没补完的地方</strong>。
         它是 Vibe Coding 课程要求的过程证据，也是我用来说清「哪些是 AI 做的、哪些是我判断的」的那份材料。
       </p>
 
       <ul class="log-meta">
-        <li><span class="log-meta-k">交互条目</span><span class="log-meta-v">%(rows)s 条，其中 <b>%(todo)s 条待补</b></span></li>
-        <li><span class="log-meta-k">时间跨度</span><span class="log-meta-v">2026-09-04 → 09-17</span></li>
-        <li><span class="log-meta-k">时间戳来源</span><span class="log-meta-v">git 提交时间，一条命令可复现</span></li>
+        <li><span class="log-meta-k" data-i18n="log.meta.rows.k">交互条目</span><span class="log-meta-v" data-i18n="log.meta.rows">%(rows)s 条，其中 <b>%(todo)s 条待补</b></span></li>
+        <li><span class="log-meta-k" data-i18n="log.meta.span.k">时间跨度</span><span class="log-meta-v" data-i18n="log.meta.span.v">2026-09-04 → 09-17</span></li>
+        <li><span class="log-meta-k" data-i18n="log.meta.src.k">时间戳来源</span><span class="log-meta-v" data-i18n="log.meta.src.v">git 提交时间，一条命令可复现</span></li>
       </ul>
 
-      <p class="log-note">
+      <p class="log-note" data-i18n="log.note">
         <strong>说明：</strong>这是一份<strong>进行中</strong>的记录，标着 <code>🟡</code> 的几条还需要我本人补写判断。
         另外，源文档中「回填表」一节是我自己的待办清单，属工作草稿，<strong>不随本页发布</strong>；
         正文里若出现「见回填表」的指引，指的就是那一节。
       </p>
+
+      <!-- 只有英文模式下才显示：说清「正文保留原文」这件事（V2.7 续二十七）。
+           ⚠️ 刻意**不给它中文版** —— 看中文的人本来就在读原文，不需要这句话。 -->
+      <p class="log-lang-note" id="logLangNote" hidden>
+        The entries below are kept in the author's original wording — they are evidence, not marketing copy.
+        Headings, navigation and this note are translated.
+      </p>
     </header>
 
-    <nav class="log-toc" aria-label="目录">
-      <p class="log-toc-title">目录</p>
+    <nav class="log-toc" aria-label="目录" data-i18n-label="log.toc">
+      <p class="log-toc-title" data-i18n="log.toc">目录</p>
       <ol>
 %(toc)s
       </ol>
@@ -315,8 +333,120 @@ PAGE = u"""<!DOCTYPE html>
 
   <footer id="footer">
     <p>© 2026 王释贤 · MYPAGE %(version)s</p>
-    <p class="copyright">AI 使用日志为课程过程证据，如实记录协作与返工，包括未完成项</p>
+    <p class="copyright" data-i18n="log.foot">AI 使用日志为课程过程证据，如实记录协作与返工，包括未完成项</p>
   </footer>
+
+  <script>
+  /* 子页的中/EN 开关（V2.7 续二十七）。
+     ⚠️ 这一页是**生成物** —— 要改这里，改 tools/build-ai-log.py 的模板后重跑脚本，别手改本文件。
+
+     机制与主页一致（[data-i18n] + 同一个 localStorage key），但**左右是反的**：
+     主页的 HTML 里放英文、词典放中文（续二十六）；这一页的源文档是中文，
+     所以 HTML 里放中文、词典放英文。
+     共用 `mypage-lang` 这个 key ⇒ 在哪一页切换，另一页打开时也跟着变。
+
+     ⚠️ **正文刻意不翻**：这张表里「我的判断与修正」那一栏是我自己写的字，是证据本身，
+     机器翻一遍只会让它失真。所以这里只翻**外壳**（标题 / 导语 / 小节标题 / 目录 / 页脚），
+     并在英文模式下显式告诉读者「正文保留原文」。 */
+  (function () {
+    var LANG_KEY = 'mypage-lang';
+    var HEAD_EN = {
+      '一、': '1. My own rules for using AI (criteria 5 and 4)',
+      '二、': '2. Interaction log',
+      '三、': '3. Key decisions (Critical Evaluation summary — criteria 2 and 3)',
+      '四、': '4. Still to fill in',
+      '五、': '5. Git commit history (main iterations and version changes)',
+      '附：': 'Appendix — an honest note about this log'
+    };
+    var EN = {
+      'log.doc.title': 'AI usage log · Wang Shixian',
+      'log.back': '← Back to home',
+      'log.eyebrow': 'PROCESS EVIDENCE',
+      'log.title': 'AI usage log',
+      'log.lead': 'This site was built with AI help, and this log records how that actually went — ' +
+                  '<strong>including the dead ends, the rework, and what is still unfinished</strong>. ' +
+                  'It is the process evidence the Vibe Coding course asks for, and it is also my own ' +
+                  'account of which parts were the AI\u2019s and which were my calls.',
+      'log.meta.rows.k': 'Entries',
+      'log.meta.rows': '{n} entries, <b>{todo} of them still to be filled in</b>',
+      'log.meta.span.k': 'Time span',
+      'log.meta.span.v': '2026-09-04 → 09-17',
+      'log.meta.src.k': 'Timestamps from',
+      'log.meta.src.v': 'git commit times — reproducible with one command',
+      'log.note': '<strong>Note:</strong> this record is a <strong>work in progress</strong> — ' +
+                  'the entries marked <code>🟡</code> are ones I still have to write my own judgement for. ' +
+                  'Also, the \u201cbackfill table\u201d section of the source document is my own to-do list, ' +
+                  'a working draft, and <strong>is not published here</strong>; where the text points to it, ' +
+                  'that is what it means.',
+      'log.toc': 'Contents',
+      'log.foot': 'This AI usage log is course process evidence: it records the collaboration and the ' +
+                  'rework honestly, including what is unfinished'
+    };
+
+    var snap = {};   // 中文原文快照（首次切换前收下来）
+
+    function enOf(k) { return EN[k] !== undefined ? EN[k] : null; }
+
+    function apply(lang, remember) {
+      var isZh = lang !== 'en';
+
+      document.querySelectorAll('[data-i18n]').forEach(function (el) {
+        var k = el.getAttribute('data-i18n');
+        if (snap[k] === undefined) snap[k] = el.innerHTML;
+        var v = isZh ? snap[k] : enOf(k);
+        if (v === null || v === undefined) { v = snap[k]; }
+        if (v === undefined) return;
+        if (v.indexOf('<') !== -1) { el.innerHTML = v; } else { el.textContent = v; }
+      });
+
+      // 「N 条，其中 M 条待补」：数字从中文原文里现取 —— 写死的话，记录一涨就两边对不上
+      var rowsEl = document.querySelector('[data-i18n="log.meta.rows"]');
+      if (rowsEl && !isZh) {
+        var plain = (snap['log.meta.rows'] || '').replace(/<[^>]+>/g, '');
+        var m = plain.match(/([0-9]+)[^0-9]*([0-9]+)/);
+        if (m) {
+          rowsEl.innerHTML = EN['log.meta.rows'].replace('{n}', m[1]).replace('{todo}', m[2]);
+        }
+      }
+
+      // 小节标题与目录：按中文标记（一、二、…附：）映射 —— 比按 id 稳（id 是脚本按顺序生成的）
+      ['.log-body h2', '.log-toc a'].forEach(function (sel) {
+        document.querySelectorAll(sel).forEach(function (el) {
+          if (el.getAttribute('data-zh') === null) { el.setAttribute('data-zh', el.textContent.trim()); }
+          var zh = el.getAttribute('data-zh');
+          var key = null;
+          for (var p in HEAD_EN) { if (zh.indexOf(p) === 0) { key = p; break; } }
+          el.textContent = (isZh || !key) ? zh : HEAD_EN[key];
+        });
+      });
+
+      var note = document.getElementById('logLangNote');
+      if (note) { note.hidden = isZh; }
+
+      document.documentElement.lang = isZh ? 'zh-Hans' : 'en';
+
+      document.querySelectorAll('.lang-btn').forEach(function (b) {
+        b.setAttribute('aria-pressed',
+          b.getAttribute('data-lang') === (isZh ? 'zh' : 'en') ? 'true' : 'false');
+      });
+
+      if (remember) {
+        try { localStorage.setItem(LANG_KEY, isZh ? 'zh' : 'en'); } catch (e) { /* 隐私模式忽略 */ }
+      }
+    }
+
+    document.querySelectorAll('.lang-btn').forEach(function (b) {
+      b.addEventListener('click', function () { apply(b.getAttribute('data-lang'), true); });
+    });
+
+    var saved = null;
+    try { saved = localStorage.getItem(LANG_KEY); } catch (e) { /* 忽略 */ }
+    if (!saved) {
+      saved = (navigator.language || '').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+    apply(saved, false);
+  })();
+  </script>
 
 </body>
 </html>

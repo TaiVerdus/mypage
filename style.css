@@ -1384,6 +1384,20 @@ section {
   color: var(--color-ink);
 }
 
+/* 只有英文模式才显示的说明（V2.7 续二十七）：
+   正文保留中文原文，这件事得跟英文读者说清楚。
+   刻意不设中文版 —— 看中文的人本来就在读原文，不需要这句话。
+   ⚠️ 它在 HTML 里带 `hidden`，靠 JS 切换；所以这里不要写 `display`，
+   否则会把 hidden 覆盖掉、变成两种语言下都显示。 */
+.log-lang-note {
+  margin-top: var(--sp-5);
+  padding: var(--sp-4) var(--sp-5);
+  border: 1px dashed var(--color-line-strong);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-caption);
+  color: var(--color-muted);
+}
+
 /* ---- 目录 ---- */
 .log-toc {
   max-width: 880px;
@@ -2290,5 +2304,56 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .glass-panel::after {
     filter: none;
+  }
+}
+
+/* ---------- 23. 语言开关（V2.7 续二十六） ---------- */
+/* 中 / EN 两个小按钮，放导航最右。
+   ⚠️ 两个语言名**不参与翻译** —— 想切到英文的人要能看到 English，翻译了就找不到了。
+   用 aria-pressed 表示当前是哪个，不是靠颜色 —— 颜色只是给看得见的人的辅助。
+   ⚠️ 高度按导航的节奏来（38px），没有套 44px 的触控标准：
+   一个 44px 高的开关会把导航整条撑高。宽度给到 44px，仍然是好点的。 */
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--r-pill);
+}
+
+.lang-btn {
+  min-width: 44px;
+  min-height: 38px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+.lang-btn:hover {
+  background: rgb(var(--c-brand-rgb) / .12);
+  color: var(--color-ink);
+}
+
+.lang-btn:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+.lang-btn[aria-pressed="true"] {
+  background: var(--color-mint);
+  color: var(--color-brand);
+}
+
+@media (max-width: 640px) {
+  .lang-switch {
+    margin-left: auto;
   }
 }
