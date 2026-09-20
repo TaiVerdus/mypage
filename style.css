@@ -1136,39 +1136,13 @@ section {
   font-weight: 400;
 }
 
-/* 外观交给 .btn--ghost */
-.contact-btn {
-  margin-top: var(--sp-6);
-  padding: var(--sp-4) var(--sp-7);
-  font-size: var(--fs-h3);
-}
-
-.contact-links {
-  margin-top: var(--sp-7);
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;        /* 窄屏时允许换行，避免「微信：xxx」挤出屏幕 */
-  gap: var(--sp-3) var(--sp-6);
-}
-
-.contact-link {
-  font-size: var(--fs-sm);
-  color: var(--color-brand);
-  text-decoration: none;
-  opacity: 0.7;
-  transition: opacity 0.2s ease;
-}
-
-.contact-link:hover {
-  opacity: 1;
-}
+/* ⚠️ 原来的 `.contact-btn` / `.contact-links` / `.contact-link` 三条在本轮删掉了 ——
+   那个「Say Hello」按钮和三个联系方式都搬进了玻璃名片（见 §22 的 .card-cta / .card-rows），
+   HTML 里不再有这三个类名，留着就是死代码。 */
 
 @media (max-width: 640px) {
   .contact-title {
     font-size: 32px;
-  }
-  .contact-links {
-    gap: 20px;
   }
 }
 
@@ -1820,6 +1794,10 @@ section {
                Arial, sans-serif;
   --font-serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino,
                 Georgia, "Times New Roman", serif;
+  /* 等宽：handle / 版本号 / 数字这类「本来就该对齐」的东西用它。
+     同样是系统自带，不引第三方字体（V2.7 续二十三新增） */
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+               "Liberation Mono", monospace;
   --section-pad: 128px;
   --lh-body: 1.75;
 }
@@ -2054,23 +2032,35 @@ body {
    **它真正新的东西**：`backdrop-filter` + 位移滤镜 —— 折射**元素背后的真实页面内容**，
    而不是像首屏泡泡那样只折射自己装的那一张图。
 
-   ⚠️ 两个必须知道的坑（这次都踩到了）：
-   ① **祖先层不能有 transform / filter / opacity / isolation** ——
-      那些会形成「背景根」，backdrop-filter 就只在那棵子树里取样，折射不到后面的形状场。
-      本站最阴的一个来源是 `.reveal.visible` 的 `transform: translateY(0)`：**它不是 none**。
-      所以这块玻璃不能套 .reveal，也不能为了「隔离层位」给它加 isolation ——
-      那会把自己变成背景根，玻璃就只剩一片空白。
+   ⚠️ 两个必须知道的坑：
+   ① **祖先层不能有 `opacity < 1` / `filter` / `isolation`** —— 那些会形成「背景根」，
+      backdrop-filter 就只在那棵子树里取样，折射不到后面的形状场。
+      本站最会踩的一处是 `.reveal`：它的 `opacity: 0 → 1`，**动画期间**正好是背景根。
+      ⇒ 所以这块玻璃不套 `.reveal`（动画那 0.7s 里玻璃会是空的）。
+      **更正（续二十三）**：早先这里还写了「`transform` 也会形成背景根」——**说错了**。
+      Abdughafur 那张卡一直挂着 `transform: scale()`，玻璃照样在折射（见他的成品截图）。
+      2D `transform` 不构成背景根；保守做法可以留着，但别把原因记错。
    ② **背景是每帧在动的 canvas** —— 这层滤镜每帧都要重算。
-      所以尺寸有上限（max-width 560px）= 重算面积有上限。
+      所以宽度有上限（380px）= 重算面积有上限。
       **觉得卡：删掉 `.glass-panel::after` 里的 `filter: url(#panelRefract)`，
       退化成纯模糊玻璃，观感仍有八成，代价归零。** */
 .glass-panel {
+  /* 缩放旋钮：1 = 100%。JS 只改这一个变量，别的什么都不动 */
+  --card-scale: 1;
   position: relative;
-  max-width: 560px;
+  width: min(100%, 380px);   /* 名片是竖的：窄一点才像卡，不像横条 */
   margin: var(--sp-7) auto 0;
-  padding: var(--sp-5) var(--sp-6);
-  border-radius: 24px;
+  padding: var(--sp-6) var(--sp-5) var(--sp-5);
+  border-radius: 26px;
   overflow: hidden;          /* 位移会把像素推出去，裁掉才有干净的边 */
+
+  /* 缩放用 `zoom` 而不是 `transform: scale()` —— 两条理由：
+     ① 这是**名片**，放大的意义是「把联系方式看清」，`zoom` 会**真的重新排版**，字是清晰的；
+        `transform: scale()` 只是把像素放大，字会糊 —— 方向正好反了
+     ② `transform` 不参与布局，缩到 130% 会**盖住下面的页脚**；`zoom` 会让页面给它让位
+     ⚠️ 刻意**不加 transition**：`zoom` 会影响布局，给它做过渡 = 每帧重排，得不偿失。
+        一档 5% 的跳变反而干脆。 */
+  zoom: var(--card-scale);
 }
 
 /* 玻璃本体：模糊 + 位移折射背后的页面内容。
@@ -2106,14 +2096,163 @@ body {
   z-index: 1;
 }
 
-/* 链接搬进面板后，原来的上外边距归零（间距交给面板的 padding） */
-.glass-panel .contact-links {
-  margin-top: 0;
+/* ---- 名片内部（V2.7 续二十三） ----
+   骨架照 Abdughafur 那张卡：头像 → 名字 → @handle → 分隔线 → 数据 → 主按钮 → 缩放。
+   配色**全走语义 token** —— 这张卡承载的是真信息，按设计系统该用界面色，
+   不该用形状场那套彩虹（彩色只留给不承载信息的装饰层）。 */
+.contact-card {
+  text-align: center;
 }
 
-/* 玻璃上的字号小，透明度压一点更清楚（原来的 .7 在玻璃上偏虚） */
-.glass-panel .contact-link {
-  opacity: .88;
+.card-id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 头像位：没有自拍就用单字印。放别人的头像 / 网图都不合适，一个字最干净 */
+.card-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border: 1px solid var(--color-line-strong);
+  background: var(--color-mint);
+  color: var(--color-brand);
+  font-family: var(--font-serif);
+  font-size: 28px;
+  line-height: 1;
+}
+
+.card-name {
+  margin: var(--sp-4) 0 0;
+  font-family: var(--font-serif);
+  font-size: var(--fs-h3);
+  font-weight: 500;
+  color: var(--color-ink);
+}
+
+.card-handle {
+  margin-top: 2px;
+  font-size: var(--fs-caption);
+  font-family: var(--font-mono);        /* 照原卡：handle 用等宽 */
+  color: var(--color-muted);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.card-handle:hover {
+  color: var(--color-brand);
+}
+
+/* 数据区：照原卡在它上面压一道分隔线 */
+.card-rows {
+  margin: var(--sp-5) 0 0;
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--color-line);
+  text-align: left;
+}
+
+.card-row + .card-row {
+  margin-top: var(--sp-3);
+}
+
+.card-row dt {
+  font-size: var(--fs-eyebrow);
+  font-weight: 500;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.card-row dd {
+  margin: 3px 0 0;
+  font-size: var(--fs-sm);
+  color: var(--color-ink);
+  overflow-wrap: anywhere;      /* 邮箱很长，别让它撑破卡片 */
+}
+
+.card-row dd a {
+  color: var(--color-brand);
+  text-decoration: none;
+}
+
+.card-row dd a:hover {
+  text-decoration: underline;
+}
+
+.card-cta {
+  margin-top: var(--sp-5);
+  /* 名片的主行动，比默认按钮大一号（照原卡那颗显眼的按钮） */
+  padding: var(--sp-3) var(--sp-7);
+  font-size: var(--fs-h3);
+}
+
+/* ---- 缩放：− / 数值 / + ---- */
+.card-zoom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-4);
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--color-line);
+}
+
+.zoom-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;                  /* 44px = 触控最小尺寸。原卡是 28px，太小了 */
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--color-line-strong);
+  background: rgb(255 255 255 / .06);
+  color: var(--color-ink);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+
+.zoom-btn:hover {
+  background: rgb(var(--c-brand-rgb) / .18);
+  border-color: var(--color-brand);
+}
+
+.zoom-btn:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+/* 到头了：**不用 `disabled`** —— disabled 会把焦点一并丢掉，
+   键盘用户按到边界时焦点会突然消失。改用 aria-disabled + 变淡（JS 里不再响应）。 */
+.zoom-btn[aria-disabled="true"] {
+  opacity: .35;
+  cursor: default;
+}
+
+.zoom-btn[aria-disabled="true"]:hover {
+  background: rgb(255 255 255 / .06);
+  border-color: var(--color-line-strong);
+}
+
+.zoom-value {
+  min-width: 5ch;               /* 位数不变时宽度不跳 */
+  text-align: center;
+  font-size: var(--fs-caption);
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  .glass-panel {
+    width: 100%;
+    padding: var(--sp-5) var(--sp-4) var(--sp-4);
+  }
 }
 
 /* 不支持 backdrop-filter（部分 Firefox / 老浏览器）：

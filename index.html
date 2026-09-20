@@ -193,9 +193,9 @@
               <p>Static · no framework · my own design system</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 38 条 + main 分支 2 条（V1.0 / V1.1）
+                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 39 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 40 commits as of 2026-09-17</p>
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 41 commits as of 2026-09-17</p>
               <a class="item-link" href="ai-log.html">How this page was built →</a>
             </div>
             <div class="bento-item bento-item--project">
@@ -468,18 +468,50 @@
       <span class="eyebrow eyebrow--center reveal">05 — Contact</span>
       <h2 class="contact-title" data-lines>Got an idea?</h2>
       <p class="contact-subtitle" data-lines>Let's talk — no pressure.</p>
-      <a href="mailto:wshixian2026@163.com" class="btn btn--ghost contact-btn">Say Hello</a>
 
-      <!-- 液态玻璃面板（V2.7 续二十二）：联系方式落在这块「会折射背景」的玻璃上。
-           ⚠️ 这块玻璃外面**不能套 .reveal** ——
-           `.reveal.visible` 的 `transform: translateY(0)` 依然不是 none，会形成「背景根」，
-           backdrop-filter 就只在这棵子树里取样，等于**折射不到后面那层形状场**。
-           详见 style.css §22。 -->
-      <div class="glass-panel">
-        <div class="contact-links">
-          <a href="mailto:wshixian2026@163.com" class="contact-link">Email</a>
-          <a href="https://github.com/TaiVerdus" class="contact-link" target="_blank" rel="noopener">GitHub</a>
-          <span class="contact-link">WeChat: Cjfgds_Hswlfsds</span>
+      <!-- 液态玻璃名片（V2.7 续二十三）：三个联系方式落在这张会折射背景的玻璃卡上。
+           骨架照 Abdughafur 那张卡来（头像 / 名字 / @handle / 分隔线 / 数据 / 主按钮 / 缩放），
+           但**内容是自己的、代码是重写的** —— 项目规矩：自己写代码，只借鉴思路。
+
+           ⚠️ 两处刻意与它不同：
+           ① **不禁用选字**。它写了 `body { user-select: none }`，等于让人没法复制邮箱和微信号；
+              而这张卡的全部意义就是让联系方式能被拿走 —— 所以选字一定留着。
+           ② **缩放有上下限（85%~130%）**。玻璃那层是 SVG 位移滤镜，
+              元素面积翻倍 = 滤镜每帧重算的面积翻**四倍**。范围收着是拿性能换来的。 -->
+      <div class="glass-panel contact-card" id="contactCard">
+        <div class="card-id">
+          <span class="card-avatar" aria-hidden="true">王</span>
+          <h3 class="card-name">Wang Shixian</h3>
+          <a class="card-handle" href="https://github.com/TaiVerdus" target="_blank" rel="noopener">@TaiVerdus</a>
+        </div>
+
+        <dl class="card-rows">
+          <div class="card-row">
+            <dt>Email</dt>
+            <dd><a href="mailto:wshixian2026@163.com">wshixian2026@163.com</a></dd>
+          </div>
+          <div class="card-row">
+            <dt>GitHub</dt>
+            <dd><a href="https://github.com/TaiVerdus" target="_blank" rel="noopener">github.com/TaiVerdus <span aria-hidden="true">↗</span></a></dd>
+          </div>
+          <div class="card-row">
+            <dt>WeChat</dt>
+            <dd>Cjfgds_Hswlfsds</dd>
+          </div>
+        </dl>
+
+        <a class="btn btn--ghost card-cta" href="mailto:wshixian2026@163.com">Say hello</a>
+
+        <!-- 缩放：− / 数值 / +。数值不只是装饰 —— 它同时是那个 live region 的可见对应物，
+             所以读屏用户听到「110%」时，屏幕上也正写着 110%。 -->
+        <div class="card-zoom" role="group" aria-label="Card size">
+          <button type="button" class="zoom-btn" id="cardZoomOut" aria-label="Make the card smaller">
+            <span aria-hidden="true">−</span>
+          </button>
+          <span class="zoom-value" id="cardZoomValue" aria-live="polite">100%</span>
+          <button type="button" class="zoom-btn" id="cardZoomIn" aria-label="Make the card bigger">
+            <span aria-hidden="true">+</span>
+          </button>
         </div>
       </div>
 

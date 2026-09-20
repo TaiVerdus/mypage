@@ -204,7 +204,7 @@ if (fxCanvas && fxCanHover && !fxReduced && fxCanvas.getContext) {
   // 不必在 HTML 里改十几处。只列「文字直接落在页面底上」的容器 ——
   // 卡片自己有底色（--c-surface），不需要让位。
   var FX_MASK_SELECTOR = '.section-head, .playlist-head, .track-list, ' +
-                         '.contact-title, .contact-subtitle, .contact-links, ' +
+                         '.contact-title, .contact-subtitle, ' +
                          '.glass-panel, footer';
 
   // ---- 色板：用 pen 原版那套彩色（用户 2026-09-18 明确要「彩色 + 黑底，像这个一样」） ----
@@ -790,5 +790,46 @@ window.addEventListener('resize', function () {
     });
   }, 180);
 });
+
+// ---------- 交互十一：联系名片缩放 ----------
+// 骨架照 Abdughafur 那张卡来（− / + 两个按钮 + 一个变量），但**三处按能用的标准重写了**：
+// ① 范围有上下限，且到边界时把按钮标成 aria-disabled ——
+//    它原来到边界是「悄悄什么都不做」，点了没反应，用户分不清是卡住还是到底了
+// ② **不用 `disabled` 属性**：disabled 会把焦点一并丢掉，
+//    键盘用户按到边界时焦点会突然消失
+// ③ 加了一个 live region（HTML 里那个 aria-live 的百分比）：改大改小读屏能听见
+// ⚠️ 缩放走 `zoom` 而不是 `transform: scale()`，理由写在样式表 §22
+(function () {
+  var card = document.getElementById('contactCard');
+  var outBtn = document.getElementById('cardZoomOut');
+  var inBtn = document.getElementById('cardZoomIn');
+  var value = document.getElementById('cardZoomValue');
+  if (!card || !outBtn || !inBtn || !value) return;
+
+  var MIN = 0.85, MAX = 1.30, STEP = 0.05;
+  var scale = 1;
+
+  function render() {
+    card.style.setProperty('--card-scale', scale.toFixed(2));
+    value.textContent = Math.round(scale * 100) + '%';
+    outBtn.setAttribute('aria-disabled', scale <= MIN + 0.001 ? 'true' : 'false');
+    inBtn.setAttribute('aria-disabled', scale >= MAX - 0.001 ? 'true' : 'false');
+  }
+
+  function step(dir) {
+    // 先取整到百分位再加，避免 0.1+0.2 那种浮点误差越积越多
+    var next = Math.round((scale + dir * STEP) * 100) / 100;
+    if (next < MIN) next = MIN;
+    if (next > MAX) next = MAX;
+    if (next === scale) return;      // 已经到边界，什么都不做
+    scale = next;
+    render();
+  }
+
+  outBtn.addEventListener('click', function () { step(-1); });
+  inBtn.addEventListener('click', function () { step(1); });
+
+  render();
+})();
 
 
