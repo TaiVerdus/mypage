@@ -193,9 +193,9 @@
               <p>Static · no framework · my own design system</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 40 条 + main 分支 2 条（V1.0 / V1.1）
+                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 41 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 42 commits as of 2026-09-17</p>
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 43 commits as of 2026-09-17</p>
               <a class="item-link" href="ai-log.html">How this page was built →</a>
             </div>
             <div class="bento-item bento-item--project">
@@ -480,7 +480,14 @@
               元素面积翻倍 = 滤镜每帧重算的面积翻**四倍**。范围收着是拿性能换来的。 -->
       <div class="glass-panel contact-card" id="contactCard">
         <div class="card-id">
-          <span class="card-avatar" aria-hidden="true">王</span>
+          <!-- 头像：用户 2026-09-20 自己提供的照片（原 960×960，缩到 240×240 不裁切）。
+               ⚠️ 这张图**没有裁切**是刻意的：照片里发顶顶边、下巴近底边，
+                 任何收紧都会切掉头发或下巴。圆形遮罩自然会切掉四角，那是正常的。
+               alt 留空是因为名字就在下面 —— 读屏已经会念「Wang Shixian」，
+               再念一遍是重复。 -->
+          <span class="card-avatar">
+            <img src="images/avatar.jpg" alt="" width="240" height="240">
+          </span>
           <h3 class="card-name">Wang Shixian</h3>
           <a class="card-handle" href="https://github.com/TaiVerdus" target="_blank" rel="noopener">@TaiVerdus</a>
         </div>
@@ -498,31 +505,11 @@
             <dt>WeChat</dt>
             <dd>
               <span class="card-vow-id">Cjfgds_Hswlfsds</span>
-
-              <!-- 微信号本来就是这句话的拼音首字母 —— 所以逐个对齐显示：
-                   上面是字，下面是它的首字母，一个字 + 一个字母绑成一组，
-                   这样换行时字和字母不会分家。大小写照微信号来（只有两个句首是大写）。
-                   视觉上是一张对照表，读屏读不出「谁配谁」，
-                   所以给读屏单独留一行完整的说法（.sr-only）。 -->
-              <span class="card-vow" aria-hidden="true">
-                <span class="vow-pair"><span>曾</span><span>C</span></span>
-                <span class="vow-pair"><span>经</span><span>j</span></span>
-                <span class="vow-pair"><span>发</span><span>f</span></span>
-                <span class="vow-pair"><span>过</span><span>g</span></span>
-                <span class="vow-pair"><span>的</span><span>d</span></span>
-                <span class="vow-pair"><span>誓</span><span>s</span></span>
-                <span class="vow-join">_</span>
-                <span class="vow-pair"><span>会</span><span>H</span></span>
-                <span class="vow-pair"><span>是</span><span>s</span></span>
-                <span class="vow-pair"><span>未</span><span>w</span></span>
-                <span class="vow-pair"><span>来</span><span>l</span></span>
-                <span class="vow-pair"><span>发</span><span>f</span></span>
-                <span class="vow-pair"><span>生</span><span>s</span></span>
-                <span class="vow-pair"><span>的</span><span>d</span></span>
-                <span class="vow-pair"><span>事</span><span>s</span></span>
-              </span>
-              <span class="card-vow-note">↳ the ID is this line's initials</span>
-              <span class="sr-only">Cjfgds_Hswlfsds is the initials of: 曾经发过的誓，会是未来发生的事</span>
+              <!-- 这句就是微信号本身：Cjfgds = 曾经发过的誓，Hswlfsds = 会是未来发生的事，
+                   中间那个 _ 就是两个分句之间的停顿。（2026-09-20 按用户要求只留句子，
+                   原来那张逐字对应的字母对照表已删。）
+                   标 lang 是因为页面整体是英文的 —— 不标，读屏会用英文音念中文。 -->
+              <span class="card-vow" lang="zh-Hans">曾经发过的誓，会是未来发生的事</span>
             </dd>
           </div>
         </dl>
