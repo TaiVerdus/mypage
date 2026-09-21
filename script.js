@@ -82,7 +82,7 @@ var KNOWLEDGE = [
   },
   {
     keywords: ['who are you', 'name', 'intro', 'wang shixian', 'shixian', 'hello', 'hi', 'hey'],
-    answer: '嗨！我是王释贤的数字分身，他不在的时候替他招呼一下访客。基本情况：ENFJ、脑机接口方向、关注 AI 前沿。随便问。'
+    answer: '嗨！我是王释贤的数字分身，他不在的时候替他招呼一下访客。基本情况：ENFJ、脑机接口方向。随便问。'
   }
 ];
 

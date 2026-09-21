@@ -290,12 +290,18 @@ main,
   color: var(--color-brand);
 }
 
-.hero-tagline {
-  margin-top: var(--sp-4);
-  font-size: var(--fs-h3);
-  font-weight: 500;
-  color: var(--color-brand);
-}
+/* ---- 首屏标语 .hero-tagline 已移除（V2.7 续四十）----
+   用户 2026-09-21 要求把「ENFJ · 脑机接口方向 · 关注 AI 前沿」整行删掉。
+   ⚠️ 它原本有**两条**规则，都清了（只删一条会留下没人用的死选择器）：
+      · .hero-tagline{…}                —— 字号与颜色
+      · #hero .hero-tagline .line > i{…} —— 入场动画的时间档位
+   ⚠️ 删掉的**信息没有丢**：ENFJ 就在正下方的 .hero-meta 列表里（MBTI / ENFJ），
+      「脑机接口」在 <title>、meta、环形跑马灯、关于我、数字分身里都有。
+   ⚠️ 入场节奏留了一个空档没动：下面那段 delay 是按
+      eyebrow(0) → h1(120ms) → **tagline(240ms)** → intro(360ms) 排的，
+      现在 240ms 那一档没人用了 ⇒ intro 会等得更久一点。
+      这属于改动效，**按规矩先问用户**，没有擅自重排。
+   要恢复这行，从 git 取（本次提交之前）。 */
 
 .hero-intro {
   margin: var(--sp-5) auto 0;
@@ -1372,9 +1378,10 @@ section {
   transition-delay: calc(var(--i, 0) * 88ms);
 }
 
-/* 首屏三行依次落位：eyebrow(0) → h1 → tagline → intro → 按钮(700ms) */
+/* 首屏各行依次落位：eyebrow(0) → h1(120ms) → intro(360ms) → 按钮(700ms)
+   ⚠️ 240ms 那一档本来给 .hero-tagline，用户 2026-09-21 把那行删了（V2.7 续四十），
+      这档就空着 —— 动效没重排，等用户定。 */
 #hero h1 .line > i             { transition-delay: calc(120ms + var(--i, 0) * 88ms); }
-#hero .hero-tagline .line > i  { transition-delay: calc(240ms + var(--i, 0) * 88ms); }
 #hero .hero-intro .line > i    { transition-delay: calc(360ms + var(--i, 0) * 88ms); }
 
 .lines.is-visible .line > i {
