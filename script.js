@@ -861,12 +861,17 @@ window.addEventListener('resize', function () {
   if (!gallery || !sphere || !labelEl) return;          // 子页没有这块，直接退出
 
   // 👉 素材到位后改这里。label 只写一行短标题（用户明确要的），不写长描述。
+  // ⚠️ 这里用的是 images/sphere/ 下的**缩略图**，不是原图 —— 球体卡片只显示 150×200 px，
+  //    喂原图纯浪费（原来 5 张原图 1.4 MB，缩略图 128 KB）。
+  //    缩略图由 `python tools/make-thumbs.py <源图或目录>` 生成（3:4 居中裁切，和 CSS 的
+  //    object-fit: cover 一致 ⇒ 视觉没变化），顺带摆正 EXIF 方向、去掉 EXIF（含 GPS）。
+  //    换素材的流程：把照片丢进一个目录 → 跑那个脚本 → 改下面这张表。
   var SPHERE_PHOTOS = [
-    { src: 'images/1.jpg', label: '书法' },
-    { src: 'images/2.jpg', label: '架子鼓' },
-    { src: 'images/3.jpg', label: '摄影' },
-    { src: 'images/4.jpg', label: '音乐' },
-    { src: 'images/5.jpg', label: '篮球' }
+    { src: 'images/sphere/1.jpg', label: '书法' },
+    { src: 'images/sphere/2.jpg', label: '架子鼓' },
+    { src: 'images/sphere/3.jpg', label: '摄影' },
+    { src: 'images/sphere/4.jpg', label: '音乐' },
+    { src: 'images/sphere/5.jpg', label: '篮球' }
   ];
 
   var TOTAL = 24;                    // 球面要铺满：把 5 张循环到 24 张
