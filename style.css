@@ -527,7 +527,11 @@ section {
   max-width: var(--page-width);
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  /* 4 格 -> 3 格（V2.7 续四十二：用户删掉了「1 方向」那格）。
+     ⚠️ 列数必须跟着内容走 —— 从 4 改成 3，不然第 4 格空着、整行看着歪。
+     ⚠️ 窄屏那两处覆写（≤900px / ≤400px）用 :nth-child(3) 找「第二行开头」，
+        删掉第 3 格之后它**正好还是**第二行开头 ⇒ **不用改** ✓ */
+  grid-template-columns: repeat(3, 1fr);
   border-top: 1px solid var(--color-line);
   border-bottom: 1px solid var(--color-line);
 }
