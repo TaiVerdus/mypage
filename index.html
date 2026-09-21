@@ -7,7 +7,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title data-i18n="doc.title">Wang Shixian · BCI Student · Personal Site</title>
+  <title>Wang Shixian · BCI Student · Personal Site</title>
   <meta name="description" content="Wang Shixian's personal site — a brain–computer interface student following the AI frontier. Studying calculus, linear algebra and programming; drums, calligraphy and basketball on the side.">
   <meta name="theme-color" content="#000000">
 
@@ -44,22 +44,12 @@
     <div class="nav-inner">
       <a class="nav-logo" href="#hero">WANG SHIXIAN</a>
       <div class="nav-links">
-        <a class="nav-link active" href="#hero" data-i18n="nav.home">Home</a>
-        <a class="nav-link" href="#about" data-i18n="nav.about">About</a>
-        <a class="nav-link" href="#photos" data-i18n="nav.photos">Photos</a>
-        <a class="nav-link" href="#music" data-i18n="nav.music">Music</a>
-        <a class="nav-link" href="#chat" data-i18n="nav.twin">Digital Twin</a>
-        <a class="nav-link" href="#contact" data-i18n="nav.contact">Contact</a>
-      </div>
-
-      <!-- 语言开关：中 / EN（V2.7 续二十六）。
-           ⚠️ 两个语言名**故意不参与翻译** —— 想切到英文的人要能看到 English，
-           翻译了反而找不到。用 aria-pressed 表示当前是哪个。 -->
-      <div class="lang-switch" role="group" aria-label="Language">
-        <button type="button" class="lang-btn" id="langZh" data-lang="zh"
-                aria-label="中文" aria-pressed="false"><span aria-hidden="true">中</span></button>
-        <button type="button" class="lang-btn" id="langEn" data-lang="en"
-                aria-label="English" aria-pressed="true"><span aria-hidden="true">EN</span></button>
+        <a class="nav-link active" href="#hero">Home</a>
+        <a class="nav-link" href="#about">About</a>
+        <a class="nav-link" href="#photos">Photos</a>
+        <a class="nav-link" href="#music">Music</a>
+        <a class="nav-link" href="#chat">Digital Twin</a>
+        <a class="nav-link" href="#contact">Contact</a>
       </div>
     </div>
     <span class="nav-progress" id="navProgress" aria-hidden="true"></span>
@@ -69,15 +59,15 @@
   <header id="hero">
     <div class="hero-grid" aria-hidden="true"></div>
     <div class="hero-content">
-      <p class="hero-eyebrow" data-i18n="hero.eyebrow">CST &amp; AI FOUNDATIONS · 2026</p>
-      <h1 data-lines data-i18n="hero.title">Hi, I'm <span class="highlight">Wang Shixian</span></h1>
-      <p class="hero-tagline" data-lines data-i18n="hero.tagline">ENFJ · BCI student · into the AI frontier</p>
-      <p class="hero-intro" data-lines data-i18n="hero.intro">Studying calculus, linear algebra and computer programming — drums, calligraphy and basketball on the side. Want to know me better? Ask my digital twin below.</p>
-      <a class="btn btn--primary hero-btn" href="#chat" data-i18n="hero.cta">Ask my digital twin</a>
+      <p class="hero-eyebrow">CST &amp; AI FOUNDATIONS · 2026</p>
+      <h1 data-lines>Hi, I'm <span class="highlight">Wang Shixian</span></h1>
+      <p class="hero-tagline" data-lines>ENFJ · BCI student · into the AI frontier</p>
+      <p class="hero-intro" data-lines>Studying calculus, linear algebra and computer programming — drums, calligraphy and basketball on the side. Want to know me better? Ask my digital twin below.</p>
+      <a class="btn btn--primary hero-btn" href="#chat">Ask my digital twin</a>
       <ul class="hero-meta">
         <li><span class="meta-k">MBTI</span><span class="meta-v">ENFJ</span></li>
-        <li><span class="meta-k" data-i18n="meta.focus">Focus</span><span class="meta-v">BCI × AI</span></li>
-        <li><span class="meta-k" data-i18n="meta.status">Status</span><span class="meta-v" data-i18n="meta.status.v">First-year undergrad</span></li>
+        <li><span class="meta-k">Focus</span><span class="meta-v">BCI × AI</span></li>
+        <li><span class="meta-k">Status</span><span class="meta-v">First-year undergrad</span></li>
       </ul>
     </div>
 
@@ -140,14 +130,14 @@
       </div>
     </div>
 
-    <a class="scroll-hint" href="#about" aria-label="Scroll down to About" data-i18n-label="scroll.hint"><span class="scroll-hint-rail"><i></i></span></a>
+    <a class="scroll-hint" href="#about" aria-label="Scroll down to About"><span class="scroll-hint-rail"><i></i></span></a>
   </header>
 
   <!-- ========== Marquee 关键词滚动横幅 ========== -->
   <div class="marquee" aria-hidden="true">
     <div class="marquee-track">
-      <span data-i18n="marquee.items">BCI · AI · DRUMS · CALLIGRAPHY · BASKETBALL · CALCULUS · LINEAR ALGEBRA · PROGRAMMING · ENFJ · </span>
-      <span data-i18n="marquee.items">BCI · AI · DRUMS · CALLIGRAPHY · BASKETBALL · CALCULUS · LINEAR ALGEBRA · PROGRAMMING · ENFJ · </span>
+      <span>BCI · AI · DRUMS · CALLIGRAPHY · BASKETBALL · CALCULUS · LINEAR ALGEBRA · PROGRAMMING · ENFJ · </span>
+      <span>BCI · AI · DRUMS · CALLIGRAPHY · BASKETBALL · CALCULUS · LINEAR ALGEBRA · PROGRAMMING · ENFJ · </span>
     </div>
   </div>
 
@@ -157,19 +147,19 @@
     <div class="stats-row">
       <div class="stat">
         <span class="stat-num" data-count="3">3</span>
-        <span class="stat-label" data-i18n="stat.courses">Core courses</span>
+        <span class="stat-label">Core courses</span>
       </div>
       <div class="stat">
         <span class="stat-num" data-count="5">5</span>
-        <span class="stat-label" data-i18n="stat.hobbies">Hobbies</span>
+        <span class="stat-label">Hobbies</span>
       </div>
       <div class="stat">
         <span class="stat-num" data-count="1">1</span>
-        <span class="stat-label" data-i18n="meta.focus">Focus</span>
+        <span class="stat-label">Focus</span>
       </div>
       <div class="stat">
         <span class="stat-num" data-count="7">7</span>
-        <span class="stat-label" data-i18n="stat.twin">Twin topics</span>
+        <span class="stat-label">Twin topics</span>
       </div>
     </div>
   </section>
@@ -178,8 +168,8 @@
     <!-- ========== 区块 2：关于我（个人信息展示区） ========== -->
     <section id="about">
       <div class="section-head">
-        <span class="eyebrow reveal" data-i18n="sec.about">01 — About</span>
-        <h2 class="section-title" data-lines data-i18n="about.title">About me</h2>
+        <span class="eyebrow reveal">01 — About</span>
+        <h2 class="section-title" data-lines>About me</h2>
       </div>
       <div class="info-grid bento-grid reveal">
         <!-- 大卡：现在在做（末条把「这个主页」本身作为编程能力的证据） -->
@@ -188,32 +178,33 @@
           <div class="bento-items">
             <div class="bento-item">
               <strong>Calculus <span class="item-idx">01</span></strong>
-              <p data-i18n="course.calc">Understanding change and limits</p>
+              <p>Understanding change and limits</p>
             </div>
             <div class="bento-item">
               <strong>Linear Algebra <span class="item-idx">02</span></strong>
-              <p data-i18n="course.linalg">Vectors, matrices and space</p>
+              <p>Vectors, matrices and space</p>
             </div>
             <div class="bento-item">
               <strong>Computer Programming <span class="item-idx">03</span></strong>
-              <p data-i18n="course.prog">Building things from scratch</p>
+              <p>Building things from scratch</p>
             </div>
             <div class="bento-item bento-item--project">
-              <strong>MYPAGE · Personal site <span class="item-badge" data-i18n="badge.building">Building</span></strong>
-              <p data-i18n="proj.mypage.note">Static · no framework · my own design system</p>
+              <strong>MYPAGE · Personal site <span class="item-badge">Building</span></strong>
+              <p>Static · no framework · my own design system</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 43 条 + main 分支 2 条（V1.0 / V1.1）
+              <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
+                   用日期锚定，这样数字永远不会因为后续提交而过时。
+                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 45 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
-              <!-- ⚠️ 这一行带提交数，由 tools/sync-version.py 自动写。
-                   换语言时**数字从这句英文里现取**（字典里是 {n} / {date} 占位符），
-                   所以脚本改了英文的数字，中文版会跟着对 —— 中文的数字绝不写死。 -->
-              <p class="item-track" data-i18n="track.tpl">V1 → V1.1 → V2.0 → V2.7 · 45 commits as of 2026-09-17</p>
-              <a class="item-link" href="ai-log.html" data-i18n="proj.mypage.link">How this page was built →</a>
+              <!-- ⚠️ 这一行带提交数，由 tools/sync-version.py 自动写 ——
+                   别手改数字，改完在提交前跑一次那个脚本。 -->
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 47 commits as of 2026-09-17</p>
+              <a class="item-link" href="ai-log.html">How this page was built →</a>
             </div>
             <div class="bento-item bento-item--project">
-              <strong>CarbonBrain <span class="item-badge" data-i18n="badge.building">Building</span></strong>
-              <p data-i18n="proj.cb.note">Course / competition project · has a working demo</p>
+              <strong>CarbonBrain <span class="item-badge">Building</span></strong>
+              <p>Course / competition project · has a working demo</p>
             </div>
           </div>
         </div>
@@ -233,7 +224,7 @@
         <!-- 大卡：关注方向 -->
         <div class="info-card bento-large">
           <h3><span class="card-dot"></span>Focus</h3>
-          <p class="info-text" data-i18n="about.info">AI × brain–computer interfaces — exploring how minds and machines connect, following the field's frontier.</p>
+          <p class="info-text">AI × brain–computer interfaces — exploring how minds and machines connect, following the field's frontier.</p>
         </div>
       </div>
     </section>
@@ -241,34 +232,34 @@
     <!-- ========== 区块：摄影集 ========== -->
     <section id="photos">
       <div class="section-head">
-        <span class="eyebrow reveal" data-i18n="sec.photos">02 — Photos</span>
-        <h2 class="section-title" data-lines data-i18n="photos.title">Photography</h2>
-        <p class="section-note reveal" data-i18n="photos.note">All photos are mine, except the stage shot, provided by the event organizer.</p>
+        <span class="eyebrow reveal">02 — Photos</span>
+        <h2 class="section-title" data-lines>Photography</h2>
+        <p class="section-note reveal">All photos are mine, except the stage shot, provided by the event organizer.</p>
       </div>
       <div class="photo-grid masonry reveal">
         <figure class="photo-item" id="photo-calligraphy">
           <img src="images/1.jpg" alt="A calligraphy class — people practising brush writing at a long table" loading="lazy" decoding="async">
-          <figcaption><span class="photo-no">01</span><span class="photo-tag" data-i18n="tag.calligraphy">Calligraphy</span></figcaption>
+          <figcaption><span class="photo-no">01</span><span class="photo-tag">Calligraphy</span></figcaption>
         </figure>
         <figure class="photo-item" id="photo-drums">
           <img src="images/2.jpg" alt="Someone at an electronic drum kit, one hand raised in a gesture" loading="lazy" decoding="async">
-          <figcaption><span class="photo-no">02</span><span class="photo-tag" data-i18n="tag.drums">Drums</span></figcaption>
+          <figcaption><span class="photo-no">02</span><span class="photo-tag">Drums</span></figcaption>
         </figure>
         <figure class="photo-item" id="photo-photography">
           <img src="images/3.jpg" alt="Looking out over hills at sunset, city and water in the distance" loading="lazy" decoding="async">
-          <figcaption><span class="photo-no">03</span><span class="photo-tag" data-i18n="photos.title">Photography</span></figcaption>
+          <figcaption><span class="photo-no">03</span><span class="photo-tag">Photography</span></figcaption>
         </figure>
         <figure class="photo-item" id="photo-performance">
           <img src="images/4.jpg" alt="A stage in red light — the silhouette of a performer, arms outstretched" loading="lazy" decoding="async">
           <figcaption>
             <span class="photo-no">04</span>
-            <span class="photo-tag" data-i18n="nav.music">Music</span>
-            <span class="photo-credit" data-i18n="photo.credit">Photo: event organizer</span>
+            <span class="photo-tag">Music</span>
+            <span class="photo-credit">Photo: event organizer</span>
           </figcaption>
         </figure>
         <figure class="photo-item" id="photo-basketball">
           <img src="images/5.jpg" alt="A basketball hoop and backboard at sunset — a ball frozen mid-air, city towers and a tree behind" loading="lazy" decoding="async">
-          <figcaption><span class="photo-no">05</span><span class="photo-tag" data-i18n="tag.basketball">Basketball</span></figcaption>
+          <figcaption><span class="photo-no">05</span><span class="photo-tag">Basketball</span></figcaption>
         </figure>
       </div>
     </section>
@@ -288,9 +279,9 @@
          行悬停只是「扫读时对齐三列」的辅助，不是可点击的暗示 -->
     <section id="music">
       <div class="section-head">
-        <span class="eyebrow reveal" data-i18n="sec.music">03 — Music</span>
-        <h2 class="section-title" data-lines data-i18n="music.title">On repeat</h2>
-        <p class="section-note reveal" data-i18n="music.note">Three artists I keep coming back to — just the list, no player. Track, album and year are facts; the labels' artwork is someone else's, so it isn't reproduced. And no runtimes: I'd rather leave a column out than invent numbers I can't verify.</p>
+        <span class="eyebrow reveal">03 — Music</span>
+        <h2 class="section-title" data-lines>On repeat</h2>
+        <p class="section-note reveal">Three artists I keep coming back to — just the list, no player. Track, album and year are facts; the labels' artwork is someone else's, so it isn't reproduced. And no runtimes: I'd rather leave a column out than invent numbers I can't verify.</p>
       </div>
 
       <div class="playlists reveal">
@@ -298,8 +289,8 @@
         <!-- ---------- 歌单 1：陶喆 ---------- -->
         <section class="playlist">
           <header class="playlist-head">
-            <h3 class="playlist-name">陶喆<span class="playlist-en" data-i18n="playlist.david">David Tao</span></h3>
-            <p class="playlist-meta" data-i18n="playlist.david.meta">5 tracks · 1997–2005</p>
+            <h3 class="playlist-name">陶喆<span class="playlist-en">David Tao</span></h3>
+            <p class="playlist-meta">5 tracks · 1997–2005</p>
           </header>
           <ol class="track-list">
             <li class="track">
@@ -348,8 +339,8 @@
         <!-- ---------- 歌单 2：薛之谦 ---------- -->
         <section class="playlist">
           <header class="playlist-head">
-            <h3 class="playlist-name">薛之谦<span class="playlist-en" data-i18n="playlist.joker">Joker Xue</span></h3>
-            <p class="playlist-meta" data-i18n="playlist.joker.meta">5 tracks · 2006–2020</p>
+            <h3 class="playlist-name">薛之谦<span class="playlist-en">Joker Xue</span></h3>
+            <p class="playlist-meta">5 tracks · 2006–2020</p>
           </header>
           <ol class="track-list">
             <li class="track">
@@ -399,7 +390,7 @@
         <section class="playlist">
           <header class="playlist-head">
             <h3 class="playlist-name">Justin Bieber</h3>
-            <p class="playlist-meta" data-i18n="playlist.justin.meta">5 tracks · 2015–2025</p>
+            <p class="playlist-meta">5 tracks · 2015–2025</p>
           </header>
           <ol class="track-list">
             <li class="track">
@@ -451,36 +442,36 @@
     <!-- ========== 区块 3：数字分身聊天区 ========== -->
     <section id="chat">
       <div class="section-head section-head--center">
-        <span class="eyebrow reveal" data-i18n="sec.twin">04 — Digital Twin</span>
-        <h2 class="section-title" data-lines data-i18n="chat.title">Chat with my digital twin</h2>
-        <p class="chat-note reveal" data-i18n="chat.note">It only knows what I've told it — when it doesn't know, it says so.</p>
+        <span class="eyebrow reveal">04 — Digital Twin</span>
+        <h2 class="section-title" data-lines>Chat with my digital twin</h2>
+        <p class="chat-note reveal">It only knows what I've told it — when it doesn't know, it says so.</p>
       </div>
       <div class="chat-window reveal">
         <div class="chat-header">
           <span class="chat-avatar">S</span>
           <div>
-            <strong data-i18n="chat.name">Shixian's digital twin</strong>
-            <small data-i18n="chat.sub">· local knowledge base · runs offline</small>
+            <strong>Shixian's digital twin</strong>
+            <small>· local knowledge base · runs offline</small>
           </div>
         </div>
         <div class="chat-messages" id="chatMessages"></div>
         <div class="chat-quick" id="chatQuick">
-          <button class="quick-btn" data-i18n="quick.study">What are you studying?</button>
-          <button class="quick-btn" data-i18n="quick.person">What kind of person are you?</button>
-          <button class="quick-btn" data-i18n="quick.fun">What do you do for fun?</button>
+          <button class="quick-btn">What are you studying?</button>
+          <button class="quick-btn">What kind of person are you?</button>
+          <button class="quick-btn">What do you do for fun?</button>
         </div>
         <div class="chat-input-row">
-          <input type="text" id="chatInput" placeholder="Ask me something…" data-i18n-ph="chat.ph" maxlength="100">
-          <button id="chatSend" class="btn btn--primary" data-i18n="chat.send">Send</button>
+          <input type="text" id="chatInput" placeholder="Ask me something…" maxlength="100">
+          <button id="chatSend" class="btn btn--primary">Send</button>
         </div>
       </div>
     </section>
 
     <!-- ========== 区块：联系我 ========== -->
     <section id="contact">
-      <span class="eyebrow eyebrow--center reveal" data-i18n="sec.contact">05 — Contact</span>
-      <h2 class="contact-title" data-lines data-i18n="contact.title">Got an idea?</h2>
-      <p class="contact-subtitle" data-lines data-i18n="contact.sub">Let's talk — no pressure.</p>
+      <span class="eyebrow eyebrow--center reveal">05 — Contact</span>
+      <h2 class="contact-title" data-lines>Got an idea?</h2>
+      <p class="contact-subtitle" data-lines>Let's talk — no pressure.</p>
 
       <!-- 液态玻璃名片（V2.7 续二十三）：三个联系方式落在这张会折射背景的玻璃卡上。
            骨架照 Abdughafur 那张卡来（头像 / 名字 / @handle / 分隔线 / 数据 / 主按钮 / 缩放），
@@ -507,7 +498,7 @@
 
         <dl class="card-rows">
           <div class="card-row">
-            <dt data-i18n="contact.email">Email</dt>
+            <dt>Email</dt>
             <dd><a href="mailto:wshixian2026@163.com">wshixian2026@163.com</a></dd>
           </div>
           <div class="card-row">
@@ -515,7 +506,7 @@
             <dd><a href="https://github.com/TaiVerdus" target="_blank" rel="noopener">github.com/TaiVerdus <span aria-hidden="true">↗</span></a></dd>
           </div>
           <div class="card-row">
-            <dt data-i18n="contact.wechat">WeChat</dt>
+            <dt>WeChat</dt>
             <dd>
               <span class="card-vow-id">Cjfgds_Hswlfsds</span>
               <!-- 这句就是微信号本身：Cjfgds = 曾经发过的誓，Hswlfsds = 会是未来发生的事，
@@ -527,16 +518,16 @@
           </div>
         </dl>
 
-        <a class="btn btn--ghost card-cta" href="mailto:wshixian2026@163.com" data-i18n="contact.cta">Say hello</a>
+        <a class="btn btn--ghost card-cta" href="mailto:wshixian2026@163.com">Say hello</a>
 
         <!-- 缩放：− / 数值 / +。数值不只是装饰 —— 它同时是那个 live region 的可见对应物，
              所以读屏用户听到「110%」时，屏幕上也正写着 110%。 -->
-        <div class="card-zoom" role="group" aria-label="Card size" data-i18n-label="zoom.group">
-          <button type="button" class="zoom-btn" id="cardZoomOut" aria-label="Make the card smaller" data-i18n-label="zoom.out">
+        <div class="card-zoom" role="group" aria-label="Card size">
+          <button type="button" class="zoom-btn" id="cardZoomOut" aria-label="Make the card smaller">
             <span aria-hidden="true">−</span>
           </button>
           <span class="zoom-value" id="cardZoomValue" aria-live="polite">100%</span>
-          <button type="button" class="zoom-btn" id="cardZoomIn" aria-label="Make the card bigger" data-i18n-label="zoom.in">
+          <button type="button" class="zoom-btn" id="cardZoomIn" aria-label="Make the card bigger">
             <span aria-hidden="true">+</span>
           </button>
         </div>
@@ -561,8 +552,8 @@
   <!-- ========== 区块 4：页脚 ========== -->
   <footer id="footer">
     <p>© 2026 Wang Shixian · MYPAGE V2.7</p>
-    <p><a class="footer-link" href="ai-log.html" data-i18n="footer.ailog">AI usage log</a></p>
-    <p class="copyright" data-i18n="footer.disclaimer">The digital twin is a local preset Q&amp;A, not connected to any online AI — no data leaves this page</p>
+    <p><a class="footer-link" href="ai-log.html">AI usage log</a></p>
+    <p class="copyright">The digital twin is a local preset Q&amp;A, not connected to any online AI — no data leaves this page</p>
   </footer>
 
   <script src="script.js"></script>

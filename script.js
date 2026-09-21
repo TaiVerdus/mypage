@@ -57,32 +57,32 @@ updateActiveNav();
 
 var KNOWLEDGE = [
   {
-    keywords: ['study', 'studying', 'course', 'calculus', 'linear', 'algebra', 'program', 'programming', 'major', 'class', 'classes', '学', '课程', '专业', '微积分', '线性代数', '编程', '上课'],
-    answer: 'kb.study'
+    keywords: ['study', 'studying', 'course', 'calculus', 'linear', 'algebra', 'program', 'programming', 'major', 'class', 'classes'],
+    answer: 'Shixian is focused on three things right now: Calculus, Linear Algebra, and Computer Programming. Math and coding together — the fundamentals for a brain–computer interface direction.'
   },
   {
-    keywords: ['bci', 'brain', 'major', 'identity', 'focus', 'why', 'direction', 'interface', '脑机', '方向', '为什么', '接口', 'bci'],
-    answer: 'kb.bci'
+    keywords: ['bci', 'brain', 'major', 'identity', 'focus', 'why', 'direction', 'interface'],
+    answer: 'Shixian is a brain–computer interface student. Why this direction? To be honest he never told me the details, so I won’t make anything up — ask him yourself.'
   },
   {
-    keywords: ['interest', 'hobby', 'hobbies', 'drum', 'drums', 'calligraphy', 'basketball', 'fun', 'free time', 'do for fun', '兴趣', '爱好', '打鼓', '架子鼓', '书法', '篮球', '玩'],
-    answer: 'kb.hobby'
+    keywords: ['interest', 'hobby', 'hobbies', 'drum', 'drums', 'calligraphy', 'basketball', 'fun', 'free time', 'do for fun'],
+    answer: 'His free time is pretty full: music, drums, calligraphy, and basketball. Loud and quiet both — drums and basketball are the loud, calligraphy is the quiet.'
   },
   {
-    keywords: ['music', 'album', 'albums', 'song', 'songs', 'listen', 'listening', 'artist', 'singer', 'favourite', 'favorite', 'david tao', 'joker xue', 'justin bieber', 'bieber', '音乐', '专辑', '歌', '听什么', '歌手', '陶喆', '薛之谦'],
-    answer: 'kb.music'
+    keywords: ['music', 'album', 'albums', 'song', 'songs', 'listen', 'listening', 'artist', 'singer', 'favourite', 'favorite', 'david tao', 'joker xue', 'justin bieber', 'bieber'],
+    answer: 'Three artists he keeps coming back to: David Tao (陶喆), Joker Xue (薛之谦) and Justin Bieber. There’s a shelf of his favourite albums further down this page.'
   },
   {
-    keywords: ['enfj', 'personality', 'person', 'what kind', 'mbti', 'enfj', '性格', '什么样的人', 'mbti'],
-    answer: 'kb.enfj'
+    keywords: ['enfj', 'personality', 'person', 'what kind', 'mbti'],
+    answer: 'Shixian is an ENFJ. Beyond the label, I’d rather not put words in his mouth — for a real sense of who he is, talk to him directly.'
   },
   {
-    keywords: ['ai', 'frontier', 'tech', 'technology', 'future', 'follow', 'research', 'ai', '人工智能', '前沿', '科技', '未来'],
-    answer: 'kb.ai'
+    keywords: ['ai', 'frontier', 'tech', 'technology', 'future', 'follow', 'research'],
+    answer: 'Shixian follows AI research closely, especially where it meets brain–computer interfaces. He explains his own views far better than I can — ask him directly.'
   },
   {
-    keywords: ['who are you', 'name', 'intro', 'wang shixian', 'shixian', 'hello', 'hi', 'hey', '你是谁', '名字', '介绍', '王释贤', '释贤', '你好'],
-    answer: 'kb.who'
+    keywords: ['who are you', 'name', 'intro', 'wang shixian', 'shixian', 'hello', 'hi', 'hey'],
+    answer: 'Hi! I’m Wang Shixian’s digital twin, greeting visitors while he’s away. The basics: ENFJ, BCI student, into the AI frontier. Ask away.'
   }
 ];
 
@@ -109,21 +109,20 @@ function matchAnswer(question) {
   for (var i = 0; i < KNOWLEDGE.length; i++) {
     for (var j = 0; j < KNOWLEDGE[i].keywords.length; j++) {
       if (q.indexOf(KNOWLEDGE[i].keywords[j].toLowerCase()) !== -1) {
-        return t(KNOWLEDGE[i].answer);
+        return KNOWLEDGE[i].answer;
       }
     }
   }
-  return t('kb.fallback');
+  return FALLBACK;
 }
 
 function ask(question) {
   if (!question.trim()) return;
 
-  userHasAsked = true;
   addMessage(question, 'user');          // 1. 先显示用户的问题
   inputEl.value = '';                     // 2. 清空输入框
 
-  var typing = addMessage(t('chat.typing'), 'bot typing'); // 3. 打字指示
+  var typing = addMessage('typing…', 'bot typing'); // 3. 打字指示
 
   setTimeout(function () {                // 4. 模拟思考延迟后给出回答
     typing.remove();
@@ -150,8 +149,7 @@ quickEl.querySelectorAll('.quick-btn').forEach(function (btn) {
 });
 
 // 开场白：分身先打招呼
-var GREETING_EL = addMessage(t('chat.greeting'), 'bot');
-var userHasAsked = false;
+addMessage('Hey, I’m Shixian’s digital twin! Ask what he’s studying, what kind of person he is, or his hobbies — and I’ll be honest when I don’t know.', 'bot');
 
 
 // ---------- 交互四：全屏形状场（光标效果） ----------
@@ -834,205 +832,4 @@ window.addEventListener('resize', function () {
   render();
 })();
 
-// ---------- 交互十二：中英文切换（V2.7 续二十六） ----------
-// 三条设计口径：
-// ① **英文原文留在 HTML 里**（HTML 就是英文源），首次加载时快照下来；中文只在 I18N.zh 里。
-//    ⇒ 一份文案只有一个真相源，不会两边各写一份然后各自过时。
-// ② 例外：文案**由 JS 生成**的（问候语、打字提示、知识库回答）HTML 里没有，
-//    所以这些在 I18N.en 里也留一份。
-// ③ **带数字的那句（提交数）走占位符**：数字从英文原文现取，
-//    所以 sync-version.py 改了 HTML 里的数字，中文版跟着对 —— 不会两边各说一个数。
-// 换语言要连带通知两个子系统：逐行入场（行是 JS 拆出来的，得按新语言重拆）和数字分身。
-var I18N = {
-  en: {
-  "chat.greeting": "Hey, I’m Shixian’s digital twin! Ask what he’s studying, what kind of person he is, or his hobbies — and I’ll be honest when I don’t know.",
-  "chat.typing": "typing…",
-  "kb.study": "Shixian is focused on three things right now: Calculus, Linear Algebra, and Computer Programming. Math and coding together — the fundamentals for a brain–computer interface direction.",
-  "kb.bci": "Shixian is a brain–computer interface student. Why this direction? To be honest he never told me the details, so I won’t make anything up — ask him yourself.",
-  "kb.hobby": "His free time is pretty full: music, drums, calligraphy, and basketball. Loud and quiet both — drums and basketball are the loud, calligraphy is the quiet.",
-  "kb.music": "Three artists he keeps coming back to: David Tao (陶喆), Joker Xue (薛之谦) and Justin Bieber. There’s a shelf of his favourite albums further down this page.",
-  "kb.enfj": "Shixian is an ENFJ. Beyond the label, I’d rather not put words in his mouth — for a real sense of who he is, talk to him directly.",
-  "kb.ai": "Shixian follows AI research closely, especially where it meets brain–computer interfaces. He explains his own views far better than I can — ask him directly.",
-  "kb.who": "Hi! I’m Wang Shixian’s digital twin, greeting visitors while he’s away. The basics: ENFJ, BCI student, into the AI frontier. Ask away.",
-  "kb.fallback": "I don’t know that one — ask the real Shixian. I only say what he’s told me, and I don’t make things up.",
-  "doc.title": "Wang Shixian · BCI Student · Personal Site",
-  "hero.title": "Hi, I'm <span class=\"highlight\">Wang Shixian</span>",
-  "track.tpl": "· {n} commits as of {date}"
-},
-  zh: {
-  "nav.home": "首页",
-  "nav.about": "关于",
-  "nav.photos": "照片",
-  "nav.music": "音乐",
-  "nav.twin": "数字分身",
-  "nav.contact": "联系",
-  "hero.eyebrow": "CST 与 AI 基础 · 2026",
-  "hero.tagline": "ENFJ · 脑机接口方向 · 关注 AI 前沿",
-  "hero.intro": "正在学微积分、线性代数和计算机编程——课余打鼓、练字、打球。想更了解我？去下面问问我的数字分身。",
-  "hero.cta": "问问我的数字分身",
-  "meta.focus": "方向",
-  "meta.status": "状态",
-  "meta.status.v": "大一在读",
-  "marquee.items": "脑机接口 · AI · 架子鼓 · 书法 · 篮球 · 微积分 · 线性代数 · 编程 · ENFJ ·",
-  "stat.courses": "在读课程",
-  "stat.hobbies": "兴趣爱好",
-  "stat.twin": "分身话题",
-  "sec.about": "01 — 关于",
-  "about.title": "关于我",
-  "course.calc": "理解变化与极限",
-  "course.linalg": "向量、矩阵与空间",
-  "course.prog": "从零动手做东西",
-  "badge.building": "建设中",
-  "proj.mypage.note": "纯静态 · 无框架 · 自己的一套设计系统",
-  "proj.mypage.link": "这个页面是怎么做出来的 →",
-  "proj.cb.note": "课程 / 比赛项目 · 已有可演示版本",
-  "about.info": "AI × 脑机接口——探索心智与机器如何相连，跟着这个领域的前沿走。",
-  "sec.photos": "02 — 照片",
-  "photos.title": "摄影",
-  "photos.note": "照片都是我拍的，除了舞台那张——那张由活动主办方提供。",
-  "tag.calligraphy": "书法",
-  "tag.drums": "架子鼓",
-  "photo.credit": "摄影：活动主办方",
-  "tag.basketball": "篮球",
-  "sec.music": "03 — 音乐",
-  "music.title": "反复在听",
-  "music.note": "三个我总回去听的歌手——只列歌单，没有播放器。曲名、专辑、年份是事实；封面的美术是别人的，所以不复刻。另外不写时长：宁可不写那一列，也不编我核实不了的数字。",
-  "playlist.david": "陶喆",
-  "playlist.david.meta": "5 首 · 1997–2005",
-  "playlist.joker": "薛之谦",
-  "playlist.joker.meta": "5 首 · 2006–2020",
-  "playlist.justin.meta": "5 首 · 2015–2025",
-  "sec.twin": "04 — 数字分身",
-  "chat.title": "和我的数字分身聊聊",
-  "chat.note": "它只知道我告诉过它的事——不知道的时候，它会直说。",
-  "chat.name": "释贤的数字分身",
-  "chat.sub": "· 本地知识库 · 离线运行",
-  "quick.study": "你在学什么？",
-  "quick.person": "你是个什么样的人？",
-  "quick.fun": "你平时玩什么？",
-  "chat.send": "发送",
-  "chat.ph": "问我点什么…",
-  "sec.contact": "05 — 联系",
-  "contact.title": "有什么想法？",
-  "contact.sub": "聊聊吧——不用有压力。",
-  "contact.email": "邮箱",
-  "contact.wechat": "微信",
-  "contact.cta": "打个招呼",
-  "zoom.group": "名片大小",
-  "zoom.out": "把名片缩小",
-  "zoom.in": "把名片放大",
-  "footer.ailog": "AI 使用日志",
-  "footer.disclaimer": "数字分身是本地预设问答，不连接任何在线 AI——没有数据离开这个页面",
-  "scroll.hint": "向下滚动到「关于」",
-  "doc.title": "王释贤 · 脑机接口方向 · 个人主页",
-  "hero.title": "你好，我是 <span class=\"highlight\">王释贤</span>",
-  "track.tpl": "· 截至 {date} 共 {n} 次提交",
-  "chat.greeting": "嗨，我是释贤的数字分身！你可以问他正在学什么、是个什么样的人，或者他有什么爱好——不知道的事我会直说。",
-  "chat.typing": "正在输入…",
-  "kb.study": "释贤现在重心在三件事上：微积分、线性代数和计算机编程。数学加编程——这是脑机接口方向的基本功。",
-  "kb.bci": "释贤是脑机接口方向的学生。为什么选这个方向？说实话他没告诉过我细节，所以我不编——你自己问他。",
-  "kb.hobby": "他课余挺满的：听音乐、打鼓、练书法、打篮球。安静的吵闹的都有——打鼓和篮球是吵的，书法是静的。",
-  "kb.music": "他常回去听的三位：陶喆、薛之谦、Justin Bieber。下面还有一栏他喜欢的专辑。",
-  "kb.enfj": "释贤是 ENFJ。除了这个标签，我不想替他多说——想真正认识他，直接找他聊。",
-  "kb.ai": "释贤一直跟着 AI 的研究走，尤其是它和脑机接口交叉的地方。他自己的看法比我能说的清楚多了——直接问他。",
-  "kb.who": "嗨！我是王释贤的数字分身，他不在的时候替他招呼一下访客。基本情况：ENFJ、脑机接口方向、关注 AI 前沿。随便问。",
-  "kb.fallback": "这个我不知道——去问本人吧。我只说告诉过我的事，不编。"
-}
-};
 
-var LANG_KEY = 'mypage-lang';
-var langNow = 'en';
-var enSnapshot = {};        // 页面上的英文原文（首次加载快照）
-
-// t(key)：取当前语言的文案；知识库/问候语那些走这里
-function t(key) {
-  var pack = I18N[langNow] || I18N.en;
-  if (pack[key] !== undefined) return pack[key];
-  if (I18N.en[key] !== undefined) return I18N.en[key];   // 中文缺了就退回英文，不显空白
-  return key;
-}
-
-// 提交数那句：从英文原文里现取数字与日期，套进中文模板
-function fillTrackLine(en) {
-  var m = en.match(/(\d+)\s+commits as of\s+(\d{4}-\d{2}-\d{2})/);
-  if (!m) return en;
-  return t('track.tpl').replace('{n}', m[1]).replace('{date}', m[2]);
-}
-
-function langValue(key, en) {
-  if (langNow === 'en') return en;
-  if (key === 'track.tpl') return fillTrackLine(en);
-  return (I18N.zh[key] !== undefined) ? I18N.zh[key] : en;
-}
-
-function applyLang(lang, remember) {
-  langNow = (lang === 'zh') ? 'zh' : 'en';
-  var isZh = langNow === 'zh';
-
-  // 首次进入中文时先把页面上的英文原文收下来（HTML 里没有的 JS 文案走 I18N.en）
-  if (Object.keys(enSnapshot).length === 0) {
-    document.querySelectorAll('[data-i18n]').forEach(function (el) {
-      if (el.classList.contains('lines')) return;      // 已拆行的不要，存到的会是拆行后的
-      enSnapshot[el.getAttribute('data-i18n')] = el.innerHTML;
-    });
-  }
-
-  document.querySelectorAll('[data-i18n]').forEach(function (el) {
-    var key = el.getAttribute('data-i18n');
-    var en = enSnapshot[key] !== undefined ? enSnapshot[key] : (I18N.en[key] || '');
-    var val = langValue(key, en);
-    // 译文里带标签的（比如标题里的名字）走 innerHTML，其余一律 textContent —— 默认最安全
-    if (val.indexOf('<') !== -1) el.innerHTML = val; else el.textContent = val;
-  });
-
-  document.querySelectorAll('[data-i18n-ph]').forEach(function (el) {
-    var key = el.getAttribute('data-i18n-ph');
-    if (!el.dataset.en) el.dataset.en = el.placeholder;
-    el.placeholder = (langNow === 'zh' && I18N.zh[key]) ? I18N.zh[key] : el.dataset.en;
-  });
-  document.querySelectorAll('[data-i18n-label]').forEach(function (el) {
-    var key = el.getAttribute('data-i18n-label');
-    if (!el.dataset.enLabel) el.dataset.enLabel = el.getAttribute('aria-label');
-    el.setAttribute('aria-label', (langNow === 'zh' && I18N.zh[key]) ? I18N.zh[key] : el.dataset.enLabel);
-  });
-
-  // 文档语言：读屏的发音、连字断行都靠它
-  document.documentElement.lang = isZh ? 'zh-Hans' : 'en';
-
-  // 逐行入场：行是按「当时的文字」拆出来的，换语言必须**按新文字重拆**
-  document.querySelectorAll('[data-lines]').forEach(function (el) {
-    if (!el.classList.contains('lines')) return;       // 还没入场的不动，等观察器按新文字处理
-    el.removeAttribute('data-html');                   // 旧的行结构作废
-    var hadDone = el.classList.contains('is-done');
-    el.classList.remove('lines', 'is-visible', 'is-done');
-    if (typeof splitIntoLines === 'function') splitIntoLines(el);
-    el.classList.add('is-visible');
-    if (hadDone) el.classList.add('is-done');          // 已经演完的不重播
-  });
-
-  // 数字分身：问候语跟着语言走（用户还没提问过才换，问过就当历史留着）
-  if (typeof GREETING_EL !== 'undefined' && GREETING_EL && !userHasAsked) {
-    GREETING_EL.textContent = t('chat.greeting');
-  }
-
-  // 开关状态
-  document.querySelectorAll('.lang-btn').forEach(function (b) {
-    b.setAttribute('aria-pressed', b.getAttribute('data-lang') === langNow ? 'true' : 'false');
-  });
-
-  if (remember) {
-    try { localStorage.setItem(LANG_KEY, langNow); } catch (e) { /* 隐私模式下写不了，忽略 */ }
-  }
-}
-
-document.querySelectorAll('.lang-btn').forEach(function (b) {
-  b.addEventListener('click', function () { applyLang(b.getAttribute('data-lang'), true); });
-});
-
-// 开局：读上次的选择。系统语言是中文也默认中文 —— 他是中文用户，作品集先给同学看
-(function () {
-  var saved = null;
-  try { saved = localStorage.getItem(LANG_KEY); } catch (e) { /* 忽略 */ }
-  var sysZh = (navigator.language || '').toLowerCase().indexOf('zh') === 0;
-  applyLang(saved || (sysZh ? 'zh' : 'en'), false);
-})();
