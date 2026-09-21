@@ -57,32 +57,50 @@ updateActiveNav();
 
 var KNOWLEDGE = [
   {
-    keywords: ['study', 'studying', 'course', 'calculus', 'linear', 'algebra', 'program', 'programming', 'major', 'class', 'classes'],
+    keywords: ['study', 'studying', 'course', 'calculus', 'linear', 'algebra', 'program', 'programming', 'major', 'class', 'classes',
+      // 中文关键词：整站中文化那次漏了这些（关键词不是界面文字，没被扫到），
+      // 导致三个中文快捷按钮一个都匹配不上、全落兜底语 ⇒ 这里补齐
+      '学什么', '在学', '学的', '课程', '专业', '微积分', '线性代数', '编程'],
     answer: '释贤现在重心在三件事上：微积分、线性代数和计算机编程。数学加编程——这是脑机接口方向的基本功。'
   },
   {
-    keywords: ['bci', 'brain', 'major', 'identity', 'focus', 'why', 'direction', 'interface'],
+    keywords: ['bci', 'brain', 'major', 'identity', 'focus', 'why', 'direction', 'interface',
+      '脑机接口', '方向', '为什么选', 'bci 是什么'],
     answer: '释贤是脑机接口方向的学生。为什么选这个方向？说实话他没告诉过我细节，所以我不编——你自己问他。'
   },
   {
-    keywords: ['interest', 'hobby', 'hobbies', 'drum', 'drums', 'calligraphy', 'basketball', 'fun', 'free time', 'do for fun'],
+    keywords: ['interest', 'hobby', 'hobbies', 'drum', 'drums', 'calligraphy', 'basketball', 'fun', 'free time', 'do for fun',
+      '爱好', '兴趣爱好', '玩什么', '平时玩', '喜欢什么', '打鼓', '书法', '篮球'],
     answer: '他课余挺满的：听音乐、打鼓、练书法、打篮球。安静的吵闹的都有——打鼓和篮球是吵的，书法是静的。'
   },
   {
-    keywords: ['music', 'album', 'albums', 'song', 'songs', 'listen', 'listening', 'artist', 'singer', 'favourite', 'favorite', 'david tao', 'joker xue', 'justin bieber', 'bieber'],
+    keywords: ['music', 'album', 'albums', 'song', 'songs', 'listen', 'listening', 'artist', 'singer', 'favourite', 'favorite', 'david tao', 'joker xue', 'justin bieber', 'bieber',
+      '音乐', '歌', '专辑', '听什么', '歌手', '陶喆', '薛之谦'],
     answer: '他常回去听的三位：陶喆、薛之谦、Justin Bieber。下面那栏「每日推荐」是他每天挑的，有时一两首、有时三首。'
   },
   {
-    keywords: ['enfj', 'personality', 'person', 'what kind', 'mbti'],
+    keywords: ['enfj', 'personality', 'person', 'what kind', 'mbti',
+      '什么样的人', '性格', '内向', '外向'],
     answer: '释贤是 ENFJ。除了这个标签，我不想替他多说——想真正认识他，直接找他聊。'
   },
   {
-    keywords: ['ai', 'frontier', 'tech', 'technology', 'future', 'follow', 'research'],
+    keywords: ['ai', 'frontier', 'tech', 'technology', 'future', 'follow', 'research',
+      '人工智能', '前沿', '技术', '研究'],
     answer: '释贤一直跟着 AI 的研究走，尤其是它和脑机接口交叉的地方。他自己的看法比我能说的清楚多了——直接问他。'
   },
   {
-    keywords: ['who are you', 'name', 'intro', 'wang shixian', 'shixian', 'hello', 'hi', 'hey'],
+    keywords: ['who are you', 'name', 'intro', 'wang shixian', 'shixian', 'hello', 'hi', 'hey',
+      '你是谁', '你叫什么', '叫什么', '名字', '自我介绍', '你好', '嗨'],
     answer: '嗨！我是王释贤的数字分身，他不在的时候替他招呼一下访客。基本情况：ENFJ、脑机接口方向。随便问。'
+  },
+
+  {
+    // 新增（V2.7 续四十三）：用户要求在快捷问题上加「你今年多大？」
+    // ⚠️ 答案**不写具体年龄** —— 年龄是「只有本人能确认」的事实，没问到他之前不编。
+    //    写成「大一在读」（页面上已有的公开事实）+ 直说不知道具体岁数，符合分身
+    //    「只说告诉过我的事，不编」的口径（那句兜底语就是这么写的）。
+    keywords: ['多大', '年龄', '几岁', '多少岁', 'how old', 'age'],
+    answer: '他大一在读。具体多大他没告诉过我——我不替他编，你想知道直接问他。'
   }
 ];
 
