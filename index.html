@@ -193,11 +193,11 @@
               <p>纯静态 · 无框架 · 自己的一套设计系统</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 49 条 + main 分支 2 条（V1.0 / V1.1）
+                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 50 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
               <!-- ⚠️ 这一行带提交数，由 tools/sync-version.py 自动写 ——
                    别手改数字，改完在提交前跑一次那个脚本。 -->
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 截至 2026-09-17 共 51 次提交</p>
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 截至 2026-09-17 共 52 次提交</p>
               <a class="item-link" href="ai-log.html">这个页面是怎么做出来的 →</a>
             </div>
             <div class="bento-item bento-item--project">
@@ -232,6 +232,25 @@
       <div class="section-head">
         <span class="eyebrow reveal">02 — 照片</span>
         <h2 class="section-title" data-lines>摄影</h2>
+      </div>
+
+      <!-- ========== 球体画廊（V2.7 续三十四） ==========
+           机制借自用户 2026-09-21 贴来的一段第三方实现（DermExcel 的摄影页），
+           **只借机制、代码全部自己写**（原版没有许可声明 ⇒ 代码与素材都不能搬）：
+           ① 斐波那契球面分布（黄金角）② 滚动驱动旋转 ③ 正面高亮 ④ 一行短标题。
+
+           ⚠️ 原版从 cdnjs 加载 GSAP + ScrollTrigger；**本站不用** ——
+              全站 0 个外部依赖，引 CDN 会破掉「纯静态、自己实现」这条。理由详见 script.js 同名注释。
+           ⚠️ 图片列表在 script.js 的 SPHERE_PHOTOS —— **素材到位后改那一处即可**（现在先用原有 5 张占位）。
+           ⚠️ 整块 `aria-hidden` —— 同样的照片在下面的照片墙里有 alt 描述，
+              球体是 3D 装饰，读屏念它两遍没有意义（可访问的那份在下面）。 -->
+      <div class="sphere-gallery" id="sphereGallery" aria-hidden="true">
+        <!-- 用 200vh 拉出可滚动的距离，里面 sticky 住一屏：
+             不劫持滚动，只是「滚过它就转」。想更短改 .sphere-gallery 的高度即可。 -->
+        <div class="sphere-scene">
+          <div class="sphere" id="sphere"></div>
+          <p class="sphere-label" id="sphereLabel"></p>
+        </div>
       </div>
       <div class="photo-grid masonry reveal">
         <figure class="photo-item" id="photo-calligraphy">

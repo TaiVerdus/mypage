@@ -1037,6 +1037,143 @@ section {
   column-gap: var(--sp-4);
 }
 
+/* ---------- 15b. 球体画廊（V2.7 续三十四） ----------
+   机制借自用户贴来的一段第三方实现（DermExcel 的摄影页）：斐波那契球面分布 +
+   滚动驱动旋转 + 正面高亮。**只借机制，代码自己写**（原版无许可声明）。
+   ⚠️ 原版用 GSAP + ScrollTrigger（走 cdnjs）；这里**不用任何外部依赖**，
+      滚动进度自己算，动画走 rAF + transform —— 和本站彩色形状场同一套写法。
+
+   滚动怎么做：外层给足高度（可调），里面 sticky 住一屏 ⇒
+   **不劫持滚动**，只是「滚过这一段，球就转」。这是原版的思路，也是它最值得借的一点。
+
+   ⚠️ 这里**故意不写 `overflow: hidden`**：
+      ① 它会破坏 `position: sticky`（让自己成为 sticky 的滚动容器）
+      ② 它会让 `preserve-3d` 被压平，卡片的远近排序就没了
+      改成「球体半径按视口算」（见 script.js），卡片自然收在一屏内，不需要裁。 */
+.sphere-gallery {
+  position: relative;
+  height: 200vh;              /* 滚过两屏：够看清转动，又不至于拖沓。想短就改这里 */
+}
+
+.sphere-scene {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1200px;
+}
+
+.sphere {
+  position: relative;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* 球面上的一张卡：居中靠负 margin（宽高的一半），位置由 JS 用 translate3d 摆 */
+.sphere-card {
+  position: absolute;
+  width: 150px;
+  height: 200px;
+  margin: -100px 0 0 -75px;
+  overflow: hidden;
+  border: 1px solid rgb(var(--c-brand-rgb) / .18);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-2);
+  backface-visibility: hidden;
+  /* 非正面：压暗 + 降饱和。正面那张恢复 —— 这就是原版的「正面高亮」机制 */
+  filter: grayscale(.75) brightness(.55);
+  opacity: .7;
+  transition: filter .45s ease, opacity .45s ease;
+}
+
+.sphere-card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sphere-card.is-front {
+  border-color: rgb(var(--c-brand-rgb) / .55);
+  box-shadow: 0 0 0 1px rgb(var(--c-brand-rgb) / .3), var(--sh-3);
+  filter: none;
+  opacity: 1;
+}
+
+/* 球形旁边那行短标题（用户要的是「只要短标题」，不写长描述）。
+   它贴在 sticky 那一屏的底部，所以滚动时一直看得见。 */
+.sphere-label {
+  position: absolute;
+  bottom: var(--sp-7);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 16px;
+  border-radius: var(--r-pill);
+  background: rgb(var(--c-bg-rgb) / .72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgb(var(--c-brand-rgb) / .18);
+  font-size: var(--fs-caption);
+  letter-spacing: .18em;
+  color: var(--color-brand);
+  white-space: nowrap;
+}
+
+/* ⚠️ 系统要求「减少动效」时**不转**：球体摊平成一行静态照片。
+   这是硬要求（本站的无障碍标准），不是可选优化。
+   摊平靠 CSS 就好，不用改 JS —— 卡片的内联 transform 被 !important 压掉。 */
+@media (prefers-reduced-motion: reduce) {
+  .sphere-gallery {
+    height: auto;
+  }
+
+  .sphere-scene {
+    position: static;
+    height: auto;
+    padding: var(--sp-7) 24px;      /* 24px = 站点的横向留白，和 .hero-content 一致 */
+  }
+
+  .sphere {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-4);
+    justify-content: center;
+    width: auto;
+    height: auto;
+    transform: none !important;
+  }
+
+  .sphere-card {
+    position: static;
+    margin: 0;
+    width: 128px;
+    height: 168px;
+    transform: none !important;
+    filter: none;
+    opacity: 1;
+  }
+
+  .sphere-label {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .sphere-gallery {
+    height: 160vh;
+  }
+
+  .sphere-card {
+    width: 104px;
+    height: 140px;
+    margin: -70px 0 0 -52px;
+  }
+}
+
 .photo-item {
   position: relative;
   margin: 0 0 var(--sp-4);

@@ -833,3 +833,176 @@ window.addEventListener('resize', function () {
 })();
 
 
+/* ========== 球体画廊（V2.7 续三十四） ==========
+   机制借自用户 2026-09-21 贴来的一段第三方实现（DermExcel 的摄影页）：
+   ① 斐波那契球面分布（黄金角）② 滚动驱动旋转 ③ 正面高亮 ④ 一行短标题。
+
+   ⚠️ **没有抄它的代码，也没有用 GSAP。**
+      原版从 cdnjs 加载 GSAP + ScrollTrigger；本站 **0 个外部依赖**（只加载本地 script.js），
+      引 CDN 会破掉「纯静态、无框架、自己实现」这条 —— 那正是课程里说得清的技术选择。
+      所以这里自己算：滚动进度 = 外层容器滚过视口的比例；动画走 rAF + transform，
+      和上面彩色形状场是同一套写法。滚动本身**不劫持**：外层给高度、里面 sticky 住一屏。
+
+   ⚠️ 两处**刻意比原版做得更对**：
+      1. 原版用 `floor(progress × 张数)` 猜「哪张在正面」—— 张数与滚动距离对不上时，
+         文字会和画面错位。这里按**真实深度**算：把每张卡片的位置按当前旋转角做矩阵变换，
+         取 z 最大的那张 ⇒ 标题永远跟着真正转到前面的那张。
+      2. 半径**按视口算**（原版写死 380 / 移动端 200）⇒ 卡片不会被挤出屏幕，
+         于是**不需要用 `overflow: hidden` 去裁**（那会压平 preserve-3d，也会让 sticky 失效）。
+
+   ⚠️ 尊重 prefers-reduced-motion：系统要求减少动效时**根本不启动滚动动画**，
+      球体由 CSS 摊平成一行静态照片，那行短标题也隐藏。
+
+   📷 **换素材只改下面 SPHERE_PHOTOS**（src + 一行短标题）—— 现在先用原有的 5 张占位。 */
+(function () {
+  var gallery = document.getElementById('sphereGallery');
+  var sphere = document.getElementById('sphere');
+  var labelEl = document.getElementById('sphereLabel');
+  if (!gallery || !sphere || !labelEl) return;          // 子页没有这块，直接退出
+
+  // 👉 素材到位后改这里。label 只写一行短标题（用户明确要的），不写长描述。
+  var SPHERE_PHOTOS = [
+    { src: 'images/1.jpg', label: '书法' },
+    { src: 'images/2.jpg', label: '架子鼓' },
+    { src: 'images/3.jpg', label: '摄影' },
+    { src: 'images/4.jpg', label: '音乐' },
+    { src: 'images/5.jpg', label: '篮球' }
+  ];
+
+  var TOTAL = 24;                    // 球面要铺满：把 5 张循环到 24 张
+  var GOLDEN = Math.PI * (3 - Math.sqrt(5));   // 黄金角 ≈ 2.39996 rad
+
+  var nodes = [];
+  var radius = 0;
+  var lastLabel = '';
+  var visible = false;
+  var ticking = false;
+
+  // 半径按视口算：两轴较小者 × 0.32，封顶 400、保底 140
+  function computeRadius() {
+    var w = window.innerWidth || 375;
+    var h = window.innerHeight || 700;
+    return Math.max(140, Math.min(400, Math.min(w, h) * 0.32));
+  }
+
+  // ---------- 1. 斐波那契球面分布 ----------
+  function build() {
+    radius = computeRadius();
+    sphere.innerHTML = '';
+    nodes = [];
+
+    for (var i = 0; i < TOTAL; i++) {
+      var it = SPHERE_PHOTOS[i % SPHERE_PHOTOS.length];
+
+      var card = document.createElement('div');
+      card.className = 'sphere-card';
+      var img = document.createElement('img');
+      img.src = it.src;
+      img.alt = '';                  // 装饰用：可访问的那份在下面的照片墙里（带 alt）
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      card.appendChild(img);
+
+      var phi = Math.acos(1 - 2 * (i + 0.5) / TOTAL);   // 极角：均匀铺开
+      var theta = GOLDEN * i;                           // 方位角：黄金角错开
+      var x = radius * Math.cos(theta) * Math.sin(phi);
+      var y = radius * Math.sin(theta) * Math.sin(phi);
+      var z = radius * Math.cos(phi);
+
+      // 让每张卡片朝外：先按 x/z 偏航，再按 y 俯仰
+      var ry = Math.atan2(x, z) * 180 / Math.PI;
+      var rx = Math.asin(Math.max(-1, Math.min(1, -y / radius))) * 180 / Math.PI;
+
+      card.style.transform =
+        'translate3d(' + x.toFixed(1) + 'px, ' + y.toFixed(1) + 'px, ' + z.toFixed(1) + 'px) ' +
+        'rotateY(' + ry.toFixed(1) + 'deg) rotateX(' + rx.toFixed(1) + 'deg)';
+
+      sphere.appendChild(card);
+      nodes.push({ el: card, x: x, y: y, z: z, depth: 0, label: it.label });
+    }
+  }
+
+  // ---------- 2. 滚动进度：外层滚过视口的比例 ----------
+  function progress() {
+    var r = gallery.getBoundingClientRect();
+    var span = r.height - window.innerHeight;
+    if (span <= 0) return 0;
+    var p = -r.top / span;
+    return p < 0 ? 0 : (p > 1 ? 1 : p);
+  }
+
+  // ---------- 3. 渲染：转球 + 按真实深度标正面 ----------
+  // CSS 的 `rotateY(A) rotateX(B)` 表示先绕 X 再绕 Y（transform 从右往左作用），
+  // 所以 z = −x·sinA + (y·sinB + z·cosB)·cosA。
+  // 两个可自检的特例：A=B=0 时取 z 最大 ⇒ 正对观众的那张；A=180° 时取 z 最小 ✓
+  function render(p) {
+    var A = p * 720;                  // 转两圈
+    var B = 6 + p * 14;               // 一点点前倾就够；转 45° 会把球压成一个盘
+
+    sphere.style.transform =
+      'rotateY(' + A.toFixed(2) + 'deg) rotateX(' + B.toFixed(2) + 'deg)';
+
+    var sinA = Math.sin(A * Math.PI / 180), cosA = Math.cos(A * Math.PI / 180);
+    var sinB = Math.sin(B * Math.PI / 180), cosB = Math.cos(B * Math.PI / 180);
+
+    var best = 0, bestD = -Infinity, i, nd;
+    for (i = 0; i < nodes.length; i++) {
+      nd = nodes[i];
+      nd.depth = -nd.x * sinA + (nd.y * sinB + nd.z * cosB) * cosA;
+      if (nd.depth > bestD) { bestD = nd.depth; best = i; }
+    }
+
+    // 高亮「朝前的那一小簇」：按深度阈值，不按序号 —— 序号和远近没有关系
+    var cut = bestD * 0.86;
+    for (i = 0; i < nodes.length; i++) {
+      nd = nodes[i];
+      var front = nd.depth >= cut;
+      if (front !== nd.el.classList.contains('is-front')) {
+        nd.el.classList.toggle('is-front', front);
+      }
+    }
+
+    // 短标题：只在真的换了一张时写 DOM，别每帧都动
+    var name = nodes[best].label;
+    if (name && name !== lastLabel) {
+      lastLabel = name;
+      labelEl.textContent = name;
+    }
+  }
+
+  function requestRender() {
+    if (!visible || ticking) return;
+    ticking = true;
+    requestAnimationFrame(function () {
+      ticking = false;
+      render(progress());
+    });
+  }
+
+  function onResize() {
+    build();
+    render(progress());
+  }
+
+  // ---------- 4. 启动 ----------
+  build();
+  render(progress());
+
+  var reduced = window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!reduced) {
+    window.addEventListener('scroll', requestRender, { passive: true });
+    window.addEventListener('resize', onResize, { passive: true });
+
+    // 只在球体进入视口时才响应滚动 —— 页面别处滚动不该白算
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) {
+        visible = entries[0].isIntersecting;
+        if (visible) requestRender();
+      }, { rootMargin: '120px' }).observe(gallery);
+    } else {
+      visible = true;
+    }
+  }
+})();
