@@ -42,6 +42,15 @@ def cover(im, tw, th):
     return im2.crop((left, top, left + tw, top + th))
 
 
+def trim_bottom(im, pct):
+    """裁掉底部若干百分比 —— 用来去掉手机相机的「Live Moment / 相机参数」水印。
+    ⚠️ 只裁底边，不动其它三边：手机水印一律贴在底部中间。"""
+    if pct <= 0:
+        return im
+    keep = max(1, int(round(im.height * (1 - pct))))
+    return im.crop((0, 0, im.width, keep))
+
+
 def collect(paths):
     out = []
     for p in paths:
@@ -63,6 +72,8 @@ def main():
     ap.add_argument("--w", type=int, default=360)
     ap.add_argument("--h", type=int, default=480)
     ap.add_argument("--q", type=int, default=82)
+    ap.add_argument("--trim-bottom", type=float, default=0.0,
+                    help="裁掉底部百分之几（0.12 = 12%%），用于去掉手机相机水印")
     a = ap.parse_args()
 
     out_dir = a.out if os.path.isabs(a.out) else os.path.join(SITE, a.out)
@@ -75,11 +86,14 @@ def main():
 
     total_in = total_out = 0
     print("目标 %d×%d（3:4 居中裁切）· 质量 %d · 输出到 %s" % (a.w, a.h, a.q, a.out))
+    if a.trim_bottom:
+        print("⚠️  每张先裁掉底部 %.1f%%（去手机相机水印）" % (a.trim_bottom * 100))
     print("-" * 68)
     for p in files:
         in_kb = os.path.getsize(p) / 1024
         im = Image.open(p)
         im = ImageOps.exif_transpose(im)        # ⚠️ 先按 EXIF 摆正，否则竖拍会躺倒
+        im = trim_bottom(im, a.trim_bottom)     # 再裁掉底部的水印条
         if im.mode not in ("RGB", "L"):
             im = im.convert("RGB")
         th = cover(im, a.w, a.h)

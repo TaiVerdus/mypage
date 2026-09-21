@@ -862,19 +862,31 @@ window.addEventListener('resize', function () {
 
   // 👉 素材到位后改这里。label 只写一行短标题（用户明确要的），不写长描述。
   // ⚠️ 这里用的是 images/sphere/ 下的**缩略图**，不是原图 —— 球体卡片只显示 150×200 px，
-  //    喂原图纯浪费（原来 5 张原图 1.4 MB，缩略图 128 KB）。
+  //    喂原图纯浪费（5 张原图 1407 KB，缩略图 128 KB）。
   //    缩略图由 `python tools/make-thumbs.py <源图或目录>` 生成（3:4 居中裁切，和 CSS 的
   //    object-fit: cover 一致 ⇒ 视觉没变化），顺带摆正 EXIF 方向、去掉 EXIF（含 GPS）。
   //    换素材的流程：把照片丢进一个目录 → 跑那个脚本 → 改下面这张表。
+  //    ⚠️ 7.jpg 跑时额外加了 `--trim-bottom 0.23` —— 那张原图底部有手机相机的水印
+  //       （Leica / Live Moment / 相机参数 / 机型），不裁掉会带进作品集。
+  // ⚠️ label 是**按画面内容拟的**（用户没给标题），是描述不是解读；要改直接说。
   var SPHERE_PHOTOS = [
     { src: 'images/sphere/1.jpg', label: '书法' },
     { src: 'images/sphere/2.jpg', label: '架子鼓' },
     { src: 'images/sphere/3.jpg', label: '摄影' },
     { src: 'images/sphere/4.jpg', label: '音乐' },
-    { src: 'images/sphere/5.jpg', label: '篮球' }
+    { src: 'images/sphere/5.jpg', label: '篮球' },
+    { src: 'images/sphere/6.jpg', label: '站台' },
+    { src: 'images/sphere/7.jpg', label: '夜市' },
+    { src: 'images/sphere/8.jpg', label: '演唱会' },
+    { src: 'images/sphere/9.jpg', label: '步道' }
   ];
 
-  var TOTAL = 24;                    // 球面要铺满：把 5 张循环到 24 张
+  // 球面要铺满才好看：把照片循环到「够密、又能被张数整除」的张数 ——
+  // ⚠️ 要整除：9 张循环到 24 张的话，有 3 张会比别的少露一次，转动时看得出来。
+  //    9 张 ⇒ 27 张（每张 3 次）；5 张 ⇒ 25 张；12 张 ⇒ 24 张。
+  var MIN_CARDS = 24;
+  var TOTAL = Math.max(MIN_CARDS,
+    Math.ceil(MIN_CARDS / SPHERE_PHOTOS.length) * SPHERE_PHOTOS.length);
   var GOLDEN = Math.PI * (3 - Math.sqrt(5));   // 黄金角 ≈ 2.39996 rad
 
   var nodes = [];
