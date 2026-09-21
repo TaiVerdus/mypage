@@ -70,7 +70,7 @@ var KNOWLEDGE = [
   },
   {
     keywords: ['music', 'album', 'albums', 'song', 'songs', 'listen', 'listening', 'artist', 'singer', 'favourite', 'favorite', 'david tao', 'joker xue', 'justin bieber', 'bieber'],
-    answer: '他常回去听的三位：陶喆、薛之谦、Justin Bieber。下面还有一栏他喜欢的专辑。'
+    answer: '他常回去听的三位：陶喆、薛之谦、Justin Bieber。下面那栏「每日推荐」是他每天挑的（有时两三首），再往下收着「常听的」15 首。'
   },
   {
     keywords: ['enfj', 'personality', 'person', 'what kind', 'mbti'],

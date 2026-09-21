@@ -1908,22 +1908,156 @@ body {
    行悬停只做「整行浅底」这一件事：那是扫读时对齐三列的辅助，
    **不是可点击的暗示** —— 所以没有光标变化、没有图标、没有曲名变色。 */
 
-.playlists {
+/* ---- 每日推荐（V2.7 续三十一，取代原来的三张歌单） ----
+   版式：今天一条做主角（大卡）+ 最近几天（紧凑列表）+「常听的」折叠区（旧歌单不丢）。
+   数据源 data/daily-picks.json；这一段由 tools/build-daily.py 生成，别手改生成物。
+   版权口径沿用上面那段：只列事实，不挂播放器 / 不放音频 / 不抄歌词 / 不复刻封面。 */
+
+.daily {
   display: grid;
-  gap: var(--sp-8);
+  gap: var(--sp-7);
 }
 
-/* ---- 歌单头：歌手名 + 曲目数 + 「全部收听」 ---- */
-.playlist-head {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: var(--sp-1) var(--sp-4);
+/* 今日推荐：一块卡片，焦点落在一首（或两三首）歌上。
+   左边那道青 + 圆角只留右侧，和「说明块」用同一套语言。 */
+.daily-today {
+  padding: var(--sp-6) var(--sp-7);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-left: 3px solid var(--color-brand);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+}
+
+.daily-today-k {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  letter-spacing: .14em;
+  color: var(--color-brand);
+}
+
+.daily-today-k time {
+  font-variant-numeric: tabular-nums;
+}
+
+.daily-items {
+  list-style: none;
+  margin: var(--sp-4) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--sp-5);
+}
+
+.daily-items li + li {
+  padding-top: var(--sp-5);
+  border-top: 1px solid var(--color-line);
+}
+
+.daily-title {
+  font-family: var(--font-serif);
+  font-size: var(--fs-h3);
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.daily-meta {
+  margin-top: var(--sp-2);
+  font-size: var(--fs-sm);
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.daily-note {
+  margin-top: var(--sp-3);
+  font-size: var(--fs-sm);
+  color: var(--color-ink);
+}
+
+/* 空状态：备选池还没开张时如实说 —— 不放假内容 */
+.daily-empty {
+  margin-top: var(--sp-3);
+  font-size: var(--fs-sm);
+  color: var(--color-muted);
+}
+
+/* ---- 最近几天 ---- */
+.daily-recent-k {
   padding-bottom: var(--sp-3);
   border-bottom: 1px solid var(--color-line-strong);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  letter-spacing: .14em;
+  color: var(--color-muted);
 }
 
-.playlist-name {
+.daily-recent-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.daily-recent-list li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-2);
+  border-bottom: 1px solid var(--color-line);
+  font-size: var(--fs-sm);
+}
+
+.daily-recent-list time {
+  flex: 0 0 5.4em;
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.daily-recent-main {
+  color: var(--color-ink);
+}
+
+/* ---- 常听的（折叠）---- */
+.daily-classics {
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--r-md);
+}
+
+.daily-classics > summary {
+  padding: var(--sp-4) var(--sp-6);
+  cursor: pointer;
+  list-style: none;                 /* 去掉默认三角，自己画一个 */
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.daily-classics > summary::-webkit-details-marker {
+  display: none;
+}
+
+.daily-classics > summary::after {
+  content: "＋";
+  float: right;
+  color: var(--color-muted);
+}
+
+.daily-classics[open] > summary::after {
+  content: "－";
+}
+
+.daily-classics > summary:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+.classics-groups {
+  display: grid;
+  gap: var(--sp-7);
+  padding: var(--sp-2) var(--sp-6) var(--sp-6);
+}
+
+.classics-name {
+  padding-bottom: var(--sp-3);
+  border-bottom: 1px solid var(--color-line-strong);
   font-family: var(--font-serif);
   font-size: var(--fs-h3);
   font-weight: 500;
@@ -2011,8 +2145,22 @@ body {
 }
 
 @media (max-width: 640px) {
-  .playlists {
-    gap: var(--sp-7);
+  /* 每日推荐：窄屏把大卡与折叠区的内边距收一收，日期列也收窄 */
+  .daily-today {
+    padding: var(--sp-5) var(--sp-4);
+  }
+
+  .classics-groups {
+    gap: var(--sp-6);
+    padding: var(--sp-2) var(--sp-4) var(--sp-5);
+  }
+
+  .daily-classics > summary {
+    padding: var(--sp-4);
+  }
+
+  .daily-recent-list time {
+    flex: 0 0 4.2em;
   }
 
   .track {
