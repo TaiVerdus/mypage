@@ -1985,21 +1985,19 @@ body {
   color: var(--color-brand-deep);
 }
 
-/* 照片说明里的「兴趣」芯片：和 photo-no 同一个 pill 家族，但用浅青底区分语义 */
-.photo-tag {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 36px;
-  height: 30px;
-  padding: 0 10px;
-  border-radius: var(--r-pill);
-  background: var(--color-mint);
-  color: var(--color-brand);
-  font-size: var(--fs-caption);
-  font-weight: 600;
-  letter-spacing: .02em;
-}
+/* ---- 照片说明里的「兴趣」芯片 .photo-tag 已移除（V2.7 续三十八）----
+   用户 2026-09-21 要求去掉照片右下角的标签 ⇒ 9 张照片上的芯片一并去掉
+   （**没只去新加的 4 张**：那样会一半有一半没有，看起来像没做完）。
+   ⚠️ 保留的两样：
+     · 左上角的编号 .photo-no（01–09）—— 它是这套照片的骨架，不是标签
+     · 舞台那张的 .photo-credit「摄影：活动主办方」—— 那是**署名**，不是标签，
+       是给别人的照片做归属用的，不能去
+   ⚠️ 「兴趣 → 照片」的**链接没有受影响**：那四个链接在「兴趣」卡里
+      （<a href="#photo-drums"> 等），跳转目标 id="photo-*" 都还在。
+      去掉的只是照片上那份**可见的文字标签**。
+   ⚠️ 每张照片的 alt 描述也都还在 —— 去掉可见标签后，alt 是唯一的图像描述，
+      对读屏用户比以前更重要。
+   要恢复这条规则，从 git 取（本次提交之前）。 */
 
 /* 从兴趣标签点过来时，照片别被 sticky 导航挡住 */
 .photo-item {
