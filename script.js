@@ -58,35 +58,35 @@ updateActiveNav();
 var KNOWLEDGE = [
   {
     keywords: ['study', 'studying', 'course', 'calculus', 'linear', 'algebra', 'program', 'programming', 'major', 'class', 'classes'],
-    answer: 'Shixian is focused on three things right now: Calculus, Linear Algebra, and Computer Programming. Math and coding together — the fundamentals for a brain–computer interface direction.'
+    answer: '释贤现在重心在三件事上：微积分、线性代数和计算机编程。数学加编程——这是脑机接口方向的基本功。'
   },
   {
     keywords: ['bci', 'brain', 'major', 'identity', 'focus', 'why', 'direction', 'interface'],
-    answer: 'Shixian is a brain–computer interface student. Why this direction? To be honest he never told me the details, so I won’t make anything up — ask him yourself.'
+    answer: '释贤是脑机接口方向的学生。为什么选这个方向？说实话他没告诉过我细节，所以我不编——你自己问他。'
   },
   {
     keywords: ['interest', 'hobby', 'hobbies', 'drum', 'drums', 'calligraphy', 'basketball', 'fun', 'free time', 'do for fun'],
-    answer: 'His free time is pretty full: music, drums, calligraphy, and basketball. Loud and quiet both — drums and basketball are the loud, calligraphy is the quiet.'
+    answer: '他课余挺满的：听音乐、打鼓、练书法、打篮球。安静的吵闹的都有——打鼓和篮球是吵的，书法是静的。'
   },
   {
     keywords: ['music', 'album', 'albums', 'song', 'songs', 'listen', 'listening', 'artist', 'singer', 'favourite', 'favorite', 'david tao', 'joker xue', 'justin bieber', 'bieber'],
-    answer: 'Three artists he keeps coming back to: David Tao (陶喆), Joker Xue (薛之谦) and Justin Bieber. There’s a shelf of his favourite albums further down this page.'
+    answer: '他常回去听的三位：陶喆、薛之谦、Justin Bieber。下面还有一栏他喜欢的专辑。'
   },
   {
     keywords: ['enfj', 'personality', 'person', 'what kind', 'mbti'],
-    answer: 'Shixian is an ENFJ. Beyond the label, I’d rather not put words in his mouth — for a real sense of who he is, talk to him directly.'
+    answer: '释贤是 ENFJ。除了这个标签，我不想替他多说——想真正认识他，直接找他聊。'
   },
   {
     keywords: ['ai', 'frontier', 'tech', 'technology', 'future', 'follow', 'research'],
-    answer: 'Shixian follows AI research closely, especially where it meets brain–computer interfaces. He explains his own views far better than I can — ask him directly.'
+    answer: '释贤一直跟着 AI 的研究走，尤其是它和脑机接口交叉的地方。他自己的看法比我能说的清楚多了——直接问他。'
   },
   {
     keywords: ['who are you', 'name', 'intro', 'wang shixian', 'shixian', 'hello', 'hi', 'hey'],
-    answer: 'Hi! I’m Wang Shixian’s digital twin, greeting visitors while he’s away. The basics: ENFJ, BCI student, into the AI frontier. Ask away.'
+    answer: '嗨！我是王释贤的数字分身，他不在的时候替他招呼一下访客。基本情况：ENFJ、脑机接口方向、关注 AI 前沿。随便问。'
   }
 ];
 
-var FALLBACK = 'I don’t know that one — ask the real Shixian. I only say what he’s told me, and I don’t make things up.';
+var FALLBACK = '这个我不知道——去问本人吧。我只说告诉过我的事，不编。'
 
 var messagesEl = document.getElementById('chatMessages');
 var inputEl = document.getElementById('chatInput');
@@ -122,7 +122,7 @@ function ask(question) {
   addMessage(question, 'user');          // 1. 先显示用户的问题
   inputEl.value = '';                     // 2. 清空输入框
 
-  var typing = addMessage('typing…', 'bot typing'); // 3. 打字指示
+  var typing = addMessage('正在输入…', 'bot typing'); // 3. 打字指示
 
   setTimeout(function () {                // 4. 模拟思考延迟后给出回答
     typing.remove();
@@ -149,7 +149,7 @@ quickEl.querySelectorAll('.quick-btn').forEach(function (btn) {
 });
 
 // 开场白：分身先打招呼
-addMessage('Hey, I’m Shixian’s digital twin! Ask what he’s studying, what kind of person he is, or his hobbies — and I’ll be honest when I don’t know.', 'bot');
+addMessage('嗨，我是释贤的数字分身！你可以问他正在学什么、是个什么样的人，或者他有什么爱好——不知道的事我会直说。', 'bot');
 
 
 // ---------- 交互四：全屏形状场（光标效果） ----------

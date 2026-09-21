@@ -93,9 +93,13 @@ def counts_with_pending(check_only):
 
 # (文件名, 说明, 正则, 替换用的组)
 RULES = [
+    # ⚠️ 这一条的正则跟的是**页面上那句中文**（V2.7 续三十整站中文化时同步改的）。
+    #    原来是 `· NN commits as of`，中文换成 `· 截至 <日期> 共 NN 次提交` ——
+    #    正则不改的话，这句就再也匹配不上，提交数会停在旧值上变假。
     ("index.html", "项目条目的提交数",
-     r"(· )(\d+)( commits as of)",
-     lambda m, v2, mn: m.group(1) + str(v2 + mn) + m.group(3)),
+     r"(· 截至 )(\d{4}-\d{2}-\d{2})( 共 )(\d+)( 次提交)",
+     lambda m, v2, mn: (m.group(1) + m.group(2) + m.group(3)
+                        + str(v2 + mn) + m.group(5))),
 
     ("index.html", "注释里的分支条数",
      r"(v2 分支 )(\d+)( 条 \+ main 分支 )(\d+)( 条)",
