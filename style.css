@@ -457,13 +457,13 @@ section {
   text-align: center;
 }
 
-/* 章节说明：补一句口径说明（如照片署名），字号克制，不与标题抢层级 */
-.section-note {
-  margin-top: var(--sp-4);
-  max-width: 52ch;
-  font-size: var(--fs-sm);
-  color: var(--color-muted);
-}
+/* ---- .section-note 已移除（V2.7 续三十三）----
+   它原本是「章节说明：补一句口径说明（如照片署名）」。
+   两个用它的区块都按用户要求把说明删了：音乐区（续三十二）、摄影区（续三十三），
+   ⇒ 全站再无引用，规则一并移除。
+   ⚠️ 照片署名**没有丢** —— 舞台那张照片自己身上还挂着 .photo-credit
+      「摄影：活动主办方」，署名跟着照片走比写在区块说明里更稳。
+   要恢复这条规则，从 git 取（见续三十二那个提交之前的版本）。 */
 
 .eyebrow {
   display: inline-block;
@@ -2014,159 +2014,23 @@ body {
   color: var(--color-ink);
 }
 
-/* ---- 常听的（折叠）---- */
-.daily-classics {
-  background: var(--color-surface);
-  border: 1px solid var(--color-line);
-  border-radius: var(--r-md);
-}
-
-.daily-classics > summary {
-  padding: var(--sp-4) var(--sp-6);
-  cursor: pointer;
-  list-style: none;                 /* 去掉默认三角，自己画一个 */
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  color: var(--color-ink);
-}
-
-.daily-classics > summary::-webkit-details-marker {
-  display: none;
-}
-
-.daily-classics > summary::after {
-  content: "＋";
-  float: right;
-  color: var(--color-muted);
-}
-
-.daily-classics[open] > summary::after {
-  content: "－";
-}
-
-.daily-classics > summary:focus-visible {
-  outline: 2px solid var(--color-brand);
-  outline-offset: 2px;
-}
-
-.classics-groups {
-  display: grid;
-  gap: var(--sp-7);
-  padding: var(--sp-2) var(--sp-6) var(--sp-6);
-}
-
-.classics-name {
-  padding-bottom: var(--sp-3);
-  border-bottom: 1px solid var(--color-line-strong);
-  font-family: var(--font-serif);
-  font-size: var(--fs-h3);
-  font-weight: 500;
-}
-
-.playlist-en {
-  margin-left: var(--sp-2);
-  font-family: var(--font-sans);
-  font-size: var(--fs-caption);
-  font-weight: 600;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  color: var(--color-muted);
-}
-
-.playlist-meta {
-  font-size: var(--fs-caption);
-  color: var(--color-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-/* ---- 曲目行：序号 | 曲名 + 歌手·专辑 | 年份 ----
-   用 grid 而不是 table：列宽可控、移动端好降级。
-   注意：这里**不是**链接、也**没有播放键** —— 见文件顶部 §21 的说明 */
-.track-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.track-list li + li {
-  border-top: 1px solid var(--color-line);
-}
-
-.track {
-  display: grid;
-  grid-template-columns: 36px minmax(0, 1fr) 56px;
-  align-items: center;
-  gap: var(--sp-3);
-  padding: var(--sp-3);
-  border-radius: var(--r-sm);
-  transition: background var(--dur-fast) var(--ease-out);
-}
-
-/* 悬停只做一件事：整行浅底。
-   这是「扫读时对齐左中右三列」的辅助，**不是可点击的暗示** ——
-   所以不做曲名变色、不做光标变化、不做行内图标。
-   三列布局没有行悬停时，眼睛很难把曲名和右边的年份对上。 */
-.track:hover {
-  background: rgb(var(--c-brand-rgb) / .06);
-}
-
-/* 序号：纯数字，不做悬停变形 —— 没有播放键 */
-.track-no {
-  font-size: var(--fs-caption);
-  color: var(--color-muted);
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
-
-.track-main {
-  min-width: 0;                  /* 让子元素的省略号生效 */
-}
-
-.track-title {
-  display: block;
-  font-family: var(--font-serif);
-  font-size: var(--fs-h3);
-  font-weight: 500;
-  line-height: 1.3;
-}
-
-.track-sub {
-  display: block;
-  margin-top: 2px;
-  font-size: var(--fs-caption);
-  color: var(--color-muted);
-}
-
-.track-year {
-  font-size: var(--fs-caption);
-  color: var(--color-muted);
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
+/* ---- 「常听的」折叠区样式已移除（V2.7 续三十二）----
+   用户 2026-09-21 要求把「常听的 15 首」从页面删掉 ⇒ 配套样式成了死代码，一并移除：
+   .daily-classics / .classics-groups / .classics-name / .track-list / .track /
+   .track-no / .track-main / .track-title / .track-sub / .track-year /
+   .playlist-en / .playlist-meta（641 行断点里的 .track 覆盖也一并去了）。
+   ⚠️ 要恢复「常听的」：**样式和数据都得从 git 取** —— 只往 data/daily-picks.json 的
+   classics 里填数据、而不恢复样式，会渲染出一堆没有样式的裸标签。
+   数据见提交 d721dc9，样式见它前一个提交。 */
 
 @media (max-width: 640px) {
-  /* 每日推荐：窄屏把大卡与折叠区的内边距收一收，日期列也收窄 */
+  /* 每日推荐：窄屏把大卡的内边距收一收，日期列也收窄 */
   .daily-today {
     padding: var(--sp-5) var(--sp-4);
   }
 
-  .classics-groups {
-    gap: var(--sp-6);
-    padding: var(--sp-2) var(--sp-4) var(--sp-5);
-  }
-
-  .daily-classics > summary {
-    padding: var(--sp-4);
-  }
-
   .daily-recent-list time {
     flex: 0 0 4.2em;
-  }
-
-  .track {
-    grid-template-columns: 26px minmax(0, 1fr) 44px;
-    gap: var(--sp-2);
-    padding: var(--sp-3) var(--sp-2);
   }
 }
 

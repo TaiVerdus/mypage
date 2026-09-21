@@ -2,49 +2,14 @@
   "_说明": "「每日推荐」的唯一数据源。页面里那一段由 tools/build-daily.py 生成，别手改生成物。",
   "_怎么加歌": "把歌加进 pool（备选池）。每天由自动化取池子里的第一条，挪进 history 顶上（带当天日期），再重跑生成脚本。",
   "_字段": "title 歌名 / artist 歌手 / album 专辑 / year 年份（数字）/ note 可选的一句推荐理由（用户自己的话，没有就留空串）",
+  "_缺失字段怎么办": "album / year 没有就留空 —— 生成器会跳过空的那几项，绝不编造年份。",
   "_版权口径": "只存「事实」——歌名、歌手、专辑、年份。不存音频、不存歌词、不存封面。",
   "_池子空了": "history 会一直留着最后一条，页面不会变空；自动化会跳过并不报错。",
+  "_classics 已清空": "「常听的 15 首」按用户要求于 2026-09-21 从页面删除（V2.7 续三十二）。原来那 15 首仍在 git 历史里（提交 d721dc9）。",
 
   "pool": [],
 
   "history": [],
 
-  "classics": [
-    {
-      "name": "陶喆",
-      "en": "David Tao",
-      "meta": "5 首 · 1997–2005",
-      "tracks": [
-        { "title": "爱很简单", "album": "David Tao", "year": 1997 },
-        { "title": "飞机场的10:30", "album": "David Tao", "year": 1997 },
-        { "title": "普通朋友", "album": "I'm OK", "year": 1999 },
-        { "title": "黑色柳丁", "album": "黑色柳丁", "year": 2001 },
-        { "title": "就是爱你", "album": "太平盛世", "year": 2005 }
-      ]
-    },
-    {
-      "name": "薛之谦",
-      "en": "Joker Xue",
-      "meta": "5 首 · 2006–2020",
-      "tracks": [
-        { "title": "认真的雪", "album": "薛之谦", "year": 2006 },
-        { "title": "深深爱过你", "album": "未完成的歌", "year": 2009 },
-        { "title": "丑八怪", "album": "意外", "year": 2013 },
-        { "title": "演员", "album": "绅士", "year": 2015 },
-        { "title": "天外来物", "album": "天外来物", "year": 2020 }
-      ]
-    },
-    {
-      "name": "Justin Bieber",
-      "en": "",
-      "meta": "5 首 · 2015–2025",
-      "tracks": [
-        { "title": "What Do You Mean?", "album": "Purpose", "year": 2015 },
-        { "title": "Sorry", "album": "Purpose", "year": 2015 },
-        { "title": "Yummy", "album": "Changes", "year": 2020 },
-        { "title": "Daisies", "album": "SWAG", "year": 2025 },
-        { "title": "Yukon", "album": "SWAG", "year": 2025 }
-      ]
-    }
-  ]
+  "classics": []
 }

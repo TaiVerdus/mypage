@@ -105,7 +105,11 @@ def build(data):
         parts.append('          </ul>')
         parts.append('        </div>')
 
-    # ---------- 常听的（折叠，内容不丢） ----------
+    # ---------- 常听的（折叠） ----------
+    # ⚠️ 用户 2026-09-21 要求把「常听的 15 首」从页面删掉，所以 data 里 classics 现在是空数组，
+    #    这一段不会输出任何东西。配套的样式（.daily-classics / .classics-* / .track-* / .playlist-*）
+    #    也一并从 style.css 移除了 —— **要恢复「常听的」，样式和数据都得从 git 取**
+    #    （数据见提交 d721dc9，样式见它前一个提交），只填 classics 而不恢复样式会得到一堆没样式的裸标签。
     classics = data.get("classics") or []
     if classics:
         total = sum(len(g.get("tracks") or []) for g in classics)
