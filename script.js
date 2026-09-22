@@ -109,14 +109,45 @@ updateActiveNav();
 // ⚠️ 完整链路（装环境 → 导微信记录 → 清洗 → 微调 → 起服务 → 填这里）见仓库根的 `WECLONE.md`
 
 var CHAT_BACKEND = {
-  // `weclone-cli server` 起来的 OpenAI 兼容地址，末尾带 /v1/chat/completions
-  // 例：'https://xxxx.trycloudflare.com/v1/chat/completions'
-  // ⚠️ 留空 ⇒ 只用本地知识库（＝接后端之前的行为，页面表现一模一样）
+  /* ---- ① 公网部署用（WeClone 那条路）----
+     `weclone-cli server` 起来的 OpenAI 兼容地址，末尾带 /v1/chat/completions
+     例：'https://xxxx.trycloudflare.com/v1/chat/completions'
+     ⚠️ 留空 ⇒ 见下面 ② 的说明（本机会自动接 ollama，公网则只用知识库） */
   url: '',
-  // WeClone 不校验模型名；官方接 AstrBot / LangBot 的文档里前端就填 gpt-3.5-turbo
-  model: 'gpt-3.5-turbo',
-  // 必须与微调时用的 default_system 一致（WeClone 文档明确要求）；留空则不发送 system
-  system: '',
+  model: 'gpt-3.5-turbo',       // WeClone 不校验模型名；官方文档里前端就填这个
+
+  /* ---- ② 本机 ollama（2026-09-23 加）----
+     ⚠️ **只有当页面是「本机打开」的（`file://` 或 localhost）才会自动接上它。**
+     公开部署的页面在 https 域名下 ⇒ 这一条永远不生效，绝不会去连访客自己的机器。
+     为什么要有它：让「本机能用真模型」和「公网永远不会变成打不开」同时成立 ——
+     不这么设计的话，要么公网页面上挂一个连不上的地址，要么每次本地调试都得手改文件。 */
+  localUrl: 'http://127.0.0.1:11434/v1/chat/completions',
+  localModel: 'qwen2.5:7b',     // 要跟 `ollama list` 里的名字一致
+
+  /* ---- ③ 人物设定 ----
+     ⚠️ 发给模型的前提词。**只写了这个页面上已经公开的事，没有添任何新事实** ——
+        个人信息以「他自己说过」为准，不替他扩写。
+     ⚠️ 以后换成 WeClone 微调出来的模型时，**这段必须与微调时的 `default_system` 一致**
+        （WeClone 官方明确要求），否则微调出来的语气会被这段前提词盖掉。 */
+  system: [
+    '你是王释贤的数字分身，在他的个人主页上替他招呼访客。你是 AI，不是他本人——被问到就直说。',
+    '称他为「释贤」，自称「我」。语气轻松、简短、口语化，像聊天，别用书面腔，也别用 emoji。',
+    '',
+    '你可以说的事（**只限于这些**）：',
+    '· 他大一在读，人在深圳',
+    '· 方向是脑机接口（BCI），也在跟 AI 的前沿',
+    '· MBTI 是 ENFJ',
+    '· 本学期在上：微积分、线性代数、计算机编程',
+    '· 在做的项目：MYPAGE（这个主页本身）、Jarvis + EEG（AI for Science）',
+    '· 爱好：架子鼓、书法、音乐、摄影、篮球、旅游；平时在深圳探店',
+    '· 常听：陶喆、薛之谦、Justin Bieber',
+    '',
+    '必须遵守：',
+    '· 不知道就直说不知道，**绝不要编造**关于他的任何事——他没告诉过我的，我不替他说',
+    '· 不报私人信息（住址、电话、具体年龄这类）；联系方式让他自己给',
+    '· 回答尽量短，两三句就够',
+  ].join('\n'),
+
   timeoutMs: 8000,        // 单次请求上限，超时即落回知识库
   historyTurns: 6,        // 带上最近几轮，对话才有连续性
   breakerMax: 2,          // 连续失败几次就跳闸
@@ -129,16 +160,18 @@ var chatHistory = [];       // 只记「微调分身真答过」的轮次 ——
 
 // ---- 本地联调用的临时覆盖（2026-09-23）----
 // 在地址栏加 `?chat=` 就能临时改后端，**不用改这个文件、也不会被提交**：
-//   index.html?chat=http://127.0.0.1:8005/v1/chat/completions   → 指向本地桩 / 真服务
+//   index.html?chat=http://127.0.0.1:8005/v1/chat/completions   → 指向本地联调桩 / 别的服务
 //   index.html?chat=off                                         → 强制走知识库（演示降级）
-// 公开页面不带这个参数 ⇒ 一切照旧（走 `CHAT_BACKEND.url`，默认空 = 只用知识库）。
+// 公开页面不带这个参数 ⇒ 一切照旧。
 //
 // ⚠️ 必须留 `typeof location !== 'undefined'` 这层守卫：两个回归测试会把这段代码
 //    抽到 node 里执行，那里没有 `location`，不守卫就会直接抛错。
+// ⚠️ `?chat=` 一旦出现就**同时关掉本机自动接管**：显式指定了就别再自作主张回落到 ollama。
 if (typeof location !== 'undefined' && location.search) {
   var chatOverride = /[?&]chat=([^&]*)/.exec(location.search);
   if (chatOverride) {
     var chatOverrideVal = decodeURIComponent(chatOverride[1]);
+    CHAT_BACKEND.localUrl = '';
     CHAT_BACKEND.url = (chatOverrideVal === 'off') ? '' : chatOverrideVal;
   }
 }
@@ -222,9 +255,29 @@ function matchAnswer(question) {
   return FALLBACK;
 }
 
-// 后端现在能不能用：配了地址、且不在跳闸冷却里
+// 页面是不是「本机打开的」—— 只有这种情况才自动接本机 ollama。
+// ⚠️ 公开部署（https 域名）永远返回 false ⇒ **公网页面绝不会去连访客自己的机器**。
+// ⚠️ 测试里没有 `location`，所以这里必须先判 `typeof`。
+function isLocalPage() {
+  if (typeof location === 'undefined' || !location.protocol) return false;
+  if (location.protocol === 'file:') return true;
+  return /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname || '');
+}
+
+// 这次该用哪个后端？① 显式配置的 url → ② 本机打开时的 ollama → 都没有则 null（走知识库）
+function resolvedBackend() {
+  if (CHAT_BACKEND.url) {
+    return { url: CHAT_BACKEND.url, model: CHAT_BACKEND.model };
+  }
+  if (CHAT_BACKEND.localUrl && isLocalPage()) {
+    return { url: CHAT_BACKEND.localUrl, model: CHAT_BACKEND.localModel };
+  }
+  return null;
+}
+
+// 后端现在能不能用：解析得出地址、且不在跳闸冷却里
 function backendUsable() {
-  return CHAT_BACKEND.url !== '' && Date.now() >= backendDownUntil;
+  return resolvedBackend() !== null && Date.now() >= backendDownUntil;
 }
 
 // 只记「微调分身真答过」的轮次：知识库的罐头回答**不进历史**，
@@ -253,7 +306,8 @@ function addOfflineNote() {
 //    这三种在这里**表现完全一样**：返回 null、落回知识库。分不出原因是有意的 ——
 //    访客不该看到技术细节，而主人看「离线版回答」出现得频繁就知道要去查。
 function askBackend(question) {
-  if (!window.fetch) return Promise.resolve(null);
+  var backend = resolvedBackend();
+  if (!backend || !window.fetch) return Promise.resolve(null);
 
   var ctrl = window.AbortController ? new AbortController() : null;
   var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, CHAT_BACKEND.timeoutMs);
@@ -264,13 +318,14 @@ function askBackend(question) {
 
   var init = {
     method: 'POST',
-    // WeClone 的 api_service 不校验 key，但 OpenAI 客户端习惯带一个，填什么都行
+    // 真实服务不校验 key（WeClone 的 api_service 与 ollama 都不校验），
+    // 但 OpenAI 客户端习惯带一个，填什么都行
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer none' },
-    body: JSON.stringify({ model: CHAT_BACKEND.model, messages: msgs, stream: false })
+    body: JSON.stringify({ model: backend.model, messages: msgs, stream: false })
   };
   if (ctrl) init.signal = ctrl.signal;
 
-  return fetch(CHAT_BACKEND.url, init).then(function (res) {
+  return fetch(backend.url, init).then(function (res) {
     clearTimeout(timer);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     return res.json();

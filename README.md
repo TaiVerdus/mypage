@@ -99,14 +99,25 @@ tag `v2.6` 保留：它标记的是 V2.6 那个里程碑，不是「项目到此
 > 给 HR / 面试官看的页面，点开必须答得上话。完整链路（装环境 → 导记录 → 清洗 → 微调 →
 > 起服务 → 填地址）与三个必踩的坑见 **[`WECLONE.md`](WECLONE.md)**。
 
-想在**自己的浏览器里**先看这条链路工作（不需要装模型、不需要 WSL）：
+**本机跑真模型（0 元，不需要 WSL、不需要管理员）**：装了 [ollama](https://ollama.com) 就行 ——
+页面在**本机打开时**会自动接上它（`file://` 或 `localhost`；**公网域名下永远不接**）。
+人物设定在 `script.js` 的 `CHAT_BACKEND.system` 里，跟着 git 走。
 
 ```bash
-python tools/openai-stub.py            # 另开一个终端，起本地假端点
-# 然后打开：index.html?chat=http://127.0.0.1:8005/v1/chat/completions
+ollama pull qwen2.5:7b      # ≈4.7GB
+python -m http.server 8000  # ⚠️ 别双击 index.html：file:// 的 origin 是 null，会被 ollama 默认白名单 403
+# 打开 http://localhost:8000/
 ```
 
-`?chat=` 是临时参数，**不改文件、也不会被提交**；不带它就一切照旧。
+**只想验链路、不想下模型**：用仓库里的联调桩。
+
+```bash
+python tools/openai-stub.py
+# 打开： index.html?chat=http://127.0.0.1:8005/v1/chat/completions
+```
+
+`?chat=` 是临时参数，**不改文件、也不会被提交**；`?chat=off` 可以强制走知识库看降级效果。
+完整说明（含本机 ollama 的两个坑、CORS 实测表）见 **[`WECLONE.md`](WECLONE.md) §2.1 / §2.2**。
 
 ## 仓库与分支
 
@@ -115,7 +126,7 @@ python tools/openai-stub.py            # 另开一个终端，起本地假端点
 
 | 分支 | 内容 | 提交数 |
 | --- | --- | --- |
-| `v2` | V2 版本线：`V2.0` → `V2.7`，当前成果在这里 | 82 |
+| `v2` | V2 版本线：`V2.0` → `V2.7`，当前成果在这里 | 83 |
 | `main` | V1 版本线：`V1.0` / `V1.1` | 2 |
 
 **两条分支没有共同祖先。** V2.0 是在新文件夹里重新 `git init` 开始的，不是从 V1.1 拉出来的分支
@@ -123,7 +134,7 @@ python tools/openai-stub.py            # 另开一个终端，起本地假端点
 哈希全部改变，已经记录在文档里的提交号会集体失效。保持两条独立历史、并在这里说明原因，
 比「看起来整齐」更重要。
 
-页面上写的「共 84 次提交」＝ `v2` 的 82 条 ＋ `main` 的 2 条。
+页面上写的「共 85 次提交」＝ `v2` 的 83 条 ＋ `main` 的 2 条。
 
 ## 设计上几个刻意的决定
 

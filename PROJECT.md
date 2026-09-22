@@ -171,7 +171,7 @@
 | 仓库 | 分支 | 内容 | 提交数 |
 | --- | --- | --- | --- |
 | `github.com/TaiVerdus/mypage` | `main` | V1 版本线（V1.0 → V1.1，2026-09-06） | 2 |
-| `github.com/TaiVerdus/mypage` | **`v2`**（设为默认分支） | V2 版本线（V2.0 → V2.7） | 82 |
+| `github.com/TaiVerdus/mypage` | **`v2`**（设为默认分支） | V2 版本线（V2.0 → V2.7） | 83 |
 
 - **两条分支没有共同祖先**：V2.0 是 2026-09-16 在新文件夹里重新 `git init` 的，不是从 V1.1 拉出来的分支。
   唯一完全相同的文件是 `PROJECT.md`（两边 blob 哈希一致 `9cf01743…`），说明当时是把 V1.1 的文件拷过来再改
@@ -236,6 +236,39 @@ python tools/sync-version.py --check   # 提交后核对：按 git 真实条数�
 `--check` 则按 git 现在的真实条数比对，是**提交之后**用的。
 
 ## 迭代日志
+
+### 2026-09-23 · V2.7 续六十三（0 元方案落地：本机 ollama 接上「真模型版」分身）
+
+**用户**：「0元半小时方案，我电脑有ollama」。
+
+**先勘察，量出四件事**（其中两件是坑）：
+
+| 发现 | 说明 |
+| --- | --- |
+| ollama **0.34.1 已装**，但**服务没在跑** | 托盘程序没起；11434 拒绝连接 |
+| ⚠️ `OLLAMA_MODELS=D:\ollama` 被改过 | `D:\ollama` 里只有 **1.5GB 孤儿 blob、没有任何 manifest** ⇒ 等于没模型（上次下断在中途）；而 `C:\Users\wshix\.ollama\models` 里那个**完整的 `deepseek-r1:7b`（4.4GB）服务端根本不看** ⇒ 白占 |
+| ⚠️ `OLLAMA_HOST` 设成了 `0.0.0.0:11434` | **CLI 连不上**（`ollama list` 报 "something went wrong, please see the server logs"），而服务端日志里 `/api/tags` **明明是 200** ⇒ 是客户端连 `0.0.0.0` 在 Windows 上不通。绕过：`OLLAMA_HOST=127.0.0.1:11434` |
+| ✅ 服务端日志确认 | **ollama 认到 RTX 5070 Laptop / compute `12.0` / CUDA v13 / 可用 6.8 GiB** ⇒ Blackwell 那条顾虑在这条路上不存在 |
+
+**页面侧**：`CHAT_BACKEND` 新增 `localUrl` / `localModel`，并加了 `isLocalPage()` / `resolvedBackend()`：
+
+- 解析顺序：**显式 `url`（WeClone）→ 本机打开时的 ollama → 都没有就用知识库**
+- ⚠️ **只有 `file://` 或 `localhost` / `127.0.0.1` 才接管；公网域名永远不接** ——
+  这条决定了「公网页面会不会去连访客自己的机器」，所以配了专门的回归测试
+  （`tools/test-chat-backend.js` 第 9 节；用例从 26 增到 **37 个**）
+- 人物设定放在页面的 `CHAT_BACKEND.system` 里（跟着 git 走、有版本记录），
+  **只写了页面上已经公开的事，没有添任何新事实**
+- `?chat=` 一旦出现就**同时关掉本机接管**（显式指定了就别再自作主张回落）
+
+**⚠️ 一条必须知道的实测结论（决定了你怎么打开页面）**：ollama 的**默认**白名单里，
+`file://` 页面发的 `Origin: null` 会被 **403** 拒掉，而 `http://localhost:8000` **直接放行**。
+⇒ **不要双击 `index.html`，起个本地 http 服务再打开**（`python -m http.server 8000`）。
+这条是**起第二个实例、故意不给 `OLLAMA_ORIGINS`** 测出来的 —— 因为用户平时用托盘程序启动，
+不会带着那个环境变量。
+
+**验证**：`node --check` 通过 · `test-chat-backend` **37/37** · `test-chat-kb` 17/17 ·
+`check-doc-vs-css` 一致 · `build-daily --check` 一致。
+⚠️ 本环境看不到渲染结果 ⇒ 页面观感由用户目视确认。
 
 ### 2026-09-23 · V2.7 续六十二（WeClone 后端起步：环境勘察 + 用联调桩把链路跑通）
 

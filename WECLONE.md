@@ -80,6 +80,53 @@ node tools/probe-openai-endpoint.js http://127.0.0.1:8005/v1/chat/completions
 
 ---
 
+### 2.2 最快路径：本机 ollama（0 元，2026-09-23 实测）
+
+不需要云、不需要 WSL、不需要管理员。本机实测：**ollama 认到 RTX 5070 Laptop（compute `12.0`，
+CUDA v13，可用 6.8 GiB）** ⇒ Blackwell 那条顾虑在这条路上不存在。
+
+```bash
+# 1. 起服务（托盘程序会自动起；或手动）
+ollama serve
+
+# 2. 拉模型（≈4.7GB；qwen2.5 与 WeClone 默认基座同族，以后换微调版最省事）
+ollama pull qwen2.5:7b
+
+# 3. ⚠️ 不要双击 index.html —— 改成本地 http 服务（见下面那条实测）
+python -m http.server 8000
+# 然后打开： http://localhost:8000/
+```
+
+**页面会自动接上本机 ollama**，不需要改任何配置 —— `script.js` 的 `CHAT_BACKEND.localUrl`
+只在**本机打开时**（`file://` 或 `localhost` / `127.0.0.1`）才接管；
+**公网域名下永远不生效**，绝不会去连访客自己的机器（这条有回归测试盯着，见
+`tools/test-chat-backend.js` 第 9 节）。
+
+#### ⚠️ 为什么必须用 `http://localhost` 而不是双击（实测）
+
+| 页面来源 | 浏览器发的 Origin | ollama **默认**白名单 |
+| --- | --- | --- |
+| `file://`（双击打开） | `null` | **403 Forbidden** ✗ |
+| `http://localhost:8000` | `http://localhost:8000` | **200 + `Access-Control-Allow-Origin`** ✓ |
+
+想让双击也能用，就得把 `OLLAMA_ORIGINS` 设成 `*` 再重启 ollama；
+**但它不设也照样能用 —— 只要用 `http://localhost` 打开**（这也更接近真实部署的样子）。
+
+#### ⚠️ 这台机器上 ollama 自身的两个坑
+
+1. **模型目录被改到了 `D:\ollama`**（`OLLAMA_MODELS=D:\ollama`）。
+   ⚠️ `C:\Users\wshix\.ollama\models` 里还躺着一个**完整的 `deepseek-r1:7b`（4.4GB）**，
+   **服务端根本不看那个目录** ⇒ 那 4.4GB 是白占的（要清理的话挪走/删掉都行）。
+2. **`OLLAMA_HOST` 被设成了 `0.0.0.0:11434`** ⇒ **CLI 会连不上**
+   （`ollama list` 会说「something went wrong, please see the ollama server logs」，
+   而服务端日志里那条 `/api/tags` 明明是 200）。**服务本身是好的**，只是客户端连 `0.0.0.0` 在
+   Windows 上不通。绕过：命令行前加 `OLLAMA_HOST=127.0.0.1:11434`，或用 HTTP 接口。
+
+> **人物设定放在页面里**（`script.js` 的 `CHAT_BACKEND.system`），不放在 ollama 那边 ——
+> 这样它跟着 git 走、有版本记录，而且以后换成 WeClone 微调模型时是同一个位置。
+
+---
+
 ## 3. 后端：六步
 
 ### 第 0 步 · 环境

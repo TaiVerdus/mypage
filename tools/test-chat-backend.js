@@ -26,7 +26,11 @@ function slice(from, to) {
 }
 
 var cfg = slice('var CHAT_BACKEND', 'var KNOWLEDGE');            // 配置 + 三个状态变量
-var fns = slice('function backendUsable', 'function ask(');      // 可用性 / 记账 / 落回标记 / 请求
+// ⚠️ 切片起点必须是 `isLocalPage`，**不能**从 `backendUsable` 开始：
+//    本机 ollama 那条路加进来之后，`backendUsable` 依赖它前面定义的
+//    `isLocalPage` / `resolvedBackend` —— 从它开始切就会把那两个漏掉，
+//    跑起来是 `ReferenceError: resolvedBackend is not defined`（这个坑已经踩过一次）。
+var fns = slice('function isLocalPage', 'function ask(');   // 选后端 / 可用性 / 记账 / 落回标记 / 请求
 
 // 桩：addOfflineNote 会碰 document 与 messagesEl
 var stubs =
@@ -35,14 +39,16 @@ var stubs =
 
 eval(stubs + cfg + '\n' + fns);
 
-// ---- 假 fetch：按 fetchMode 返回不同结果，并记下最后一次请求体 ----
+// ---- 假 fetch：按 fetchMode 返回不同结果，并记下最后一次请求 ----
 var fetchMode = 'ok';
 var lastInit = null;
+var lastUrl = null;
 var calls = 0;
 
 global.fetch = function (url, init) {
   calls++;
   lastInit = init;
+  lastUrl = url;
   if (fetchMode === 'hang') {                       // 永不返回，等被 abort
     return new Promise(function (resolve, reject) {
       if (init.signal) init.signal.addEventListener('abort', function () { reject(new Error('aborted')); });
@@ -74,8 +80,10 @@ function ok(cond, name, extra) {
 }
 function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 var URL_OK = 'https://example.test/v1/chat/completions';
+var LOCAL_URL_DEFAULT = CHAT_BACKEND.localUrl;      // 9.6 会临时清掉，reset() 负责还原
 function reset() {
   CHAT_BACKEND.url = URL_OK;
+  CHAT_BACKEND.localUrl = LOCAL_URL_DEFAULT;
   CHAT_BACKEND.model = 'gpt-3.5-turbo';
   CHAT_BACKEND.system = '';
   CHAT_BACKEND.timeoutMs = 8000;
@@ -176,6 +184,50 @@ function reset() {
   for (var i = 1; i <= 5; i++) remember('q' + i, 'a' + i);
   ok(chatHistory.length === 6, '截断到 historyTurns × 2 = 6 条', '实际 ' + chatHistory.length);
   ok(chatHistory[5].content === 'a5' && chatHistory[0].content === 'q3', '保留的是最近的几轮');
+
+  console.log('\n=== 9. 本机 ollama 自动接管（★ 公网页面绝不能触发）===');
+  // 9.1 没有 location（＝node / 非浏览器）⇒ 不接管
+  reset();
+  CHAT_BACKEND.url = '';
+  delete global.location;
+  ok(resolvedBackend() === null, '没有 location ⇒ 不接管（走知识库）');
+
+  // 9.2 file:// 打开（双击 index.html）⇒ 自动接本机 ollama
+  global.location = { protocol: 'file:', hostname: '', search: '' };
+  ok(isLocalPage() === true, 'file:// ⇒ isLocalPage() = true');
+  var b = resolvedBackend();
+  ok(b !== null && b.url === CHAT_BACKEND.localUrl && b.model === CHAT_BACKEND.localModel,
+    'file:// ⇒ 接到本机 ollama（用 localModel，不是 model）', JSON.stringify(b));
+  ok(backendUsable() === true, '此时后端可用（会先试 ollama）');
+
+  // 9.3 ★ 公网域名 ⇒ 绝不接管（这条是安全底线：不能去连访客自己的机器）
+  global.location = { protocol: 'https:', hostname: 'taiv-v2.pages.dev', search: '' };
+  ok(isLocalPage() === false, 'https 域名 ⇒ isLocalPage() = false');
+  ok(resolvedBackend() === null, '★ 公网页面不接本机、也不报错，直接走知识库');
+
+  // 9.4 本地起 http server 调试时也接管
+  global.location = { protocol: 'http:', hostname: 'localhost', search: '' };
+  ok(isLocalPage() === true, 'http://localhost ⇒ 接管');
+  global.location = { protocol: 'http:', hostname: '127.0.0.1', search: '' };
+  ok(isLocalPage() === true, 'http://127.0.0.1 ⇒ 接管');
+
+  // 9.5 显式配了 url ⇒ 以它为准，本机不抢
+  reset();
+  global.location = { protocol: 'file:', hostname: '', search: '' };
+  var b2 = resolvedBackend();
+  ok(b2 !== null && b2.url === URL_OK, '★ 显式配了 url ⇒ 以它为准（本机 ollama 不抢）');
+  fetchMode = 'ok';
+  await askBackend('q');
+  ok(lastUrl === URL_OK, '请求真的发到显式那个地址', '实际：' + lastUrl);
+
+  // 9.6 ?chat=off 的做法＝把 localUrl 也清掉 ⇒ 强制回知识库
+  reset();
+  var keepLocal = CHAT_BACKEND.localUrl;
+  CHAT_BACKEND.localUrl = '';
+  CHAT_BACKEND.url = '';
+  ok(resolvedBackend() === null, '?chat=off（清掉 localUrl）⇒ 连本机也不接，强制走知识库');
+  CHAT_BACKEND.localUrl = keepLocal;
+  delete global.location;
 
   console.log('\n知识库那侧不受影响；用例 %d / 失败 %d', pass + fail, fail);
   process.exit(fail ? 1 : 0);
