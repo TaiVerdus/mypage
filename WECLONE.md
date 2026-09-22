@@ -67,7 +67,7 @@ python tools/openai-stub.py
 - 验**超时**：`python tools/openai-stub.py --delay 12`（比页面默认的 8 秒长）
 - 强制走知识库：`index.html?chat=off`
 
-> `?chat=` 只影响你自己那次打开；公开页面不带这个参数，一切照旧。
+> 这两个参数（`?chat=` 与 `?model=`）只影响**你自己那次打开**；公开页面不带它们，一切照旧。
 
 **接真后端之前，先用这个探一下它能不能被页面用上：**
 
@@ -89,8 +89,8 @@ CUDA v13，可用 6.8 GiB）** ⇒ Blackwell 那条顾虑在这条路上不存�
 # 1. 起服务（托盘程序会自动起；或手动）
 ollama serve
 
-# 2. 拉模型（≈4.7GB；qwen2.5 与 WeClone 默认基座同族，以后换微调版最省事）
-ollama pull qwen2.5:7b
+# 2. 模型：这台机器已经装好 `deepseek-r1:7b` 了（见下面「用哪个模型」），这步可跳过
+#    真要新装才需要：ollama pull deepseek-r1:7b
 
 # 3. ⚠️ 不要双击 index.html —— 改成本地 http 服务（见下面那条实测）
 python -m http.server 8000
@@ -114,13 +114,40 @@ python -m http.server 8000
 
 #### ⚠️ 这台机器上 ollama 自身的两个坑
 
-1. **模型目录被改到了 `D:\ollama`**（`OLLAMA_MODELS=D:\ollama`）。
-   ⚠️ `C:\Users\wshix\.ollama\models` 里还躺着一个**完整的 `deepseek-r1:7b`（4.4GB）**，
-   **服务端根本不看那个目录** ⇒ 那 4.4GB 是白占的（要清理的话挪走/删掉都行）。
+1. **模型目录被改到了 `D:\ollama`**（`OLLAMA_MODELS=D:\ollama`）—— ollama **只认这个目录**，
+   默认的 `C:\Users\wshix\.ollama\models` 它根本不看。
+   ⚠️ 2026-09-23：原先躺在 C 盘、服务端读不到的 **`deepseek-r1:7b` 已经并进 `D:\ollama`**
+   （现在页面上用的就是它）⇒ **C 盘那份成了纯冗余**（4.4GB，删掉不影响使用，随时可清）。
 2. **`OLLAMA_HOST` 被设成了 `0.0.0.0:11434`** ⇒ **CLI 会连不上**
    （`ollama list` 会说「something went wrong, please see the ollama server logs」，
    而服务端日志里那条 `/api/tags` 明明是 200）。**服务本身是好的**，只是客户端连 `0.0.0.0` 在
    Windows 上不通。绕过：命令行前加 `OLLAMA_HOST=127.0.0.1:11434`，或用 HTTP 接口。
+   （想根治就把这个用户环境变量改成 `127.0.0.1:11434` 并重启 ollama —— 我这边没有改系统变量的权限。）
+
+#### 用哪个模型：现在是 `deepseek-r1:7b`（2026-09-23 定的）
+
+`ollama list` 里现在**只有 `deepseek-r1:7b`** —— 当天先试的是 `qwen2.5:7b`，
+用户比较后选回 deepseek，并把千问删掉了（释放 5.1GB）。
+⚠️ 8GB 显存**一次只装得下一个 7B**，换模型会有一次重新加载的等待。
+
+| | **`deepseek-r1:7b`**（当前在用） | `qwen2.5:7b`（2026-09-23 已删） |
+| --- | --- | --- |
+| 速度 | **2.5 ~ 6.2 秒**（冷启动 9~15 秒） | 0.2 ~ 0.7 秒 |
+| 人称 | 加了人称约束后，**第三人称问句已经答对**（「他女朋友是谁」→「等他自己告诉你」）；直接问「你」时仍偶尔把访客当成本人 | 稳 |
+| 性质 | **推理模型** —— 开口前要先过一遍思路；**角色扮演不是它的训练目标**，它更爱「解释」而不是「扮演」 | instruct 模型，与 WeClone 默认基座同族 |
+
+⚠️ **因为它慢，`CHAT_BACKEND.timeoutMs` 跟着从 8000 调到了 20000**。
+还留 8000 的话会偶发超时掉回知识库，表现成「有时答有时不答」—— **比慢本身更糟**。
+（代价：后端真挂掉时访客最多等这么久；但连续失败 2 次就跳闸，之后不再等待。）
+
+**想换模型（不改文件、不会被提交）：** 地址栏加 `?model=`，名字照 `ollama list` 写。
+⚠️ 前提是那个模型还在库里 —— 千问已经删了，想试回去得先 `ollama pull qwen2.5:7b`（≈4.7GB）。
+
+```
+http://localhost:8000/?model=qwen2.5:7b
+```
+
+两条参数可以并用：`?chat=...&model=...`
 
 > **人物设定放在页面里**（`script.js` 的 `CHAT_BACKEND.system`），不放在 ollama 那边 ——
 > 这样它跟着 git 走、有版本记录，而且以后换成 WeClone 微调模型时是同一个位置。

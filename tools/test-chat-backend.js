@@ -229,6 +229,37 @@ function reset() {
   CHAT_BACKEND.localUrl = keepLocal;
   delete global.location;
 
+  console.log('\n=== 10. ?chat= / ?model= 参数（不动文件就能换后端与模型）===');
+  // 期望值从 script.js 里现读，不写死 —— 以后改默认模型不用来改测试
+  var defaultModel = (/localModel:\s*'([^']+)'/.exec(src) || [, '(读不到)'])[1];
+
+  global.location = { protocol: 'file:', hostname: '', search: '?model=deepseek-r1:7b' };
+  eval(cfg);
+  ok(CHAT_BACKEND.localModel === 'deepseek-r1:7b', '?model= ⇒ localModel 被覆盖（本机 ollama 换模型）',
+    '实际：' + CHAT_BACKEND.localModel);
+  ok(CHAT_BACKEND.model === 'deepseek-r1:7b', '?model= ⇒ model 一起覆盖（本机与公网语义一致）');
+
+  global.location = { protocol: 'file:', hostname: '', search: '' };
+  eval(cfg);
+  ok(CHAT_BACKEND.localModel === defaultModel, '不带 ?model= ⇒ 保持默认（' + defaultModel + '）',
+    '实际：' + CHAT_BACKEND.localModel);
+
+  global.location = { protocol: 'file:', hostname: '', search: '?chat=off' };
+  eval(cfg);
+  ok(CHAT_BACKEND.url === '' && CHAT_BACKEND.localUrl === '',
+    '?chat=off ⇒ 两条路都关掉（强制走知识库，用来演示降级）',
+    'url=' + CHAT_BACKEND.url + ' localUrl=' + CHAT_BACKEND.localUrl);
+
+  global.location = {
+    protocol: 'file:', hostname: '',
+    search: '?chat=http://127.0.0.1:8005/v1/chat/completions&model=deepseek-r1:7b'
+  };
+  eval(cfg);
+  ok(CHAT_BACKEND.url === 'http://127.0.0.1:8005/v1/chat/completions' && CHAT_BACKEND.localModel === 'deepseek-r1:7b',
+    '?chat= 与 ?model= 能并用', 'url=' + CHAT_BACKEND.url + ' model=' + CHAT_BACKEND.localModel);
+  ok(CHAT_BACKEND.localUrl === '', '?chat= 出现 ⇒ 本机自动接管仍被关掉（新参数没破坏这条规矩）');
+  delete global.location;
+
   console.log('\n知识库那侧不受影响；用例 %d / 失败 %d', pass + fail, fail);
   process.exit(fail ? 1 : 0);
 })();

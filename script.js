@@ -122,7 +122,15 @@ var CHAT_BACKEND = {
      为什么要有它：让「本机能用真模型」和「公网永远不会变成打不开」同时成立 ——
      不这么设计的话，要么公网页面上挂一个连不上的地址，要么每次本地调试都得手改文件。 */
   localUrl: 'http://127.0.0.1:11434/v1/chat/completions',
-  localModel: 'qwen2.5:7b',     // 要跟 `ollama list` 里的名字一致
+  localModel: 'deepseek-r1:7b',  // 要跟 `ollama list` 里的名字一致
+  /* ⚠️ 2026-09-23 用户定为 **deepseek-r1:7b**（当天先试的是 qwen2.5:7b，用户比较后改回 deepseek，
+        并把千问删掉了）。两者实测差别（同一套人设、同一台机器）：
+          · 速度：deepseek 2.5~6.2s（冷启动 9~15s）／ qwen 0.2~0.7s
+          · 人称：deepseek 更容易把访客当成释贤本人 ⇒ 下面 system 里专门加了一条约束压它
+          · 根子：deepseek-r1 是**推理模型**，开口前要先把思路过一遍；
+            角色扮演不是它的训练目标 ⇒ 它更爱「解释」而不是「扮演」
+        ⚠️ 因为它慢，下面 timeoutMs 跟着调到了 20000 —— 还留 8000 的话会偶发超时掉回知识库，
+           表现成「有时答有时不答」，比慢本身更糟。 */
 
   /* ---- ③ 人物设定 ----
      ⚠️ 发给模型的前提词。**只写了这个页面上已经公开的事，没有添任何新事实** ——
@@ -143,12 +151,18 @@ var CHAT_BACKEND = {
     '· 常听：陶喆、薛之谦、Justin Bieber',
     '',
     '必须遵守：',
+    '· **三个人称别搞混**：你是分身（不是他本人）、访客是来看页面的人（也不是他）、',
+    '  你和访客口中的「他 / 释贤」才是本人 —— 别把访客当成他，也别说「等你告诉我」这类话',
     '· 不知道就直说不知道，**绝不要编造**关于他的任何事——他没告诉过我的，我不替他说',
     '· 不报私人信息（住址、电话、具体年龄这类）；联系方式让他自己给',
     '· 回答尽量短，两三句就够',
   ].join('\n'),
 
-  timeoutMs: 8000,        // 单次请求上限，超时即落回知识库
+  /* ⚠️ 20000 而不是 8000：deepseek-r1 是推理模型，本身要 2.5~6.2 秒，冷启动还要 9~15 秒。
+     8000 会让它偶尔来不及答完就落回知识库 —— 表现成「有时答有时不答」，比慢更糟。
+     ⚠️ 代价：后端真的挂掉时，访客最多等这么久才落回知识库；但连续失败 2 次就跳闸，
+        之后不再等待（见下面 breakerMax）。 */
+  timeoutMs: 20000,
   historyTurns: 6,        // 带上最近几轮，对话才有连续性
   breakerMax: 2,          // 连续失败几次就跳闸
   breakerCoolMs: 120000   // 跳闸后冷却多久
@@ -159,10 +173,11 @@ var backendFails = 0;       // 连续失败计数
 var chatHistory = [];       // 只记「微调分身真答过」的轮次 —— 见 remember()
 
 // ---- 本地联调用的临时覆盖（2026-09-23）----
-// 在地址栏加 `?chat=` 就能临时改后端，**不用改这个文件、也不会被提交**：
+// 在地址栏加参数就能临时改后端与模型，**不用改这个文件、也不会被提交**：
 //   index.html?chat=http://127.0.0.1:8005/v1/chat/completions   → 指向本地联调桩 / 别的服务
 //   index.html?chat=off                                         → 强制走知识库（演示降级）
-// 公开页面不带这个参数 ⇒ 一切照旧。
+//   index.html?model=deepseek-r1:7b                             → 换一个模型（名字照 `ollama list`）
+// 两个参数可以一起用。公开页面不带它们 ⇒ 一切照旧。
 //
 // ⚠️ 必须留 `typeof location !== 'undefined'` 这层守卫：两个回归测试会把这段代码
 //    抽到 node 里执行，那里没有 `location`，不守卫就会直接抛错。
@@ -173,6 +188,16 @@ if (typeof location !== 'undefined' && location.search) {
     var chatOverrideVal = decodeURIComponent(chatOverride[1]);
     CHAT_BACKEND.localUrl = '';
     CHAT_BACKEND.url = (chatOverrideVal === 'off') ? '' : chatOverrideVal;
+  }
+  // `?model=` 同时改这两个字段：本机走 localModel（ollama），公网走 model（WeClone）。
+  // 只改一个的话，同一个参数在本机和公网会得到不同结果 —— 那太容易让人困惑。
+  var modelOverride = /[?&]model=([^&]*)/.exec(location.search);
+  if (modelOverride) {
+    var modelOverrideVal = decodeURIComponent(modelOverride[1]);
+    if (modelOverrideVal) {
+      CHAT_BACKEND.model = modelOverrideVal;
+      CHAT_BACKEND.localModel = modelOverrideVal;
+    }
   }
 }
 
