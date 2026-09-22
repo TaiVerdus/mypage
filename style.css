@@ -939,6 +939,18 @@ section {
   font-style: italic;
 }
 
+/* 数字分身：落回本地知识库时的小标记（V2.7 续六十一，用户 2026-09-23）
+   ⚠️ 只在「微调分身没答上、由本地知识库兜底」时出现 —— 如实说明这句话不是分身本体答的，
+      不骗访客；主人也能一眼看出后端是不是挂着（频繁出现＝该去查服务）。
+   ⚠️ 它是 `.chat-messages`（flex 列）里的独立一格，靠 align-self 与左侧气泡对齐；
+      上边距取负值把 gap 收小，让它读起来像上面那条气泡的附注，而不是一条新消息。 */
+.msg-note {
+  align-self: flex-start;
+  margin-top: calc(-8px * var(--scale));
+  font-size: var(--fs-caption);
+  color: var(--color-muted);
+}
+
 @keyframes bubbleIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }

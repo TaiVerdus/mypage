@@ -95,6 +95,37 @@ updateActiveNav();
 
 // ---------- 交互三：数字分身 ----------
 // 设计原则：只回答"释贤告诉过它的事"，匹配不到就诚实说不知道，绝不编造
+//
+// ⚠️ 2026-09-23（V2.7 续六十一）：分身改成**两个大脑**（用户 2026-09-23 定）：
+//    ① **本地知识库**（下面的 KNOWLEDGE）= 地板。0 依赖、0 延迟、**永远可用**
+//    ② **WeClone 微调分身**（CHAT_BACKEND）= 天花板。走 OpenAI 兼容 API，填上地址即启用
+//    ②连不上 / 超时 / 返回不合法 ⇒ **自动落回 ①**，并补一个「离线版回答」小标记。
+//    站点「纯静态、打开就能用」这条底线不能丢：给 HR / 面试官看的页面，点开必须答得上话。
+//
+// ⚠️ **为什么要有断路器**：后端挂着的时候，如果每条消息都先干等满 timeoutMs 再落回知识库，
+//    访客每次都要等 8 秒 —— 那比直接答知识库还糟。所以连续失败 2 次就「跳闸」2 分钟，
+//    这段时间里**直接走知识库、完全不碰网络**。
+//
+// ⚠️ 完整链路（装环境 → 导微信记录 → 清洗 → 微调 → 起服务 → 填这里）见仓库根的 `WECLONE.md`
+
+var CHAT_BACKEND = {
+  // `weclone-cli server` 起来的 OpenAI 兼容地址，末尾带 /v1/chat/completions
+  // 例：'https://xxxx.trycloudflare.com/v1/chat/completions'
+  // ⚠️ 留空 ⇒ 只用本地知识库（＝接后端之前的行为，页面表现一模一样）
+  url: '',
+  // WeClone 不校验模型名；官方接 AstrBot / LangBot 的文档里前端就填 gpt-3.5-turbo
+  model: 'gpt-3.5-turbo',
+  // 必须与微调时用的 default_system 一致（WeClone 文档明确要求）；留空则不发送 system
+  system: '',
+  timeoutMs: 8000,        // 单次请求上限，超时即落回知识库
+  historyTurns: 6,        // 带上最近几轮，对话才有连续性
+  breakerMax: 2,          // 连续失败几次就跳闸
+  breakerCoolMs: 120000   // 跳闸后冷却多久
+};
+
+var backendDownUntil = 0;   // 跳闸到期时间戳（0 = 没跳闸）
+var backendFails = 0;       // 连续失败计数
+var chatHistory = [];       // 只记「微调分身真答过」的轮次 —— 见 remember()
 
 var KNOWLEDGE = [
   {
@@ -175,6 +206,76 @@ function matchAnswer(question) {
   return FALLBACK;
 }
 
+// 后端现在能不能用：配了地址、且不在跳闸冷却里
+function backendUsable() {
+  return CHAT_BACKEND.url !== '' && Date.now() >= backendDownUntil;
+}
+
+// 只记「微调分身真答过」的轮次：知识库的罐头回答**不进历史**，
+// 否则下一次请求会把罐头话当成它自己说过的，把语气带偏。
+function remember(question, answer) {
+  chatHistory.push({ role: 'user', content: question });
+  chatHistory.push({ role: 'assistant', content: answer });
+  var cap = CHAT_BACKEND.historyTurns * 2;
+  if (chatHistory.length > cap) chatHistory = chatHistory.slice(-cap);
+}
+
+// 落回知识库时补一个小标记：如实说明这句不是微调分身答的，不骗访客。
+function addOfflineNote() {
+  var el = document.createElement('div');
+  el.className = 'msg-note';
+  el.textContent = '离线版回答';
+  messagesEl.appendChild(el);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+// 调 WeClone（OpenAI 兼容）。成功返回文本；**任何**异常都返回 null，由调用方落回知识库。
+// ⚠️ 三种最常见的失败（部署时一定会碰到，`WECLONE.md` 里也写了怎么绕）：
+//    ① **CORS** —— 页面与 API 不同源时，服务端必须放行 Access-Control-Allow-Origin
+//    ② **混合内容** —— 页面走 https 就不能调 http 的地址（浏览器直接拦掉）
+//    ③ 服务没起 / 隧道断了 —— 连接直接失败
+//    这三种在这里**表现完全一样**：返回 null、落回知识库。分不出原因是有意的 ——
+//    访客不该看到技术细节，而主人看「离线版回答」出现得频繁就知道要去查。
+function askBackend(question) {
+  if (!window.fetch) return Promise.resolve(null);
+
+  var ctrl = window.AbortController ? new AbortController() : null;
+  var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, CHAT_BACKEND.timeoutMs);
+
+  var msgs = [];
+  if (CHAT_BACKEND.system) msgs.push({ role: 'system', content: CHAT_BACKEND.system });
+  msgs = msgs.concat(chatHistory, [{ role: 'user', content: question }]);
+
+  var init = {
+    method: 'POST',
+    // WeClone 的 api_service 不校验 key，但 OpenAI 客户端习惯带一个，填什么都行
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer none' },
+    body: JSON.stringify({ model: CHAT_BACKEND.model, messages: msgs, stream: false })
+  };
+  if (ctrl) init.signal = ctrl.signal;
+
+  return fetch(CHAT_BACKEND.url, init).then(function (res) {
+    clearTimeout(timer);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  }).then(function (data) {
+    var c = data && data.choices && data.choices[0] && data.choices[0].message;
+    var text = c && c.content;
+    if (!text || !String(text).trim()) throw new Error('空回复');
+    backendFails = 0;          // 成功 ⇒ 清零，并解除跳闸
+    backendDownUntil = 0;
+    return String(text).trim();
+  }).catch(function () {
+    clearTimeout(timer);
+    backendFails++;
+    if (backendFails >= CHAT_BACKEND.breakerMax) {   // 连续失败够数 ⇒ 跳闸
+      backendDownUntil = Date.now() + CHAT_BACKEND.breakerCoolMs;
+      backendFails = 0;
+    }
+    return null;
+  });
+}
+
 function ask(question) {
   if (!question.trim()) return;
 
@@ -183,10 +284,27 @@ function ask(question) {
 
   var typing = addMessage('正在输入…', 'bot typing'); // 3. 打字指示
 
-  setTimeout(function () {                // 4. 模拟思考延迟后给出回答
+  function land(answer, fromFallback) {   // 4. 收尾：摘掉打字指示、上屏、按需补标记
     typing.remove();
-    addMessage(matchAnswer(question), 'bot');
-  }, 700);
+    addMessage(answer, 'bot');
+    if (fromFallback) addOfflineNote();
+  }
+
+  // 没配后端、或正在跳闸冷却里 ⇒ 直接走知识库，延迟与接后端之前一模一样（700ms）
+  if (!backendUsable()) {
+    setTimeout(function () { land(matchAnswer(question), false); }, 700);
+    return;
+  }
+
+  // 配了后端 ⇒ 先问微调分身；只要它没给出有效回答，就落回知识库并如实标出来
+  askBackend(question).then(function (answer) {
+    if (answer) {
+      remember(question, answer);
+      land(answer, false);
+    } else {
+      land(matchAnswer(question), true);
+    }
+  });
 }
 
 // 发送按钮 + 回车键两种提交方式
