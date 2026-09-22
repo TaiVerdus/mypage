@@ -118,11 +118,9 @@
   --c-brand-deep:  color-mix(in srgb, var(--c-brand) 56%, var(--c-surface));
 }
 
-/* 两处「白色面」在深色主题里要单独交代 —— 全站就这两处硬编码了浅色面 */
-[data-theme="dark"] .hero-eyebrow {
-  background: rgba(255, 255, 255, .07);   /* 原来 .6 的白底 + 浅青字 = 对比度不够 */
-}
-
+/* 需要深色主题单独交代的「白色面」—— 2026-09-22 起**只剩 .chat-avatar 一处**了
+   （.hero-eyebrow 那条已随首屏眉题一起删除，见 .hero-content h1 上方那段说明）。
+   ⚠️ 这层白底现在是「头像图还没加载出来」的占位色，不是装饰，别删。 */
 [data-theme="dark"] .chat-avatar {
   background: rgba(255, 255, 255, .10);
 }
@@ -263,19 +261,17 @@ main,
   text-align: center;
 }
 
-.hero-eyebrow {
-  display: inline-block;
-  font-size: var(--fs-eyebrow);
-  font-weight: 500;
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  color: var(--color-brand);
-  padding: 6px 16px;
-  border: 1px solid var(--color-line-strong);
-  border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, .6);
-  animation: heroFadeInUp 0.8s ease-out both;
-}
+/* ---- 首屏眉题 .hero-eyebrow 已移除（V2.7 续四十八，用户 2026-09-22）----
+   删的是那条「CST 与 AI 基础 · 2026」胶囊标签。它牵到**三条**规则，都清了：
+     · .hero-eyebrow{…}                     —— 胶囊外观（含全站最后一处硬编码浅色面）
+     · [data-theme="dark"] .hero-eyebrow{…} —— 深色主题的覆写（见 §1.5）
+     · 「眉题 / 元信息键 / 数据标签」的**分组选择器**里只摘掉 .hero-eyebrow 一项
+       —— .eyebrow / .meta-k / .stat-label 都还在用，**整条不能删**
+   ⚠️ 入场节奏又空出一块（这属于改动效，按规矩**没有擅自重排**）：
+      下面那段 delay 是按 eyebrow(0) → h1(120ms) → tagline(240ms) → intro(360ms) 排的，
+      现在 **0ms 与 240ms 两档都没人用了** ⇒ 首屏从「立刻出现眉题」变成「120ms 后标题升起」。
+      h1 / intro / 按钮 / 信息条的档位**一个都没动**。
+   要恢复这行，从 git 取（本次提交之前）。 */
 
 .hero-content h1 {
   margin-top: var(--sp-5);
@@ -297,7 +293,7 @@ main,
       · #hero .hero-tagline .line > i{…} —— 入场动画的时间档位
    ⚠️ 删掉的**信息没有丢**：ENFJ 就在正下方的 .hero-meta 列表里（MBTI / ENFJ），
       「脑机接口」在 <title>、meta、环形跑马灯、关于我、数字分身里都有。
-   ⚠️ 入场节奏留了一个空档没动：下面那段 delay 是按
+   ⚠️ 入场节奏的空档没动（后来又空了一档，见 .hero-content h1 上方那段）：下面那段 delay 是按
       eyebrow(0) → h1(120ms) → **tagline(240ms)** → intro(360ms) 排的，
       现在 240ms 那一档没人用了 ⇒ intro 会等得更久一点。
       这属于改动效，**按规矩先问用户**，没有擅自重排。
@@ -2182,9 +2178,10 @@ body {
   font-weight: 500;
 }
 
-/* 眉题 / 元信息键 / 数据标签：大写 + 加宽字距 = 精致 */
+/* 眉题 / 元信息键 / 数据标签：大写 + 加宽字距 = 精致
+   ⚠️ 原来这条里还有 .hero-eyebrow —— 2026-09-22 随首屏眉题一起删掉了，
+      只摘它一项（另三个都还在用），别把整条删了 */
 .eyebrow,
-.hero-eyebrow,
 .meta-k,
 .stat-label {
   text-transform: uppercase;
