@@ -192,11 +192,11 @@
               <p>纯静态 · 无框架 · 自己的一套设计系统</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 72 条 + main 分支 2 条（V1.0 / V1.1）
+                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 74 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
               <!-- ⚠️ 这一行带提交数，由 tools/sync-version.py 自动写 ——
                    别手改数字，改完在提交前跑一次那个脚本。 -->
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 截至 2026-09-22 共 74 次提交</p>
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 截至 2026-09-22 共 76 次提交</p>
               <a class="item-link" href="ai-log.html">这个页面是怎么做出来的 →</a>
             </div>
             <!-- ⚠️ 这里原来是 CarbonBrain（写着「课程 / 比赛项目 · 已有可演示版本」）——
@@ -285,62 +285,94 @@
           <p class="sphere-label" id="sphereLabel"></p>
         </div>
       </div>
-      <div class="photo-grid masonry reveal">
-        <figure class="photo-item" id="photo-calligraphy">
-          <img src="images/1.jpg" alt="书法课上，几个人围着一张长桌练字" loading="lazy" decoding="async">
-          <figcaption><span class="photo-no">01</span></figcaption>
-        </figure>
-        <figure class="photo-item" id="photo-drums">
-          <img src="images/2.jpg" alt="有人坐在电子鼓前，一只手抬起" loading="lazy" decoding="async">
-          <figcaption><span class="photo-no">02</span></figcaption>
-        </figure>
-        <figure class="photo-item" id="photo-photography">
-          <img src="images/3.jpg" alt="日落时望向远处，山丘、城市与水" loading="lazy" decoding="async">
-          <figcaption><span class="photo-no">03</span></figcaption>
-        </figure>
-        <figure class="photo-item" id="photo-performance">
-          <img src="images/4.jpg" alt="红光下的舞台，表演者的剪影张开双臂" loading="lazy" decoding="async">
-          <figcaption>
-            <span class="photo-no">04</span>
-            <span class="photo-credit">摄影：活动主办方</span>
-          </figcaption>
-        </figure>
-        <figure class="photo-item" id="photo-basketball">
-          <img src="images/5.jpg" alt="日落时的篮球架与篮板，一颗球停在半空，背后是城市高楼和一棵树" loading="lazy" decoding="async">
-          <figcaption><span class="photo-no">05</span></figcaption>
-        </figure>
-        <!-- 06-09：用户 2026-09-21 发来的四张（原来只在球体里，他要求也放进照片墙）。
-             标签与球体用同一套 —— 同一张照片不该有两个名字。
-             ⚠️ 标题是**按画面内容拟的**（他没给），是描述不是解读，要改直接说。
-             ⚠️ 08 是演唱会现场，画面是舞台大屏上的艺人影像、屏上还有一行字幕 ——
+      <!-- ========== 照片墙：4 条「带」拼成的一面墙（V2.7 续五十六 重排）==========
+           原来是 `.masonry { columns: 3 }`（CSS 多列瀑布流）—— 整齐，但**没有设计**：
+           每张按原比例自然堆叠，谁大谁小是随机的，没有主次、没有节奏。
+           现在按「带」拼墙，四条带各司其职：
+
+             带 1  band-hero    1 张 · 全宽  ← 开篇主图（最大、最完整，作视觉锚点）
+             带 2  band-trio    3 张 · 各 1/3  ← 横图段，中速
+             带 3  band-quartet 4 张 · 各 1/4  ← 竖图段，最密最小（节奏最快的一拍）
+             带 4  band-pair    2 张 · 7:5 不对称 ← 收尾，两张大的
+
+           带高依次 ≈ 0.75 / 0.25 / 0.33 / 0.63（单位＝内容宽）⇒ 大 → 小 → 中 → 大，有起伏。
+           ⚠️ **每带内部等高、每带左右满宽** ⇒ 上下边与左右边都严格对齐（「统一」就来自这里）。
+           ⚠️ 每张挂的比例类（.ar-4x3 等）是**排版用的格子比例**，由「同带内 span × 1/比例 相等」
+              反算出来的；与原图比例差得多的两张会裁掉几个百分点，见样式表 §15 的说明。
+           ⚠️ **编号跟着墙的顺序重排成 01–10**（原来编号=文件名序号，重排后会乱跳）。
+              编号是这套照片的「骨架」，读起来要顺 —— 文件名与编号的对应见样式表/PROJECT.md。
+           ⚠️ `id` 一个没动：那是兴趣标签的锚点（photo-travel / drums / calligraphy / …）。 -->
+      <div class="photo-wall reveal">
+
+        <!-- 带 1 · 开篇主图：日落（横构图里最宽的一张，配全宽最自然） -->
+        <div class="wall-band band-hero">
+          <figure class="photo-item ar-4x3" id="photo-photography">
+            <img src="images/3.jpg" alt="日落时望向远处，山丘、城市与水" loading="lazy" decoding="async">
+            <figcaption><span class="photo-no">01</span></figcaption>
+          </figure>
+        </div>
+
+        <!-- 带 2 · 三联横图。三张都是 4:3 ⇒ 同宽即等高，一张没裁 -->
+        <div class="wall-band band-trio">
+          <!-- 夜市（用户 2026-09-22 发来，兴趣里的「旅游」跳到这里）
+               ⚠️ 画面上有手机相机的「Leica / Live Moment / 23mm / Xiaomi」水印 ——
+                  **按项目既有口径不做后处理**：不修图、不裁掉别人的商标；水印本身也是「用什么拍的」的线索。
+               ⚠️ 这张单独存成 images/entry-street.jpg（4:3 横拍，没挤进 1–9 的编号文件里），
+                  也暂时**没有做球体缩略图**（球体是一整圈竖版 3:4 卡片，混一张横的会显歪）。 -->
+          <figure class="photo-item ar-4x3" id="photo-travel">
+            <img src="images/entry-street.jpg" alt="从台阶高处俯看夜晚的街边夜市：成排的餐桌、人群与灯箱，画面下方是伸出去的鞋" loading="lazy" decoding="async">
+            <figcaption><span class="photo-no">02</span></figcaption>
+          </figure>
+          <figure class="photo-item ar-4x3" id="photo-basketball">
+            <img src="images/5.jpg" alt="日落时的篮球架与篮板，一颗球停在半空，背后是城市高楼和一棵树" loading="lazy" decoding="async">
+            <figcaption><span class="photo-no">03</span></figcaption>
+          </figure>
+          <figure class="photo-item ar-4x3">
+            <img src="images/7.jpg" alt="从高处俯看夜市：成排的餐桌与人群，画面下方是自己的鞋" loading="lazy" decoding="async">
+            <figcaption><span class="photo-no">04</span></figcaption>
+          </figure>
+        </div>
+
+        <!-- 带 3 · 四联竖图（全站最密的一段：每张约四分之一宽）
+             ⚠️ 07 是演唱会现场，画面是舞台大屏上的艺人影像、屏上还有一行字幕 ——
                 这里**不写艺人姓名**；他不想要这张就撤掉。
-             这三张没有 id，因为目前没有任何链接指向它们（原有的 id 是给兴趣标签做锚点的）。 -->
-        <figure class="photo-item">
-          <img src="images/6.jpg" alt="清晨的站台，太阳从侧面照过来，栏杆外是一片绿" loading="lazy" decoding="async">
-          <figcaption><span class="photo-no">06</span></figcaption>
-        </figure>
-        <figure class="photo-item">
-          <img src="images/7.jpg" alt="从高处俯看夜市：成排的餐桌与人群，画面下方是自己的鞋" loading="lazy" decoding="async">
-          <figcaption><span class="photo-no">07</span></figcaption>
-        </figure>
-        <figure class="photo-item">
-          <img src="images/8.jpg" alt="演唱会现场，舞台大屏上一位表演者在唱歌，屏边有一行竖排字幕" loading="lazy" decoding="async">
-          <figcaption><span class="photo-no">08</span></figcaption>
-        </figure>
-        <figure class="photo-item">
-          <img src="images/9.jpg" alt="草地上的步道指示牌，牌面是列车线描造型，背后是绿树与城市高楼" loading="lazy" decoding="async">
-          <figcaption><span class="photo-no">09</span></figcaption>
-        </figure>
-        <!-- 10：用户 2026-09-22 发来的一张（兴趣里的「旅游」要跳到这里）。
-             ⚠️ 画面上有手机相机的「Leica / Live Moment / 23mm / Xiaomi」水印 ——
-                **按项目既有口径不做后处理**：不修图、不裁掉别人的商标；水印本身也是「用什么拍的」的线索。
-             ⚠️ 这张比例是 4:3 横拍，所以单独存成 images/entry-street.jpg（没挤进 1–9 的编号文件里），
-                也暂时**没有做球体缩略图**（球体是一整圈竖版 3:4 卡片，混一张横的会显歪）。
-                想让它在球体里也出现，说一声我单独处理。 -->
-        <figure class="photo-item" id="photo-travel">
-          <img src="images/entry-street.jpg" alt="从台阶高处俯看夜晚的街边夜市：成排的餐桌、人群与灯箱，画面下方是伸出去的鞋" loading="lazy" decoding="async">
-          <figcaption><span class="photo-no">10</span></figcaption>
-        </figure>
+             ⚠️ 这四张没有 id：目前没有任何链接指向它们（id 是给兴趣标签做锚点的）。 -->
+        <div class="wall-band band-quartet">
+          <figure class="photo-item ar-3x4" id="photo-calligraphy">
+            <img src="images/1.jpg" alt="书法课上，几个人围着一张长桌练字" loading="lazy" decoding="async">
+            <figcaption><span class="photo-no">05</span></figcaption>
+          </figure>
+          <figure class="photo-item ar-3x4">
+            <img src="images/6.jpg" alt="清晨的站台，太阳从侧面照过来，栏杆外是一片绿" loading="lazy" decoding="async">
+            <figcaption><span class="photo-no">06</span></figcaption>
+          </figure>
+          <figure class="photo-item ar-3x4">
+            <img src="images/8.jpg" alt="演唱会现场，舞台大屏上一位表演者在唱歌，屏边有一行竖排字幕" loading="lazy" decoding="async">
+            <figcaption><span class="photo-no">07</span></figcaption>
+          </figure>
+          <figure class="photo-item ar-3x4">
+            <img src="images/9.jpg" alt="草地上的步道指示牌，牌面是列车线描造型，背后是绿树与城市高楼" loading="lazy" decoding="async">
+            <figcaption><span class="photo-no">08</span></figcaption>
+          </figure>
+        </div>
+
+        <!-- 带 4 · 收尾两张（7:5 不对称 —— 刻意不做等分，避免整面墙太"格子"）
+             这两张原比例差得多（0.87 与 0.66），靠「不同格比例 + 不同列宽」凑成等高；
+             ⚠️ 改列划分必须同时改比例类，算式写在样式表 §15 里。 -->
+        <div class="wall-band band-pair">
+          <figure class="photo-item ar-14x15" id="photo-drums">
+            <img src="images/2.jpg" alt="有人坐在电子鼓前，一只手抬起" loading="lazy" decoding="async">
+            <figcaption><span class="photo-no">09</span></figcaption>
+          </figure>
+          <figure class="photo-item ar-2x3" id="photo-performance">
+            <img src="images/4.jpg" alt="红光下的舞台，表演者的剪影张开双臂" loading="lazy" decoding="async">
+            <figcaption>
+              <span class="photo-no">10</span>
+              <span class="photo-credit">摄影：活动主办方</span>
+            </figcaption>
+          </figure>
+        </div>
+
       </div>
     </section>
 

@@ -1266,11 +1266,52 @@ section {
   }
 }
 
-/* ---------- 15. 摄影集（瀑布流） ---------- */
-.masonry {
-  columns: 3;
-  column-gap: var(--sp-4);
+/* ---------- 15. 摄影集：一面「设计过的照片墙」（V2.7 续五十六）----------
+   原来是 `.masonry { columns: 3 }`（CSS 多列的瀑布流）：整齐，但**没有设计** ——
+   每张按原比例自然堆叠，谁大谁小纯看照片本身，没有主次、没有节奏。
+
+   现在改成「按带拼墙」：4 条带，每条带内部等高、每条带左右满宽。
+   ⇒ 上下边（带内对齐）与左右边（跨带对齐）都严格对齐 —— **「统一」就是从这两组对齐来的**。
+
+     带 1  .band-hero    1 张 · 全宽          开篇主图（最大、最完整，当视觉锚点）
+     带 2  .band-trio    3 张 · 各 1/3       横图段
+     带 3  .band-quartet 4 张 · 各 1/4       竖图段（最密最小，节奏最快的一拍）
+     带 4  .band-pair    2 张 · 7fr / 5fr    收尾，刻意**不对称**（否则整面墙太"格子"）
+
+   带高依次 ≈ 0.75 / 0.25 / 0.33 / 0.63（单位 = 内容宽）⇒ **大 → 小 → 中 → 大**，有起伏。
+
+   ⚠️ 每张挂的比例类（.ar-*）是「排版用的格子比例」，**不一定等于原图比例**。
+      它由「同带内各张的 span ÷ 格子比例 相等」反算出来（即同带等高）：
+        带 2：三张同为 4:3，各跨 1/3 ⇒ 高都 = 0.25W
+        带 3：四张同为 3:4，各跨 1/4 ⇒ 高都 = 0.333W
+        带 4：7fr 的 .ar-14x15 ⇒ 高 = (7/12) ÷ (14/15) = 0.625W
+              5fr 的 .ar-2x3   ⇒ 高 = (5/12) ÷ (2/3)   = 0.625W  ✓ 相等
+      ⚠️ 改列划分就必须**同时**改比例类，否则同带会不等高（出现半格空洞）。
+   ⚠️ 与原图比例差得多的两张会被裁掉几个百分点（object-fit: cover 居中裁）：
+      · 日落 1.4229 → 4:3（格子更"窄高"）⇒ **裁左右**各 ~3.2%
+      · 架子鼓 0.8661 → 14:15（格子更"宽扁"）⇒ **裁上下**各 ~3.6%
+      其余 8 张差 ≤0.8%（看不见）。⚠️ 这是**渲染层裁切**，原图文件一个字节没动。 */
+.photo-wall {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);              /* 带与带的间距 —— 与带内同一个值，间距只有一种 */
 }
+
+.wall-band {
+  display: grid;
+  gap: var(--sp-4);              /* 带内间距 */
+}
+
+.band-hero    { grid-template-columns: 1fr; }                          /* 1 张 · 全宽 */
+.band-trio    { grid-template-columns: repeat(3, minmax(0, 1fr)); }     /* 3 张 · 等分 */
+.band-quartet { grid-template-columns: repeat(4, minmax(0, 1fr)); }     /* 4 张 · 等分 */
+.band-pair    { grid-template-columns: 7fr 5fr; }                       /* 2 张 · 不对称 */
+
+/* 排版用的格子比例（不是原图比例，见上面那段说明） */
+.ar-4x3   { aspect-ratio: 4 / 3; }
+.ar-3x4   { aspect-ratio: 3 / 4; }
+.ar-2x3   { aspect-ratio: 2 / 3; }
+.ar-14x15 { aspect-ratio: 14 / 15; }
 
 /* ---------- 15b. 球体画廊（V2.7 续三十四） ----------
    机制借自用户贴来的一段第三方实现（DermExcel 的摄影页）：斐波那契球面分布 +
@@ -1411,17 +1452,20 @@ section {
 
 .photo-item {
   position: relative;
-  margin: 0 0 var(--sp-4);
+  /* ⚠️ 没有 margin：排列间距一律交给 `.wall-band` 的 gap（原来是瀑布流，靠下边距撑开列） */
   border-radius: var(--r-md);
   overflow: hidden;
-  break-inside: avoid;
-  background: var(--color-mint);
+  background: var(--color-mint);   /* 图没加载出来时的占位底色 */
   box-shadow: var(--sh-1);
   transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
 }
 
+/* ⚠️ 高度 100% + cover：图填满「比例类」定下来的格子。
+   多出来的部分居中裁掉（原图文件不动）—— 这是排版层的事，不是修图。 */
 .photo-item img {
   width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
   transition: transform var(--dur-slow) var(--ease-out);
 }
@@ -1474,15 +1518,19 @@ section {
   letter-spacing: .02em;
 }
 
+/* 照片墙的窄屏：**每条带都变成两列**（带与带的高低关系不变）
+   ⚠️ 两条规则配合，保证不留半格空洞：
+     ① 带内张数是奇数时，最后一张占满一行（否则它会半宽落单、右边空一半）
+     ② 收尾那两张的格子比例不一样，等宽就一定不等高 ⇒ 让它们各自占满一行 */
 @media (max-width: 768px) {
-  .masonry {
-    columns: 2;
+  .wall-band {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-}
-
-@media (max-width: 480px) {
-  .masonry {
-    columns: 1;
+  .wall-band > .photo-item:last-child:nth-child(odd) {
+    grid-column: span 2;
+  }
+  .band-pair > .photo-item {
+    grid-column: span 2;
   }
 }
 
