@@ -314,10 +314,10 @@ main,
      · [data-theme="dark"] .hero-eyebrow{…} —— 深色主题的覆写（见 §1.5）
      · 「眉题 / 元信息键 / 数据标签」的**分组选择器**里只摘掉 .hero-eyebrow 一项
        —— .eyebrow / .meta-k / .stat-label 都还在用，**整条不能删**
-   ⚠️ 入场节奏又空出一块（这属于改动效，按规矩**没有擅自重排**）：
-      下面那段 delay 是按 eyebrow(0) → h1(120ms) → tagline(240ms) → intro(360ms) 排的，
-      现在 **0ms 与 240ms 两档都没人用了** ⇒ 首屏从「立刻出现眉题」变成「120ms 后标题升起」。
-      h1 / intro / 按钮 / 信息条的档位**一个都没动**。
+   ⚠️ 入场节奏当时又空出一块（**同日已重排，见下**）：
+      下面那段 delay 原本是按 eyebrow(0) → h1(120ms) → tagline(240ms) → intro(360ms) 排的，
+      0ms 与 240ms 于是都没人用 ⇒ 首屏从「立刻出现眉题」变成「120ms 后标题升起」。
+      用户 2026-09-22 选「往前压」⇒ 标题 0ms / 正文 200ms / 按钮 500ms / 信息条 700ms ✓
    要恢复这行，从 git 取（本次提交之前）。 */
 
 .hero-content h1 {
@@ -340,7 +340,7 @@ main,
       · #hero .hero-tagline .line > i{…} —— 入场动画的时间档位
    ⚠️ 删掉的**信息没有丢**：ENFJ 就在正下方的 .hero-meta 列表里（MBTI / ENFJ），
       「脑机接口」在 <title>、meta、环形跑马灯、关于我、数字分身里都有。
-   ⚠️ 入场节奏的空档没动（后来又空了一档，见 .hero-content h1 上方那段）：下面那段 delay 是按
+   ⚠️ 入场节奏当时空了一档（后来又空一档；**2026-09-22 已整体重排**，见 .hero-content h1 上方那段）：下面那段 delay 是按
       eyebrow(0) → h1(120ms) → **tagline(240ms)** → intro(360ms) 排的，
       现在 240ms 那一档没人用了 ⇒ intro 会等得更久一点。
       这属于改动效，**按规矩先问用户**，没有擅自重排。
@@ -360,7 +360,8 @@ main,
   display: flex;
   justify-content: center;
   margin-top: var(--sp-7);
-  animation: heroFadeInUp 0.8s ease-out 0.9s both;
+  /* 档位 700ms —— 首屏入场最后一档（标题 0 / 正文 200 / 按钮 500 / 这条 700） */
+  animation: heroFadeInUp 0.8s ease-out 0.7s both;
 }
 
 .hero-meta li {
@@ -466,7 +467,8 @@ main,
   margin-top: var(--sp-6);
   padding: var(--sp-3) var(--sp-6);
   font-size: var(--fs-body);
-  animation: heroFadeInUp 0.8s ease-out 0.7s both;
+  /* 档位 500ms —— 首屏入场第三档（标题 0 / 正文 200 / 这条 500 / 信息条 700） */
+  animation: heroFadeInUp 0.8s ease-out 0.5s both;
 }
 
 @keyframes heroFadeInUp {
@@ -1594,11 +1596,15 @@ section {
   transition-delay: calc(var(--i, 0) * 88ms);
 }
 
-/* 首屏各行依次落位：eyebrow(0) → h1(120ms) → intro(360ms) → 按钮(700ms)
-   ⚠️ 240ms 那一档本来给 .hero-tagline，用户 2026-09-21 把那行删了（V2.7 续四十），
-      这档就空着 —— 动效没重排，等用户定。 */
-#hero h1 .line > i             { transition-delay: calc(120ms + var(--i, 0) * 88ms); }
-#hero .hero-intro .line > i    { transition-delay: calc(360ms + var(--i, 0) * 88ms); }
+/* 首屏各行依次落位（**2026-09-22 重排过**）：
+   标题 0ms → 正文 200ms → 按钮 500ms → 信息条 700ms；行内再按 var(--i) 每行 +88ms。
+   ⚠️ 重排的来由：原本这梯子是按「眉题(0) → 标题(120) → 标语(240) → 正文(360)」排的，
+      而眉题与标语先后被删（V2.7 续四十 / 续四十八）⇒ 头部两档全空，
+      首屏从「立刻出现眉题」变成「120ms 后标题才升起」，开头那一下是死的。
+      用户 2026-09-22 选定「往前压」⇒ 标题回到 0ms、正文 200ms、按钮 500ms、信息条 700ms。
+   ⚠️ 重排后这四档**不再跟任何「已删元素」挂钩**；以后首屏再加元素，重新排一遍即可。 */
+#hero h1 .line > i             { transition-delay: calc(0ms + var(--i, 0) * 88ms); }
+#hero .hero-intro .line > i    { transition-delay: calc(200ms + var(--i, 0) * 88ms); }
 
 .lines.is-visible .line > i {
   transform: translateY(0);
