@@ -2668,7 +2668,10 @@ body {
    上面汉字、下面首字母），用户 2026-09-20 要求删掉、只留句子 ⇒ 已删。
    连带 `.vow-pair` / `.vow-join` / `.card-vow-note` / `.sr-only` 四条样式一并移除
    （对照表没了，那四条都没人用了；`.sr-only` 是通用工具类，将来要用八行就能加回来）。 */
-.card-vow-id {
+/* 名片里「要逐字认的字符串」—— 微信号、QQ 号这类（handle 用 --font-mono 是照原卡来的）。
+   ⚠️ 2026-09-22 由 .card-vow-id 改名成 .card-mono：加 QQ 号时它不再只服务那一句誓了，
+      名字要说明的是**处理方式**（等宽），不是内容。 */
+.card-mono {
   font-family: var(--font-mono);
 }
 

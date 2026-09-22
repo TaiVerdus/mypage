@@ -192,11 +192,11 @@
               <p>纯静态 · 无框架 · 自己的一套设计系统</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 74 条 + main 分支 2 条（V1.0 / V1.1）
+                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 75 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
               <!-- ⚠️ 这一行带提交数，由 tools/sync-version.py 自动写 ——
                    别手改数字，改完在提交前跑一次那个脚本。 -->
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 截至 2026-09-22 共 76 次提交</p>
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 截至 2026-09-22 共 77 次提交</p>
               <a class="item-link" href="ai-log.html">这个页面是怎么做出来的 →</a>
             </div>
             <!-- ⚠️ 这里原来是 CarbonBrain（写着「课程 / 比赛项目 · 已有可演示版本」）——
@@ -507,13 +507,24 @@
           <div class="card-row">
             <dt>微信</dt>
             <dd>
-              <span class="card-vow-id">Cjfgds_Hswlfsds</span>
+              <span class="card-mono">Cjfgds_Hswlfsds</span>
               <!-- 这句就是微信号本身：Cjfgds = 曾经发过的誓，Hswlfsds = 会是未来发生的事，
                    中间那个 _ 就是两个分句之间的停顿。（2026-09-20 按用户要求只留句子，
                    原来那张逐字对应的字母对照表已删。）
                    标 lang 是因为页面整体是英文的 —— 不标，读屏会用英文音念中文。 -->
               <span class="card-vow" lang="zh-Hans">曾经发过的誓，会是未来发生的事</span>
             </dd>
+          </div>
+          <!-- QQ（2026-09-22 用户要求补上）：与上面三条**同一个骨架** ——
+               `<dt>` 是标签、`<dd>` 是值，标签的样式（12px / 大写 / 疏排 / 次要灰）与其它行完全一致。
+               ⚠️ **做成普通文字、不做成链接**：网页上没有可靠的「QQ 号 → 加好友」地址，
+                  硬造一个点不通的链接比不链接更糟（同「微信」那条的处理）。
+               ⚠️ 数字串挂 `.card-mono`（等宽）—— 与微信号同一套：等宽下数字不容易看串行
+                  （DESIGN-SYSTEM 里 `--font-mono` 的用途就写着「handle、版本号、数字」）。
+               ⚠️ 全站 0 处 `user-select: none`：这张卡的意义就是联系方式能被复制走。 -->
+          <div class="card-row">
+            <dt>QQ</dt>
+            <dd><span class="card-mono">3587867540</span></dd>
           </div>
         </dl>
 
