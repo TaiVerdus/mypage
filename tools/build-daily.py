@@ -105,36 +105,16 @@ def build(data):
         parts.append('          </ul>')
         parts.append('        </div>')
 
-    # ---------- 常听的（折叠） ----------
-    # ⚠️ 用户 2026-09-21 要求把「常听的 15 首」从页面删掉，所以 data 里 classics 现在是空数组，
-    #    这一段不会输出任何东西。配套的样式（.daily-classics / .classics-* / .track-* / .playlist-*）
-    #    也一并从 style.css 移除了 —— **要恢复「常听的」，样式和数据都得从 git 取**
-    #    （数据见提交 d721dc9，样式见它前一个提交），只填 classics 而不恢复样式会得到一堆没样式的裸标签。
-    classics = data.get("classics") or []
-    if classics:
-        total = sum(len(g.get("tracks") or []) for g in classics)
-        parts.append('        <details class="daily-classics">')
-        parts.append('          <summary>常听的 %d 首</summary>' % total)
-        parts.append('          <div class="classics-groups">')
-        for g in classics:
-            parts.append('            <section class="classics-group">')
-            en = ('<span class="playlist-en">%s</span>' % esc(g["en"])) if g.get("en") else ""
-            parts.append('              <h3 class="classics-name">%s%s</h3>' % (esc(g.get("name", "")), en))
-            parts.append('              <p class="playlist-meta">%s</p>' % esc(g.get("meta", "")))
-            parts.append('              <ol class="track-list">')
-            for t in (g.get("tracks") or []):
-                parts.append('                <li class="track">')
-                parts.append('                  <span class="track-main">')
-                parts.append('                    <span class="track-title">%s</span>' % esc(t.get("title", "")))
-                parts.append('                    <span class="track-sub">%s · %s</span>'
-                             % (esc(g.get("name", "")), esc(t.get("album", ""))))
-                parts.append('                  </span>')
-                parts.append('                  <span class="track-year">%s</span>' % esc(t.get("year", "")))
-                parts.append('                </li>')
-            parts.append('              </ol>')
-            parts.append('            </section>')
-        parts.append('          </div>')
-        parts.append('        </details>')
+    # ---------- 常听的：**不在这里渲染了**（V2.7 续四十四）----------
+    # ⚠️ 2026-09-22 起，「常听的」改由 tools/build-receipt.py 渲染成一张**小票**
+    #    （用户给了一张 QQ音乐 的歌单小票截图做模板）。所以：
+    #      · data/daily-picks.json 的 classics 现在归 build-receipt.py 用，
+    #        字段是平铺的 {title, artist, duration}（不再是这里的「按歌手分组」形状）
+    #      · 原来那段 <details class="daily-classics"> 的渲染已删除，
+    #        它配套的样式也早在 2026-09-21 就移除了 ⇒ 留着只会输出没样式的裸标签
+    #    本函数现在只管 pool / history（每日推荐那部分）。
+    #    两个生成器各管一段、互不写入：daily 管 <!-- daily:begin..end -->，
+    #    receipt 管 <!-- receipt:begin..end -->。
 
     parts.append('      </div>')
     return "\n".join(parts)

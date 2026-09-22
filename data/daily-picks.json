@@ -5,11 +5,117 @@
   "_缺失字段怎么办": "album / year 没有就留空 —— 生成器会跳过空的那几项，绝不编造年份。",
   "_版权口径": "只存「事实」——歌名、歌手、专辑、年份。不存音频、不存歌词、不存封面。",
   "_池子空了": "history 会一直留着最后一条，页面不会变空；自动化会跳过并不报错。",
-  "_classics 已清空": "「常听的 15 首」按用户要求于 2026-09-21 从页面删除（V2.7 续三十二）。原来那 15 首仍在 git 历史里（提交 d721dc9）。",
-
   "pool": [],
-
   "history": [],
-
-  "classics": []
+  "classics": [
+    {
+      "title": "爱不来 (feat. Miss Ko 葛仲珊)",
+      "artist": "方大同/葛仲珊",
+      "duration": "4:48",
+      "album": "",
+      "year": ""
+    },
+    {
+      "title": "味道",
+      "artist": "方大同/Zion.T (자이언티)/Crush (크러쉬)",
+      "duration": "4:09",
+      "album": "",
+      "year": ""
+    },
+    {
+      "title": "瘦子 (Skinny Love)",
+      "artist": "丁世光",
+      "duration": "2:45",
+      "album": "",
+      "year": ""
+    },
+    {
+      "title": "潮流季",
+      "artist": "薛之谦",
+      "duration": "3:59",
+      "album": "",
+      "year": ""
+    },
+    {
+      "title": "媚人",
+      "artist": "薛之谦",
+      "duration": "3:46",
+      "album": "",
+      "year": ""
+    },
+    {
+      "title": "爱情宣判",
+      "artist": "薛之谦",
+      "duration": "4:34",
+      "album": "",
+      "year": ""
+    },
+    {
+      "title": "我的雅典娜",
+      "artist": "薛之谦",
+      "duration": "3:42",
+      "album": "",
+      "year": ""
+    },
+    {
+      "title": "念",
+      "artist": "薛之谦",
+      "duration": "5:08",
+      "album": "",
+      "year": ""
+    },
+    {
+      "title": "彩券",
+      "artist": "薛之谦",
+      "duration": "4:35",
+      "album": "",
+      "year": ""
+    },
+    {
+      "title": "Come Together (Live)",
+      "artist": "方大同",
+      "duration": "4:59",
+      "album": "",
+      "year": ""
+    },
+    {
+      "title": "宫保鸡丁",
+      "artist": "陶喆",
+      "duration": "3:54",
+      "album": "",
+      "year": ""
+    },
+    {
+      "title": "讨厌",
+      "artist": "芮恩",
+      "duration": "4:17",
+      "album": "",
+      "year": ""
+    },
+    {
+      "title": "违背的青春",
+      "artist": "薛之谦",
+      "duration": "5:36",
+      "album": "",
+      "year": ""
+    },
+    {
+      "title": "深深爱过你 (前世)",
+      "artist": "薛之谦",
+      "duration": "4:38",
+      "album": "",
+      "year": ""
+    },
+    {
+      "title": "唉！",
+      "artist": "方大同",
+      "duration": "3:40",
+      "album": "",
+      "year": ""
+    }
+  ],
+  "_duration": "duration 是这轮新加的字段（'m:ss'）。小票的 AMT 列与 TOTAL 都用它；⚠️ TOTAL 由 tools/build-receipt.py 现算，不抄截图里那个数 ——截图写 64:22，而 15 条相加是 64:30，对不上，所以以算出来的为准。",
+  "_album_year 为什么空着": "截图里没有专辑/年份，而「没有就留空，绝不编造」是本站的规矩 ⇒ 留空。小票也不显示这两项，不影响呈现。",
+  "classics_updated": "2026-09-22",
+  "_classics 现在归谁管": "classics 由 tools/build-receipt.py 渲染成一张小票写进 index.html，build-daily.py **不再碰它**（那边的渲染器已摘除）。字段形状：平铺的 {title, artist, duration}（duration 形如 '4:48'）。来源：用户 2026-09-22 的 QQ音乐 歌单小票截图（过程证据/参考-歌单小票模板.jpg），AI 逐条转录 —— ⚠️ 转录可能有误，等用户核对过再定稿。"
 }

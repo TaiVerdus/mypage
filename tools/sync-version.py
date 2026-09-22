@@ -91,6 +91,35 @@ def counts_with_pending(check_only):
     return v2 + 1, main, src
 
 
+# 「截至 <日期>」那个日期取哪个值，两种模式不一样（2026-09-22 修）。
+# ⚠️ 原来这条规则替换时用的是 m.group(2)（**文件里原来的日期**），
+#    于是提交数一直涨、日期钉死在 2026-09-17 ⇒ 那行成了假话
+#    （「截至 2026-09-17 共 62 次」——9-17 那天根本不是 62 次）。
+_MODE = {"check": False}
+_DATE_CACHE = {}
+
+
+def today_iso():
+    import datetime
+    return datetime.date.today().isoformat()
+
+
+def stamp_date():
+    """写入时用**今天**（= 这一次待提交的提交日期）；--check 时用**最后一次提交的日期**。
+
+    两种模式取值不同是刻意的：
+      · 写入发生在提交**之前** ⇒ 今天才是这次提交的日期
+      · 核对发生在提交**之后** ⇒ 那时 HEAD 的日期就是它
+    两边都用 today() 的话，第二天再核对就会假报「不一致」；
+    两边都用 HEAD 的话，写入时会把上一次提交的日期写进去。
+    """
+    if not _MODE["check"]:
+        return today_iso()
+    if "d" not in _DATE_CACHE:
+        _DATE_CACHE["d"] = git("log", "-1", "--format=%cs") or "unknown"
+    return _DATE_CACHE["d"]
+
+
 # (文件名, 说明, 正则, 替换用的组)
 RULES = [
     # ⚠️ 这一条的正则跟的是**页面上那句中文**（V2.7 续三十整站中文化时同步改的）。
@@ -98,7 +127,7 @@ RULES = [
     #    正则不改的话，这句就再也匹配不上，提交数会停在旧值上变假。
     ("index.html", "项目条目的提交数",
      r"(· 截至 )(\d{4}-\d{2}-\d{2})( 共 )(\d+)( 次提交)",
-     lambda m, v2, mn: (m.group(1) + m.group(2) + m.group(3)
+     lambda m, v2, mn: (m.group(1) + stamp_date() + m.group(3)
                         + str(v2 + mn) + m.group(5))),
 
     ("index.html", "注释里的分支条数",
@@ -122,6 +151,7 @@ RULES = [
 
 def main():
     check_only = "--check" in sys.argv
+    _MODE["check"] = check_only          # ⚠️ 必须在套用 RULES 之前设好：日期取哪个值取决于它
     v2c, mc, src = counts_with_pending(check_only)
     total = v2c + mc
 

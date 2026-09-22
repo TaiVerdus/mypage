@@ -188,11 +188,11 @@
               <p>纯静态 · 无框架 · 自己的一套设计系统</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 59 条 + main 分支 2 条（V1.0 / V1.1）
+                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 60 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
               <!-- ⚠️ 这一行带提交数，由 tools/sync-version.py 自动写 ——
                    别手改数字，改完在提交前跑一次那个脚本。 -->
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 截至 2026-09-17 共 61 次提交</p>
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 截至 2026-09-22 共 62 次提交</p>
               <a class="item-link" href="ai-log.html">这个页面是怎么做出来的 →</a>
             </div>
             <div class="bento-item bento-item--project">
@@ -327,6 +327,61 @@
         </article>
       </div>
       <!-- daily:end -->
+
+      <!-- receipt:begin 由 tools/build-receipt.py 生成，请勿手改 -->
+      <!-- ⚠️ 生成物：改内容请改 data/daily-picks.json 的 classics，再跑
+           python tools/build-receipt.py —— 别直接改下面这些行。
+           数据来源：用户 2026-09-22 在 QQ音乐 生成的歌单小票（他自己的清单），
+           由 AI 逐条转录 —— ⚠️ 转录可能有误，等他核对。
+           右上角原本是 QQ音乐 的二维码、底部是它的 logo ⇒ 都没搬（别人的东西），
+           二维码那格换成他自己的单字印。TOTAL 是现算的，不抄截图那个数。 -->
+      <article class="receipt reveal">
+        <p class="receipt-kicker">PLAYLIST</p>
+        <h3 class="receipt-title">常听的</h3>
+        <div class="receipt-top">
+          <p class="receipt-date">AS OF 2026-09-22</p>
+          <span class="receipt-mark" aria-hidden="true">释</span>
+        </div>
+        <p class="receipt-store">00 WANG SHIXIAN · MYPAGE</p>
+        <div class="receipt-head" aria-hidden="true">
+          <span>QTY</span><span>ITEM</span><span>AMT</span>
+        </div>
+        <!-- ⚠️ role="list" 不能少：CSS 里给有序列表写了 list-style: none，
+             而 Safari/VoiceOver 会因此丢掉列表语义。
+             ⚠️ 注释里**别写标签样式的文字**（比如把 ol 用尖括号包起来写）——
+                结构检查器会把注释里的它当成真开标签，报一串「未闭合」。
+                这条踩过：V2.7 续四十四首版就是这么把标签检查弄红的。 -->
+        <ol class="receipt-list" role="list">
+          <li><span class="r-no">01</span><span class="r-name">爱不来 (feat. Miss Ko 葛仲珊)<span class="r-artist"> — 方大同/葛仲珊</span></span><span class="r-amt">4:48</span></li>
+          <li><span class="r-no">02</span><span class="r-name">味道<span class="r-artist"> — 方大同/Zion.T (자이언티)/Crush (크러쉬)</span></span><span class="r-amt">4:09</span></li>
+          <li><span class="r-no">03</span><span class="r-name">瘦子 (Skinny Love)<span class="r-artist"> — 丁世光</span></span><span class="r-amt">2:45</span></li>
+          <li><span class="r-no">04</span><span class="r-name">潮流季<span class="r-artist"> — 薛之谦</span></span><span class="r-amt">3:59</span></li>
+          <li><span class="r-no">05</span><span class="r-name">媚人<span class="r-artist"> — 薛之谦</span></span><span class="r-amt">3:46</span></li>
+          <li><span class="r-no">06</span><span class="r-name">爱情宣判<span class="r-artist"> — 薛之谦</span></span><span class="r-amt">4:34</span></li>
+          <li><span class="r-no">07</span><span class="r-name">我的雅典娜<span class="r-artist"> — 薛之谦</span></span><span class="r-amt">3:42</span></li>
+          <li><span class="r-no">08</span><span class="r-name">念<span class="r-artist"> — 薛之谦</span></span><span class="r-amt">5:08</span></li>
+          <li><span class="r-no">09</span><span class="r-name">彩券<span class="r-artist"> — 薛之谦</span></span><span class="r-amt">4:35</span></li>
+          <li><span class="r-no">10</span><span class="r-name">Come Together (Live)<span class="r-artist"> — 方大同</span></span><span class="r-amt">4:59</span></li>
+          <li><span class="r-no">11</span><span class="r-name">宫保鸡丁<span class="r-artist"> — 陶喆</span></span><span class="r-amt">3:54</span></li>
+          <li><span class="r-no">12</span><span class="r-name">讨厌<span class="r-artist"> — 芮恩</span></span><span class="r-amt">4:17</span></li>
+          <li><span class="r-no">13</span><span class="r-name">违背的青春<span class="r-artist"> — 薛之谦</span></span><span class="r-amt">5:36</span></li>
+          <li><span class="r-no">14</span><span class="r-name">深深爱过你 (前世)<span class="r-artist"> — 薛之谦</span></span><span class="r-amt">4:38</span></li>
+          <li><span class="r-no">15</span><span class="r-name">唉！<span class="r-artist"> — 方大同</span></span><span class="r-amt">3:40</span></li>
+        </ol>
+        <div class="receipt-sum">
+          <p><span>COUNT:</span><span>15</span></p>
+          <p><span>TOTAL:</span><span>64:30</span></p>
+        </div>
+        <div class="receipt-foot">
+          <p>PLAYLIST ID: MYPAGE-20260922-A995</p>
+          <p>EDITED TIME: 2026-09-22</p>
+          <p>EDITED BY: 释贤</p>
+        </div>
+        <!-- 条码纯装饰（CSS 画的，扫不出东西）⇒ 对读屏隐藏 -->
+        <div class="receipt-barcode" aria-hidden="true"></div>
+        <p class="receipt-thanks">THANK YOU FOR LISTENING</p>
+      </article>
+<!-- receipt:end -->
     </section>
 
     <!-- ========== 区块 3：数字分身聊天区 ========== -->
