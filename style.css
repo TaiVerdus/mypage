@@ -580,15 +580,26 @@ section {
    ⚠️ 记忆里那条「知识库加减条目要同步页面上的『分身话题』数字」也随之作废（页面上不再有这个数字）。
    要恢复这一栏，从 git 取（本次提交之前）。 */
 
-/* ---------- 6. 关于我：Bento Grid 卡片 ---------- */
+/* ---------- 6. 关于我：Bento Grid 卡片 ----------
+   布局（用户 2026-09-22：「把关注方向和兴趣放在一列」）：
+     左栏一张大卡（现在在做的事）· 右栏两张小卡上下排（兴趣 / 关注方向）
+   ⇒ 两列 + 右栏内部再竖向 flex，而不是「跨 2 列 / 跨 1 列 / 跨 2 列」那种三卡排法。
+   ⚠️ 换掉旧排法的两个原因：
+     ① 旧排法会**空出第二行右侧一格**（3 张卡各跨 2 / 1 / 2 列 ⇒ 那格没人占）；
+     ② 旧排法是「格子里的人一起被拉高」，兴趣卡只有 5 个标签却被拉到和大卡一样高，
+        下面空一大截。现在右栏是 flex 竖排，**两张卡各按自己的内容取高**，
+        右栏总高不够时余下的是页面底色（不是一张看不见内容的空卡）✓ */
 .bento-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 2fr 1fr;
   gap: var(--sp-4);
 }
 
-.bento-large {
-  grid-column: span 2;
+/* 右栏：两张小卡竖向排，各取自己的内容高度 */
+.bento-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
 }
 
 /* 卡片质感：1px 渐变描边 + 多层阴影 + 顶部高光 */
@@ -782,11 +793,10 @@ section {
 }
 
 @media (max-width: 768px) {
+  /* 窄屏收成单列：左栏大卡 + 右栏那两张，一共三张竖向排下来
+     （.bento-side 本来就竖向 flex，所以它跟着 1fr 一起坍下去正好） */
   .bento-grid {
     grid-template-columns: 1fr;
-  }
-  .bento-large {
-    grid-column: span 1;
   }
 }
 
@@ -994,9 +1004,9 @@ section {
    数据条一删，整块都没内容了，所以连媒体查询一起移除（留个空的会让人以为漏了东西）。 */
 
 @media (max-width: 640px) {
-  .info-grid {
-    grid-template-columns: 1fr;
-  }
+  /* ⚠️ 原来这里有一条 `.info-grid { grid-template-columns: 1fr }` —— 是**冗余的**：
+     关于我那三张卡在 ≤768px 就已经由 `.bento-grid` 收成单列了，这里再写一次不会多做什么。
+     `.info-grid` 现在在样式表里没有任何别的规则，所以这一条一并去掉（2026-09-22）。 */
 
   .nav-inner {
     padding: 0 16px;

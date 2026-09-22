@@ -164,9 +164,12 @@
         <span class="eyebrow reveal">01 — 关于</span>
         <h2 class="section-title" data-lines>关于我</h2>
       </div>
-      <div class="info-grid bento-grid reveal">
-        <!-- 大卡：现在在做（内容由用户 2026-09-22 更新；MYPAGE 那条同时是「编程能力」的证据） -->
-        <div class="info-card bento-large">
+      <!-- ⚠️ 这个容器原来还有 `info-grid` 这个类名，但样式表里早就没有对应规则了
+           （2026-09-22 一并清掉：留着会让人以为它在控制布局，其实是 .bento-grid 在管）。 -->
+      <div class="bento-grid reveal">
+        <!-- 左栏大卡：现在在做（内容由用户 2026-09-22 更新；MYPAGE 那条同时是「编程能力」的证据）
+             宽度与高度由 .bento-grid / .bento-side 那套栅格决定（不再用 .bento-large 跨列） -->
+        <div class="info-card">
           <h3><span class="card-dot"></span>现在在做的事</h3>
           <div class="bento-items">
             <!-- 课程（用户给的那组「Lecture」）：课程名 · 授课老师。
@@ -189,11 +192,11 @@
               <p>纯静态 · 无框架 · 自己的一套设计系统</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 70 条 + main 分支 2 条（V1.0 / V1.1）
+                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 71 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
               <!-- ⚠️ 这一行带提交数，由 tools/sync-version.py 自动写 ——
                    别手改数字，改完在提交前跑一次那个脚本。 -->
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 截至 2026-09-22 共 72 次提交</p>
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 截至 2026-09-22 共 73 次提交</p>
               <a class="item-link" href="ai-log.html">这个页面是怎么做出来的 →</a>
             </div>
             <!-- ⚠️ 这里原来是 CarbonBrain（写着「课程 / 比赛项目 · 已有可演示版本」）——
@@ -221,24 +224,35 @@
           </div>
         </div>
 
-        <!-- 小卡：兴趣（有照片的标签会跳到照片，作为「证据」） -->
-        <div class="info-card">
-          <h3><span class="card-dot"></span>兴趣</h3>
-          <ul class="tag-list">
-            <li><a href="#photo-drums" title="看打鼓那张照片">架子鼓 <span aria-hidden="true">↘</span></a></li>
-            <li><a href="#photo-calligraphy" title="看书法那张照片">书法 <span aria-hidden="true">↘</span></a></li>
-            <li><a href="#music" title="看歌单">音乐 <span aria-hidden="true">↘</span></a></li>
-            <li><a href="#photo-photography" title="看日落那张照片">摄影 <span aria-hidden="true">↘</span></a></li>
-            <li><a href="#photo-basketball" title="看篮球那张照片">篮球 <span aria-hidden="true">↘</span></a></li>
-          </ul>
-        </div>
+        <!-- 右侧竖排两张小卡（用户 2026-09-22：「把关注方向和兴趣放在一列」）——
+             它们被包进 .bento-side，在网格里**合占一列**、上下排列；
+             左边那张大卡（现在在做的事）占满其余宽度与整块高度。
+             ⚠️ 这样顺手补掉了「第二行右侧那格空洞」—— 3 张卡各自「跨2 / 跨1 / 跨2」时会空出一格。 -->
+        <div class="bento-side">
 
-        <!-- 大卡：关注方向（用户 2026-09-22 明确为「AI、BCI」）
-             ⚠️ 缩写与全称都给：BCI 是用户自己的说法，括号里补全称是为了能被搜到
-                （同 .hero-meta 那条「窄处用 BCI、正文用脑机接口」的分工，见 DESIGN-SYSTEM）。 -->
-        <div class="info-card bento-large">
-          <h3><span class="card-dot"></span>关注方向</h3>
-          <p class="info-text">AI × BCI（脑机接口）—— 探索心智与机器如何相连，跟着这个领域的前沿走。</p>
+          <!-- 小卡：兴趣（有照片的标签会跳到照片，作为「证据」；没照片的是普通标签） -->
+          <div class="info-card">
+            <h3><span class="card-dot"></span>兴趣</h3>
+            <ul class="tag-list">
+              <li><a href="#photo-drums" title="看打鼓那张照片">架子鼓 <span aria-hidden="true">↘</span></a></li>
+              <li><a href="#photo-calligraphy" title="看书法那张照片">书法 <span aria-hidden="true">↘</span></a></li>
+              <li><a href="#music" title="看歌单">音乐 <span aria-hidden="true">↘</span></a></li>
+              <li><a href="#photo-photography" title="看日落那张照片">摄影 <span aria-hidden="true">↘</span></a></li>
+              <li><a href="#photo-basketball" title="看篮球那张照片">篮球 <span aria-hidden="true">↘</span></a></li>
+              <!-- ⚠️ 旅游没有照片 ⇒ **只做普通标签、不带那个箭头**：
+                   箭头在全站的含义是「点了会跳到一张照片」，没有证据可跳就不该给这个暗示。
+                   （早点没给篮球挂箭头也是同一个道理；后来它有了照片才挂上。） -->
+              <li>旅游</li>
+            </ul>
+          </div>
+
+          <!-- 关注方向（用户 2026-09-22 明确为「AI、BCI」）
+               ⚠️ 缩写与全称都给：BCI 是用户自己的说法，括号里补全称是为了能被搜到
+                  （同 .hero-meta 那条「窄处用 BCI、正文用脑机接口」的分工，见 DESIGN-SYSTEM）。 -->
+          <div class="info-card">
+            <h3><span class="card-dot"></span>关注方向</h3>
+            <p class="info-text">AI × BCI（脑机接口）—— 探索心智与机器如何相连，跟着这个领域的前沿走。</p>
+          </div>
         </div>
       </div>
     </section>
