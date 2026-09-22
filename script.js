@@ -837,7 +837,8 @@ window.addEventListener('resize', function () {
    ⚠️ 尊重 prefers-reduced-motion：系统要求减少动效时**根本不启动滚动动画**，
       球体由 CSS 摊平成一行静态照片，那行短标题也隐藏。
 
-   📷 **换素材只改下面 SPHERE_PHOTOS**（src + 一行短标题）—— 现在先用原有的 5 张占位。 */
+   📷 **换素材只改下面 SPHERE_PHOTOS**（src + 一行短标题）—— 现在是 9 张真人素材
+   （2026-09-21 由 5 张占位换成 9 张）。 */
 (function () {
   var gallery = document.getElementById('sphereGallery');
   var sphere = document.getElementById('sphere');
@@ -846,7 +847,8 @@ window.addEventListener('resize', function () {
 
   // 👉 素材到位后改这里。label 只写一行短标题（用户明确要的），不写长描述。
   // ⚠️ 这里用的是 images/sphere/ 下的**缩略图**，不是原图 —— 球体卡片只显示 150×200 px，
-  //    喂原图纯浪费（5 张原图 1407 KB，缩略图 128 KB）。
+  //    喂原图纯浪费（9 张原图合计 2343 KB，缩略图合计 256 KB —— 省约 89%）。
+  //    ⚠️ 这两个数是 2026-09-22 实测的；换素材后请重新量一遍，别让注释停在旧数字上。
   //    缩略图由 `python tools/make-thumbs.py <源图或目录>` 生成（3:4 居中裁切，和 CSS 的
   //    object-fit: cover 一致 ⇒ 视觉没变化），顺带摆正 EXIF 方向、去掉 EXIF（含 GPS）。
   //    换素材的流程：把照片丢进一个目录 → 跑那个脚本 → 改下面这张表。

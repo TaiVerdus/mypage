@@ -146,17 +146,36 @@
 
 | Token | 值 | 场景 |
 | --- | --- | --- |
-| `--fs-display` | `clamp(34px, 6vw, 52px)` | 首屏 H1 |
-| `--fs-hero2` | `clamp(28px, 5vw, 40px)` | 联系区大标题 |
-| `--fs-h2` | `clamp(22px, 3.2vw, 28px)` | 区块标题 |
-| `--fs-h3` | `16px` | 卡片标题 |
+| `--fs-display` | `clamp(40px, 7vw, 68px)` | 首屏 H1 |
+| `--fs-hero2` | `clamp(32px, 5.5vw, 48px)` | 联系区大标题 |
+| `--fs-h2` | `clamp(26px, 3.6vw, 34px)` | 区块标题 |
+| `--fs-h3` | `17px` | 卡片标题 |
 | `--fs-body` | `15px` | 正文 |
 | `--fs-sm` | `14px` | 卡片内容 |
 | `--fs-xs` | `13px` | 说明文字 |
-| `--fs-caption` | `12px` | 页脚、角标 |
+| `--fs-caption` | `12px` | 页脚、角标、**导航栏那句引语** |
+| `--fs-eyebrow` | `12px` | 眉题 / 卡片小标签（`.eyebrow`、`.card-row dt`）|
 
-行高：`--lh-tight: 1.25`（标题）、`--lh-body: 1.7`（正文）。
-字重**只用两档**：`400` 正文、`600` 强调。标题不超过 `700`。
+行高：`--lh-tight: 1.18`（标题）、`--lh-body: 1.7`（正文）。
+
+**字重**（2026-09-22 对着样式表实际数了 39 处）：
+
+| 档 | 用在哪 |
+| --- | --- |
+| `400` | 正文：`body`、首屏自我介绍、导航栏引语 |
+| `500` | 标签与小字：`.eyebrow`、`.meta-k`、`.tag-list li`、`.item-idx`、`.item-badge`、`.card-row dt` |
+| `600` | `.btn`、卡片小标题 `h3`、`.meta-v`、`.bento-item strong` |
+| `700` | 大标题：`h1`、`.section-title`、`.contact-title`、`.nav-logo`、小票标题 |
+| `800` | **全站只有一处**：Marquee 的镂空描边字 |
+
+> ⚠️ **同一个选择器可能被后面的规则覆写**：`.contact-title` 先写 500、后面又改成 700；
+> `.meta-k` 先写 500、后面被那条分组规则改成 600。
+> ⇒ 判断某处字重时**以文件里靠后的那次为准**，别只看到前面那条就下结论。
+> ⚠️ 这条以前写的是「只用两档：400 / 600」，**是错的**（500 才是用得最多的一档，共 17 处）。
+
+**小字号（≤12px）的颜色**：只能配 `--color-muted` 或 `--color-brand`，两套主题都过 WCAG AA。
+实测对比度：次要灰 **浅色 7.27:1 / 深色 9.45:1**；强调青 **浅色 5.47:1 / 深色 12.80:1**。
+⚠️ **不要用 `opacity` 做淡化** —— 跨主题会掉到门槛以下，且 `--c-600` / `--c-700` 那两个 token **早就没有了**（V2.3 收敛掉了）。
 
 ---
 
@@ -164,15 +183,20 @@
 
 **间距（4px 基准）**：`--sp-1:4` `--sp-2:8` `--sp-3:12` `--sp-4:16` `--sp-5:24` `--sp-6:32` `--sp-7:48` `--sp-8:64`
 
-**圆角**：`--r-sm:10px`（输入框/小按钮）、`--r-md:14px`（卡片/图片）、`--r-lg:16px`（聊天窗）、`--r-pill:999px`（按钮/标签）
+**圆角**：`--r-sm:10px`（输入框/小按钮）、`--r-md:14px`（卡片/图片）、`--r-lg:18px`（聊天窗/玻璃名片）、`--r-pill:999px`（按钮/标签）
 
 **阴影（三级，不要自造）**
 
 | Token | 值 | 场景 |
 | --- | --- | --- |
-| `--sh-1` | `0 1px 3px rgba(15,118,110,.08), 0 1px 2px rgba(15,118,110,.05)` | 静止态卡片 |
-| `--sh-2` | `0 6px 18px rgba(15,118,110,.14)` | hover 抬起 |
-| `--sh-3` | `0 4px 20px rgba(15,118,110,.10)` | 导航条投影 |
+| `--sh-1` | 三层：`0 1px 2px` + `0 2px 8px` + `0 8px 24px`（`--c-brand-rgb` 的 4~5%）| 静止态卡片 |
+| `--sh-2` | 三层：`0 2px 4px` + `0 10px 24px` + `0 24px 48px`（6~10%）| hover 抬起 |
+| `--sh-3` | 一层：`0 4px 20px`（10%）| 导航条投影 |
+
+⚠️ 两条意思：① **三级就够，别自造第四级**；② 阴影颜色**一律从 `--c-brand-rgb` 派生**、不用黑灰
+—— 换主题时阴影颜色自动跟着走（这也是两套主题只改 token 就够的原因之一）。
+⚠️ `--sh-1` / `--sh-2` 是**三层叠出来的**，不是单层：单层只能表达「一个高度」，叠起来才有远近。
+这两行以前写成两个具体 rgba 值，**是过时的**。
 
 **动效**
 
@@ -180,9 +204,13 @@
 | --- | --- |
 | `--dur-fast` | `150ms` |
 | `--dur-base` | `220ms` |
-| `--ease-out` | `cubic-bezier(.22,.61,.36,1)` |
+| `--dur-slow` | `500ms` |
+| `--ease-out` | `cubic-bezier(0.22, 0.61, 0.36, 1)` |
 
-抬起位移统一 `-2px`（小元素 `-1px`），不要出现 `-3px` / `-4px` 混用。
+**抬起位移**（hover 的 `translateY`）：**卡片 `-3px`**（`.info-card` / `.photo-item`）、
+**按钮与链接 `-2px`**、极小元素 `-1px`；不要出现 `-4px`。
+⚠️ 这条以前写「统一 `-2px`」，**与代码不符** —— 实际是按元素体量分三档。
+要么把两处卡片改回 `-2px`、要么认下这条新规矩，**待定**（属改动效，没擅自改）。
 
 ---
 
@@ -192,21 +220,34 @@
 
 | 变体 | 底色 | 文字 | 用法 |
 | --- | --- | --- | --- |
-| `.btn--primary` | 主色→强调色 135° 渐变 | 白 | 页面**唯一**主行动（首屏提问） |
-| `.btn--ghost` | 白底 | `--color-primary-dark` | 次级行动（Say Hello） |
+| `.btn--primary` | `--color-brand` → `--color-brand-deep` 135° 渐变 | `--color-surface` | **唯一**主行动（首屏提问 / 发送） |
+| `.btn--ghost` | `--color-surface`（＋一层淡青投影）| `--color-brand` | 次级行动 |
 
-- 圆角统一 `--r-pill`，hover 统一 `translateY(-2px)` + `--sh-2`
+- 圆角统一 `--r-pill`，hover 统一 `translateY(-2px)` + `--sh-2`；字重 `600`
 - 一屏内 primary 最多 1 个
-- 焦点必须有可见环：`outline: 3px solid rgba(15,118,110,.45)`
+- **焦点环是全局的**，不在 `.btn` 上单独写：
+  `:focus-visible` → `outline: 3px solid rgb(var(--c-brand-rgb) / .45)` + `outline-offset: 2px`
+  ⚠️ 唯一例外是名片的缩放按钮 `.zoom-btn`（自己写了一条 2px 的）—— 那个按钮小，3px 会显得笨重
+- ⚠️ 以前这一行写 `--color-primary-dark`，**这个 token 不存在**（语义 token 只有 `--color-brand-deep`）
 
 ### 6.2 卡片 `.info-card`
 
-白底 + `--color-border` 1px + `--r-md` + `--sh-1`；hover 抬起 `-2px` + `--sh-2`。
-内边距统一 `24px`；标题 `--fs-h3` 用 `--color-primary-dark`。
+`--color-surface` 底 + **1px 渐变描边** + `--r-md` + `--sh-1`；hover 抬起 `-3px` + `--sh-2`。
+
+- 描边来自 `::before` 那条 **`mask-composite: exclude` 抠环**（`padding: 1px` + 双向 mask 相减），
+  **不是**三层边框叠加；hover 时渐变里的白端换成青，描边跟着亮起来
+- ⚠️ 规则里那句 `border: 1px solid var(--color-line)` 是给老浏览器的**兜底**，不是主描边
+- `::after` 是**跟随鼠标的柔光**（JS 把指针坐标写进卡片的 `--mx` / `--my`，CSS 画一圈径向光），
+  平时 `opacity: 0`，hover 变 1
+- ⚠️ 以前这一行写的 `--color-border`，**这个 token 不存在**（正确名是 `--color-line`）
+- 内边距统一 `--sp-5`（24px）；卡片标题 `.info-card h3` = `--fs-h3` / 字重 `600` / **`--color-brand`**
+  ⚠️ 以前这里写「用 `--color-primary-dark`」—— **这个 token 不存在**
 
 ### 6.3 标签 `.tag-list li`
 
-底色 `--c-100`，文字 `--color-primary-dark`，`--r-pill`，横向排布允许换行。
+底色 **`--color-mint`（浅青）** ＋ 文字 **`--color-brand`（青）** ＋ `--r-pill`；
+字号 `--fs-sm`、字重 `500`；父层 `.tag-list` 是 `display:flex; flex-wrap:wrap` ⇒ 横向排布、允许换行。
+⚠️ 以前这里写「底色 `--c-100`、文字 `--color-primary-dark`」—— **两个 token 都不存在**（V2.3 收敛成 6 色时去掉了）。
 
 ### 6.4 导航 `.nav`
 
@@ -215,7 +256,10 @@
 
 ### 6.5 图片 `.photo-item`
 
-`--r-md`，`loading="lazy"`，alt 必须描述内容，瀑布流列数 3 / 2 / 1。
+`--r-md` + `--sh-1`；底下一层 `--color-mint`（图没加载出来时不至于空一块）；hover 抬 `-3px`。
+`loading="lazy"`、`decoding="async"`，**alt 必须描述画面内容**（不写「图片」这类同义反复）。
+瀑布流用的是 **CSS 多列** `.masonry { columns: 3 }`，靠 `break-inside: avoid` 防止一张图被切成两半；
+列数 3 → ≤768px 2 列 → ≤480px 1 列。
 
 ---
 
