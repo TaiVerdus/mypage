@@ -216,6 +216,53 @@ main,
   flex-shrink: 0;
 }
 
+/* ---------- 站名 + 引语（V2.7 续五十，用户 2026-09-22）----------
+   用户把首屏那句「曾经发过的誓，会是未来发生的事。」挪进了**导航栏**、紧挨站名。
+   ⚠️ 出处（沙一汀EL《VLOG》）跟着句子一起搬 —— 这句话是**歌词**，
+      只留句子就成了未署名的引用。
+   ⚠️ 「调整字体」是这轮的重点，四条判断：
+      ① 引语 12px（--fs-caption）+ --color-muted —— 小字号**不能配更浅的颜色**，
+         暗色主题下 9.5:1、浅色主题 7.3:1，两种主题都过 AA；
+      ② 站名 14px/700 ↔ 引语 12px/400 ⇒ 靠**字号 + 字重**拉开层级，不新增颜色；
+      ③ 出处 11px + 疏排（沿用「眉题 / 标签」那套小字处理），和正文句分开；
+      ④ **baseline 对齐** —— 站名带 2px 字距、引语不带，不按基线对会歪。
+   ⚠️ `.nav-brand` 用 flex:1 1 auto + min-width:0 ⇒ 空间不够时**先裁引语**（出省略号），
+      **不去挤导航项**：导航项被挤到换行比截断一句引语难看得多。 */
+.nav-brand {
+  display: flex;
+  align-items: baseline;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.nav-vow {
+  margin-left: 12px;
+  padding-left: 12px;
+  border-left: 1px solid var(--color-line);   /* 一条淡竖线，把「站名」和「引语」分开 */
+  min-width: 0;
+  font-size: var(--fs-caption);
+  font-weight: 400;
+  color: var(--color-muted);
+  letter-spacing: .02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-vow-src {
+  font-size: 11px;
+  letter-spacing: .06em;
+}
+
+/* ⚠️ ≤900px 把整条引语隐藏：64px 高的导航条里，「站名 + 引语 + 6 个导航项」放不下。
+   硬塞的结果是导航项换行或横向溢出 —— 比看不见这句话糟糕得多。
+   要它在手机上也出现，得换位置（例如在导航条下面单开一行），那是另一套改法。 */
+@media (max-width: 900px) {
+  .nav-vow {
+    display: none;
+  }
+}
+
 .nav-links {
   display: flex;
   gap: 24px;
@@ -514,51 +561,22 @@ section {
   margin-right: auto;
 }
 
-/* ---------- 5.5 数据条 ---------- */
-#stats {
-  padding: 0 24px;
-}
-
-.stats-row {
-  max-width: var(--page-width);
-  margin: 0 auto;
-  display: grid;
-  /* 4 格 -> 3 格（V2.7 续四十二：用户删掉了「1 方向」那格）。
-     ⚠️ 列数必须跟着内容走 —— 从 4 改成 3，不然第 4 格空着、整行看着歪。
-     ⚠️ 窄屏那两处覆写（≤900px / ≤400px）用 :nth-child(3) 找「第二行开头」，
-        删掉第 3 格之后它**正好还是**第二行开头 ⇒ **不用改** ✓ */
-  grid-template-columns: repeat(3, 1fr);
-  border-top: 1px solid var(--color-line);
-  border-bottom: 1px solid var(--color-line);
-}
-
-.stat {
-  padding: 28px 8px;
-  text-align: center;
-  border-left: 1px solid var(--color-line);
-}
-
-.stat:first-child {
-  border-left: none;
-}
-
-.stat-num {
-  display: block;
-  font-size: clamp(30px, 4vw, 44px);
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.02em;
-  color: var(--color-brand);
-  font-variant-numeric: tabular-nums;
-}
-
-.stat-label {
-  display: block;
-  margin-top: var(--sp-2);
-  font-size: var(--fs-caption);
-  letter-spacing: .04em;
-  color: var(--color-muted);
-}
+/* ---------- 5.5 数据条：整块已删除（V2.7 续四十九，用户 2026-09-22）----------
+   用户附截图 +「把这栏删掉」⇒ 删掉的是那三格：3 在读课程 / 5 兴趣爱好 / 8 分身话题。
+   ⚠️ 动手前数了一遍它牵到**几条规则**，结果 **7 条**，都清了：
+     · #stats{…}                  · .stats-row{…}   · .stat{…}
+     · .stat:first-child{…}       · .stat-num{…}    · .stat-label{…}
+     · 三条数字补丁：@media ≤900px 整块（.stats-row / .stat:nth-child(3) / :nth-child(n+3)）、
+       ≤640px 里的 #stats、≤400px 整块（.stats-row / .stat）
+   ⚠️ **分组选择器里只摘掉 .stat-label 那一项**（见文件下方 §19「眉题 / 元信息键」那条）——
+      .eyebrow / .meta-k 都还在用，整条删会让它们一起变裸样式。
+   ⚠️ **token 不能跟着删**：`--fs-eyebrow` 只是「名字像眉题」，它同时还撑着
+      `.eyebrow`（§5 通用区块）与 `.card-row dt`（玻璃名片的三行名值对）⇒ 必须留着。
+   ⚠️ 顺带补了一处**连带视觉修正**：`.marquee` 的**下边框恢复了** ——
+      它当年正是为了「不和数据条自带的上下边框贴成两条线」才去掉的，
+      数据条一走，这里就得把线还回来，否则跑马灯与正文之间就没有分隔。
+   ⚠️ 记忆里那条「知识库加减条目要同步页面上的『分身话题』数字」也随之作废（页面上不再有这个数字）。
+   要恢复这一栏，从 git 取（本次提交之前）。 */
 
 /* ---------- 6. 关于我：Bento Grid 卡片 ---------- */
 .bento-grid {
@@ -969,17 +987,9 @@ section {
 }
 
 /* ---------- 9. 移动端适配 ---------- */
-@media (max-width: 900px) {
-  .stats-row {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .stat:nth-child(3) {
-    border-left: none;
-  }
-  .stat:nth-child(n+3) {
-    border-top: 1px solid var(--color-line);
-  }
-}
+/* ⚠️ 原来这里有一个 @media (max-width: 900px) 块，里面只有数据条的三条补丁
+   （.stats-row 两列 / .stat:nth-child(3) 去左边线 / .stat:nth-child(n+3) 加上边线）——
+   数据条一删，整块都没内容了，所以连媒体查询一起移除（留个空的会让人以为漏了东西）。 */
 
 @media (max-width: 640px) {
   .info-grid {
@@ -1036,20 +1046,10 @@ section {
   .msg {
     max-width: 90%;
   }
-
-  #stats {
-    padding: 0 16px;
-  }
 }
 
-@media (max-width: 400px) {
-  .stats-row {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .stat {
-    padding: 20px 4px;
-  }
-}
+/* ⚠️ 原来这里还有一个 @media (max-width: 400px)，里面只有数据条的两条补丁
+   （.stats-row 两列 / .stat 收窄内边距）—— 数据条一删，整块空了，连媒体查询一起移除。 */
 
 /* ---------- 16b. 每日推荐 = 一张小票（V2.7 续四十四/四十五） ----------
    用户 2026-09-22 给了一张 QQ音乐 的歌单小票截图。第一版我理解成「另做一张『常听的』」
@@ -1503,11 +1503,14 @@ section {
 }
 
 /* ---------- 13. Marquee 关键词滚动横幅 ---------- */
-/* 下边框去掉：紧邻的数据条自带上边框，避免两条 1px 线贴在一起 */
+/* ⚠️ 下边框是 2026-09-22 **恢复**的：它当年被去掉，是因为紧邻的数据条自带上下边框、
+   两条 1px 线会贴在一起。数据条整块删除后（V2.7 续四十九），跑马灯与正文之间
+   就只剩这一条线了 —— 不收回来，两段内容之间会没有分隔。 */
 .marquee {
   overflow: hidden;
   padding: 32px 0;
   border-top: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-line);
 }
 
 .marquee-track {
@@ -2172,18 +2175,17 @@ body {
   letter-spacing: -0.02em;
 }
 
-/* 数字：衬线大数字是编辑排版里的经典记忆点 */
-.stat-num {
-  font-family: var(--font-serif);
-  font-weight: 500;
-}
+/* ⚠️ 原「数字：衬线大数字是编辑排版里的经典记忆点」那条 .stat-num 已随数据条一起删除
+   （V2.7 续四十九）。页面上的大数字（section-title / contact-title）各有自己的规则，
+   不靠这条 —— 留着就是死规则。 */
 
-/* 眉题 / 元信息键 / 数据标签：大写 + 加宽字距 = 精致
-   ⚠️ 原来这条里还有 .hero-eyebrow —— 2026-09-22 随首屏眉题一起删掉了，
-      只摘它一项（另三个都还在用），别把整条删了 */
+/* 眉题 / 元信息键：大写 + 加宽字距 = 精致
+   ⚠️ 这条**原来有四个成员，两次删除各摘掉一项，都没整条删**（整条删＝幸存的会变裸样式）：
+      · .hero-eyebrow —— 2026-09-22 随首屏眉题删除（V2.7 续四十八）
+      · .stat-label   —— 同日随数据条整块删除（V2.7 续四十九）
+      .eyebrow 与 .meta-k 都还在用，**这两个不能删** */
 .eyebrow,
-.meta-k,
-.stat-label {
+.meta-k {
   text-transform: uppercase;
   letter-spacing: .22em;
   font-weight: 600;

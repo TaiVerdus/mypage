@@ -573,47 +573,13 @@ document.querySelectorAll('.info-card').forEach(function (card) {
   });
 });
 
-// ---------- 交互七：数据条数字滚动 ----------
+// ---------- 交互七：数据条数字滚动 —— **已随数据条一起删除**（V2.7 续四十九，2026-09-22）----------
+// 原来这里是 countUp() + `.stat-num` 的 IntersectionObserver（页面上那个 3 / 5 / 8 往上滚）。
+// 数据条整块删掉后，这一整段**没有任何调用点** ⇒ 留着就是死代码，清掉。
+// ⚠️ **但下面这个变量不能删**：下面的逐行入场（`if (!reduceMotion)`）还在用它。
+//    （补充：`querySelectorAll('.stat-num')` 命中不到东西时返回空 NodeList、不会报错，
+//      所以当初「只删页面不删 JS」是能跑的 —— 但那不叫干净。）
 var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-function countUp(el) {
-  var target = parseInt(el.getAttribute('data-count'), 10);
-  if (isNaN(target)) return;
-
-  if (reduceMotion) {
-    el.textContent = target;
-    return;
-  }
-
-  var duration = 900;
-  var startTime = null;
-
-  function step(now) {
-    if (startTime === null) startTime = now;
-    var p = Math.min((now - startTime) / duration, 1);
-    var eased = 1 - Math.pow(1 - p, 3);      // ease-out cubic
-    el.textContent = Math.round(target * eased);
-    if (p < 1) requestAnimationFrame(step);
-  }
-  requestAnimationFrame(step);
-}
-
-var statNums = document.querySelectorAll('.stat-num');
-
-if ('IntersectionObserver' in window && !reduceMotion) {
-  var statObserver = new IntersectionObserver(function (entries) {
-    entries.forEach(function (entry) {
-      if (entry.isIntersecting) {
-        countUp(entry.target);
-        statObserver.unobserve(entry.target);   // 只数一次
-      }
-    });
-  }, { threshold: 0.6 });
-
-  statNums.forEach(function (el) {
-    statObserver.observe(el);
-  });
-}
 
 // ---------- 交互八：顶部阅读进度条 ----------
 var progressEl = document.getElementById('navProgress');

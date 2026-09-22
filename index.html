@@ -42,7 +42,15 @@
   <!-- ========== Sticky 导航 ========== -->
   <nav class="nav" id="nav">
     <div class="nav-inner">
-      <a class="nav-logo" href="#hero">王释贤</a>
+      <div class="nav-brand">
+        <a class="nav-logo" href="#hero">王释贤</a>
+        <!-- 引语 + 出处（用户 2026-09-22 要求：把首屏那句挪到这一栏、紧挨站名）。
+             ⚠️ 这句话是**歌词**，出自沙一汀EL《VLOG》（词曲：沙一汀EL，2024-08-16，
+                专辑《敏感小孩》），同时也是微信号 Cjfgds_Hswlfsds 的来源。
+             ⚠️ **出处必须跟着句子一起搬** —— 只留句子就成了未署名的引用。
+             ⚠️ 窄屏（≤900px）整条隐藏：这一栏在手机上放不下（见样式表 §3 的说明）。 -->
+        <p class="nav-vow">曾经发过的誓，会是未来发生的事。<span class="nav-vow-src">—— 沙一汀EL《VLOG》</span></p>
+      </div>
       <div class="nav-links">
         <a class="nav-link active" href="#hero">首页</a>
         <a class="nav-link" href="#about">关于</a>
@@ -63,7 +71,10 @@
            它是 .hero-eyebrow，全站只此一处；那条样式与深色主题覆写已一并清掉。
            首屏现在是三块：大标题 / 自我介绍 / 按钮。 -->
       <h1 data-lines>你好，我是 <span class="highlight">王释贤</span></h1>
-      <p class="hero-intro" data-lines>曾经发过的誓，会是未来发生的事。想更了解我？去下面问问我什么都不知道的数字分身。</p>
+      <!-- ⚠️ 原先这句开头还有「曾经发过的誓，会是未来发生的事。」——
+           2026-09-22 按用户要求**挪进了导航栏**（紧挨站名，见 .nav-vow）。
+           这里只留引导语，不要把那句再加回来（否则同一句话会出现两次）。 -->
+      <p class="hero-intro" data-lines>想更了解我？去下面问问我什么都不知道的数字分身。</p>
       <a class="btn btn--primary hero-btn" href="#chat">问问我的数字分身</a>
       <ul class="hero-meta">
         <li><span class="meta-k">MBTI</span><span class="meta-v">ENFJ</span></li>
@@ -142,24 +153,9 @@
     </div>
   </div>
 
-  <!-- ========== 数据条：一眼看完关键信息 ========== -->
-  <!-- 不加 reveal：数字滚动本身就是入场动画，叠加淡入会导致数字在看不见时数完 -->
-  <section id="stats">
-    <div class="stats-row">
-      <div class="stat">
-        <span class="stat-num" data-count="3">3</span>
-        <span class="stat-label">在读课程</span>
-      </div>
-      <div class="stat">
-        <span class="stat-num" data-count="5">5</span>
-        <span class="stat-label">兴趣爱好</span>
-      </div>
-      <div class="stat">
-        <span class="stat-num" data-count="8">8</span>
-        <span class="stat-label">分身话题</span>
-      </div>
-    </div>
-  </section>
+  <!-- 数据条整块删除（V2.7 续四十九，用户 2026-09-22）：原是三格
+       「3 在读课程 / 5 兴趣爱好 / 8 分身话题」。
+       样式与「数字滚动」的清理说明见 style.css §5.5 那段注释。 -->
 
   <main>
     <!-- ========== 区块 2：关于我（个人信息展示区） ========== -->
@@ -190,11 +186,11 @@
               <p>纯静态 · 无框架 · 自己的一套设计系统</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 64 条 + main 分支 2 条（V1.0 / V1.1）
+                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 66 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
               <!-- ⚠️ 这一行带提交数，由 tools/sync-version.py 自动写 ——
                    别手改数字，改完在提交前跑一次那个脚本。 -->
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 截至 2026-09-22 共 66 次提交</p>
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 截至 2026-09-22 共 68 次提交</p>
               <a class="item-link" href="ai-log.html">这个页面是怎么做出来的 →</a>
             </div>
             <div class="bento-item bento-item--project">
