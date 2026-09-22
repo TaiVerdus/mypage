@@ -80,10 +80,12 @@ function ok(cond, name, extra) {
 }
 function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 var URL_OK = 'https://example.test/v1/chat/completions';
-var LOCAL_URL_DEFAULT = CHAT_BACKEND.localUrl;      // 9.6 会临时清掉，reset() 负责还原
+var LOCAL_URL_DEFAULT = CHAT_BACKEND.localUrl;      // 9.6 / 10 会临时清掉，reset() 负责还原
+var CLOUD_URL_DEFAULT = CHAT_BACKEND.cloudUrl;
 function reset() {
   CHAT_BACKEND.url = URL_OK;
   CHAT_BACKEND.localUrl = LOCAL_URL_DEFAULT;
+  CHAT_BACKEND.cloudUrl = CLOUD_URL_DEFAULT;
   CHAT_BACKEND.model = 'gpt-3.5-turbo';
   CHAT_BACKEND.system = '';
   CHAT_BACKEND.timeoutMs = 8000;
@@ -97,10 +99,11 @@ function reset() {
 }
 
 (async function () {
-  console.log('=== 1. 没配地址：完全不碰网络 ===');
+  console.log('=== 1. 三条路都没配：完全不碰网络 ===');
   reset();
   CHAT_BACKEND.url = '';
-  ok(backendUsable() === false, 'url 留空 ⇒ backendUsable() = false（直接走知识库）');
+  CHAT_BACKEND.cloudUrl = '';      // 现在多了云端那条路 ⇒ 要三条全空才等于「没后端」
+  ok(backendUsable() === false, '本机 / 云端 / 显式全空 ⇒ backendUsable() = false（直接走知识库）');
   ok(document !== undefined, '（桩已就位）');
 
   console.log('\n=== 2. 正常响应 ===');
@@ -186,11 +189,14 @@ function reset() {
   ok(chatHistory[5].content === 'a5' && chatHistory[0].content === 'q3', '保留的是最近的几轮');
 
   console.log('\n=== 9. 本机 ollama 自动接管（★ 公网页面绝不能触发）===');
-  // 9.1 没有 location（＝node / 非浏览器）⇒ 不接管
+  // 9.1 没有 location（＝node / 非浏览器）⇒ 判断不出是不是本机 ⇒ 不接本机
   reset();
   CHAT_BACKEND.url = '';
   delete global.location;
-  ok(resolvedBackend() === null, '没有 location ⇒ 不接管（走知识库）');
+  ok(isLocalPage() === false, '没有 location ⇒ isLocalPage() = false');
+  var bNoLoc = resolvedBackend();
+  ok(bNoLoc === null || !/127\.0\.0\.1|localhost|\[::1\]/.test(bNoLoc.url),
+    '没有 location ⇒ 不会去接本机 ollama', JSON.stringify(bNoLoc));
 
   // 9.2 file:// 打开（双击 index.html）⇒ 自动接本机 ollama
   global.location = { protocol: 'file:', hostname: '', search: '' };
@@ -200,10 +206,30 @@ function reset() {
     'file:// ⇒ 接到本机 ollama（用 localModel，不是 model）', JSON.stringify(b));
   ok(backendUsable() === true, '此时后端可用（会先试 ollama）');
 
-  // 9.3 ★ 公网域名 ⇒ 绝不接管（这条是安全底线：不能去连访客自己的机器）
+  // 9.3 ★ 公网域名 ⇒ 走云端代理，但**绝不接本机**（这条是安全底线）
+  reset();
+  CHAT_BACKEND.url = '';                 // 没显式配置
   global.location = { protocol: 'https:', hostname: 'taiv-v2.pages.dev', search: '' };
   ok(isLocalPage() === false, 'https 域名 ⇒ isLocalPage() = false');
-  ok(resolvedBackend() === null, '★ 公网页面不接本机、也不报错，直接走知识库');
+  var bCloud = resolvedBackend();
+  ok(bCloud !== null && bCloud.url === CHAT_BACKEND.cloudUrl,
+    '公网 ⇒ 用云端代理（部署后的同源 /api/chat）', JSON.stringify(bCloud));
+  ok(bCloud === null || !/127\.0\.0\.1|localhost|\[::1\]/.test(bCloud.url),
+    '★★ 公网解析出的地址里**没有任何本机地址**（不会去连访客自己的电脑）',
+    JSON.stringify(bCloud));
+
+  // 9.3b 云端也没配（＝还没部署代理）⇒ 公网老实走知识库
+  CHAT_BACKEND.cloudUrl = '';
+  ok(resolvedBackend() === null, '公网 + 没配云端 ⇒ null（走知识库，页面照常能用）');
+  CHAT_BACKEND.cloudUrl = CLOUD_URL_DEFAULT;
+
+  // 9.3c 本机打开时：本机 ollama **优先于**云端（本机开发用本地模型，免费又快）
+  reset();
+  CHAT_BACKEND.url = '';
+  global.location = { protocol: 'http:', hostname: 'localhost', search: '' };
+  var bLocal = resolvedBackend();
+  ok(bLocal !== null && bLocal.url === CHAT_BACKEND.localUrl,
+    '本机打开 ⇒ 先用本机 ollama，而不是云端', JSON.stringify(bLocal));
 
   // 9.4 本地起 http server 调试时也接管
   global.location = { protocol: 'http:', hostname: 'localhost', search: '' };
@@ -220,13 +246,12 @@ function reset() {
   await askBackend('q');
   ok(lastUrl === URL_OK, '请求真的发到显式那个地址', '实际：' + lastUrl);
 
-  // 9.6 ?chat=off 的做法＝把 localUrl 也清掉 ⇒ 强制回知识库
+  // 9.6 ?chat=off 的做法＝把三条路全清掉 ⇒ 强制回知识库
   reset();
-  var keepLocal = CHAT_BACKEND.localUrl;
   CHAT_BACKEND.localUrl = '';
+  CHAT_BACKEND.cloudUrl = '';
   CHAT_BACKEND.url = '';
-  ok(resolvedBackend() === null, '?chat=off（清掉 localUrl）⇒ 连本机也不接，强制走知识库');
-  CHAT_BACKEND.localUrl = keepLocal;
+  ok(resolvedBackend() === null, '?chat=off（本机 / 云端 / 显式全清）⇒ 强制走知识库');
   delete global.location;
 
   console.log('\n=== 10. ?chat= / ?model= 参数（不动文件就能换后端与模型）===');
@@ -246,9 +271,9 @@ function reset() {
 
   global.location = { protocol: 'file:', hostname: '', search: '?chat=off' };
   eval(cfg);
-  ok(CHAT_BACKEND.url === '' && CHAT_BACKEND.localUrl === '',
-    '?chat=off ⇒ 两条路都关掉（强制走知识库，用来演示降级）',
-    'url=' + CHAT_BACKEND.url + ' localUrl=' + CHAT_BACKEND.localUrl);
+  ok(CHAT_BACKEND.url === '' && CHAT_BACKEND.localUrl === '' && CHAT_BACKEND.cloudUrl === '',
+    '?chat=off ⇒ 三条路全关（本机 / 云端 / 显式），强制走知识库',
+    'url=' + CHAT_BACKEND.url + ' localUrl=' + CHAT_BACKEND.localUrl + ' cloudUrl=' + CHAT_BACKEND.cloudUrl);
 
   global.location = {
     protocol: 'file:', hostname: '',
@@ -257,7 +282,8 @@ function reset() {
   eval(cfg);
   ok(CHAT_BACKEND.url === 'http://127.0.0.1:8005/v1/chat/completions' && CHAT_BACKEND.localModel === 'deepseek-r1:7b',
     '?chat= 与 ?model= 能并用', 'url=' + CHAT_BACKEND.url + ' model=' + CHAT_BACKEND.localModel);
-  ok(CHAT_BACKEND.localUrl === '', '?chat= 出现 ⇒ 本机自动接管仍被关掉（新参数没破坏这条规矩）');
+  ok(CHAT_BACKEND.localUrl === '' && CHAT_BACKEND.cloudUrl === '',
+    '?chat= 出现 ⇒ 本机与云端都关掉（显式指定了就别自作主张回落）');
   delete global.location;
 
   console.log('\n知识库那侧不受影响；用例 %d / 失败 %d', pass + fail, fail);

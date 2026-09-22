@@ -132,6 +132,16 @@ var CHAT_BACKEND = {
         ⚠️ 因为它慢，下面 timeoutMs 跟着调到了 20000 —— 还留 8000 的话会偶发超时掉回知识库，
            表现成「有时答有时不答」，比慢本身更糟。 */
 
+  /* ---- ③ 公网访客用：部署后的云端代理（2026-09-23 加）----
+     部署 `server.js` 之后，页面和代理**同源** ⇒ 用相对路径就够。
+     那一层在服务端保管 DeepSeek 的 API key、并锁死数字分身的人设
+     （为什么必须这样，见 `server.js` 头部注释）。
+     ⚠️ 留空 ⇒ 公网访客只用知识库（＝没部署代理时的行为，页面一模一样）。
+     ⚠️ 这里的 model 只是**告知性**的：服务端会用自己的模型名，客户端传什么它都不理
+        （跟 system 一样 —— 免得有人改前端就把人设或模型换掉）。 */
+  cloudUrl: '/api/chat',
+  cloudModel: 'deepseek-flash',
+
   /* ---- ③ 人物设定 ----
      ⚠️ 发给模型的前提词。**只写了这个页面上已经公开的事，没有添任何新事实** ——
         个人信息以「他自己说过」为准，不替他扩写。
@@ -156,6 +166,7 @@ var CHAT_BACKEND = {
     '· 不知道就直说不知道，**绝不要编造**关于他的任何事——他没告诉过我的，我不替他说',
     '· 不报私人信息（住址、电话、具体年龄这类）；联系方式让他自己给',
     '· 回答尽量短，两三句就够',
+    '· **不要用 markdown**（这个聊天窗不渲染它，星号和井号会原样显示出来）',
   ].join('\n'),
 
   /* ⚠️ 20000 而不是 8000：deepseek-r1 是推理模型，本身要 2.5~6.2 秒，冷启动还要 9~15 秒。
@@ -181,12 +192,13 @@ var chatHistory = [];       // 只记「微调分身真答过」的轮次 ——
 //
 // ⚠️ 必须留 `typeof location !== 'undefined'` 这层守卫：两个回归测试会把这段代码
 //    抽到 node 里执行，那里没有 `location`，不守卫就会直接抛错。
-// ⚠️ `?chat=` 一旦出现就**同时关掉本机自动接管**：显式指定了就别再自作主张回落到 ollama。
+// ⚠️ `?chat=` 一旦出现就**同时关掉本机自动接管与云端**：显式指定了就别再自作主张回落。
 if (typeof location !== 'undefined' && location.search) {
   var chatOverride = /[?&]chat=([^&]*)/.exec(location.search);
   if (chatOverride) {
     var chatOverrideVal = decodeURIComponent(chatOverride[1]);
     CHAT_BACKEND.localUrl = '';
+    CHAT_BACKEND.cloudUrl = '';   // `?chat=off` 要能真的退回知识库，这一条不能漏
     CHAT_BACKEND.url = (chatOverrideVal === 'off') ? '' : chatOverrideVal;
   }
   // `?model=` 同时改这两个字段：本机走 localModel（ollama），公网走 model（WeClone）。
@@ -289,13 +301,21 @@ function isLocalPage() {
   return /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname || '');
 }
 
-// 这次该用哪个后端？① 显式配置的 url → ② 本机打开时的 ollama → 都没有则 null（走知识库）
+// 这次该用哪个后端？逐级往下挑，都没有则 null（走知识库）：
+//   ① `url`       —— 显式指定的（WeClone 地址 / 地址栏 `?chat=` 临时覆盖）
+//   ② `localUrl`  —— **只有本机打开时**才用（`file://` / localhost / 127.0.0.1）
+//   ③ `cloudUrl`  —— 公网访客用（部署后的云端代理，同源相对路径）
+// ⚠️ ② 在 ③ 前面是**故意的**：本机开发时用本地模型（免费、快），公网访客才走云端。
+//    而 ① 永远最优先，所以 `?chat=` 的语义没变 —— 它会把 localUrl 清掉、直接指定地址。
 function resolvedBackend() {
   if (CHAT_BACKEND.url) {
     return { url: CHAT_BACKEND.url, model: CHAT_BACKEND.model };
   }
   if (CHAT_BACKEND.localUrl && isLocalPage()) {
     return { url: CHAT_BACKEND.localUrl, model: CHAT_BACKEND.localModel };
+  }
+  if (CHAT_BACKEND.cloudUrl) {
+    return { url: CHAT_BACKEND.cloudUrl, model: CHAT_BACKEND.cloudModel };
   }
   return null;
 }
