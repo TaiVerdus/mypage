@@ -44,25 +44,46 @@
   --color-line:        var(--c-line);
   --color-line-strong: var(--c-line-strong);
 
-  /* ---- 字体尺度 ---- */
-  --fs-display: clamp(40px, 7vw, 68px);
-  --fs-hero2:   clamp(32px, 5.5vw, 48px);
-  --fs-h2:      clamp(26px, 3.6vw, 34px);
-  --fs-h3:      17px;
-  --fs-body:    15px;
-  --fs-sm:      14px;
-  --fs-xs:      13px;
-  --fs-caption: 12px;
-  --fs-eyebrow: 12px;
+  /* ---- 整体尺寸总旋钮（V2.7 续六十，用户 2026-09-22）----
+     用户要求「整体尺寸明显调大，改善视觉平衡与饱满度」。
+     做法 = **一个无单位系数**：字号 / 间距 / 圆角 / 页宽 / 元件尺寸全部由它派生
+     ⇒ 想再大一点、再小一点，**只改这一处**，全站一起动。
+     ⚠️ 它只管「尺寸」，不碰颜色、层位、动效时长（那些各有各的旋钮）。
+     ⚠️ 窄屏那几条硬编码（导航 / 首屏 / 小票在 640 断点里的值）**故意不乘它** ——
+        手机上再按这个比例放大，导航 6 个链接会溢出 360px 宽的机身。
+     1.16 = 线性 +16%（面积 +35%）：1920 屏上正文列 1032px → 1197px，H1 68px → 79px。 */
+  --scale: 1.16;
+
+  /* ---- 字体尺度（全部由 --scale 派生） ---- */
+  --fs-display: clamp(calc(40px * var(--scale)), calc(7vw * var(--scale)), calc(68px * var(--scale)));
+  --fs-hero2:   clamp(calc(32px * var(--scale)), calc(5.5vw * var(--scale)), calc(48px * var(--scale)));
+  --fs-h2:      clamp(calc(26px * var(--scale)), calc(3.6vw * var(--scale)), calc(34px * var(--scale)));
+  --fs-h3:      calc(17px * var(--scale));
+  --fs-body:    calc(15px * var(--scale));
+  --fs-sm:      calc(14px * var(--scale));
+  --fs-xs:      calc(13px * var(--scale));
+  --fs-caption: calc(12px * var(--scale));
+  --fs-eyebrow: calc(12px * var(--scale));
   --lh-tight: 1.18;
   --lh-body: 1.7;
 
-  /* ---- 间距（4px 基准） ---- */
-  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
-  --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 64px;
+  /* ---- 间距（基准仍是 4px，整体随 --scale 放大）
+     ⚠️ 一个 token 一行：项目里所有检查脚本都按「行首 --token: 值」来找定义，
+        挤在一行会被判成「未定义」（已被自己的校验脚本抓到一次）。 ---- */
+  --sp-1: calc(4px * var(--scale));
+  --sp-2: calc(8px * var(--scale));
+  --sp-3: calc(12px * var(--scale));
+  --sp-4: calc(16px * var(--scale));
+  --sp-5: calc(24px * var(--scale));
+  --sp-6: calc(32px * var(--scale));
+  --sp-7: calc(48px * var(--scale));
+  --sp-8: calc(64px * var(--scale));
 
   /* ---- 圆角 ---- */
-  --r-sm: 10px; --r-md: 14px; --r-lg: 18px; --r-pill: 999px;
+  --r-sm: calc(10px * var(--scale));
+  --r-md: calc(14px * var(--scale));
+  --r-lg: calc(18px * var(--scale));
+  --r-pill: 999px;
 
   /* ---- 阴影（多层柔和阴影，模拟真实光照） ---- */
   --sh-1: 0 1px 2px rgb(var(--c-brand-rgb) / .04),
@@ -80,7 +101,10 @@
   --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
 
   /* ---- 布局 ---- */
-  --page-width: 1080px;
+  --page-width: calc(1080px * var(--scale));   /* 1080 → 1253（正文列 1032 → 1197） */
+  /* ⚠️ 区块间距**刻意不乘 --scale**：内容整体放大、而上下留白不跟着长，
+     页面才会「更饱满」；等比放大的话「空」的比例一点没变。
+     这条在 §20 的 :root 里还有一次覆写（128px），两处都不乘。 */
   --section-pad: 104px;
 }
 
@@ -166,7 +190,7 @@ main,
 .hero-content {
   max-width: var(--page-width);
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 calc(24px * var(--scale));
 }
 
 /* ---------- 3. 导航（Sticky + 毛玻璃） ---------- */
@@ -191,7 +215,7 @@ main,
   position: absolute;
   left: 0;
   bottom: -1px;
-  height: 2px;
+  height: calc(2px * var(--scale));
   width: 0;
   background: linear-gradient(90deg, var(--color-brand), var(--color-brand-deep));
   transition: width 80ms linear;
@@ -201,17 +225,17 @@ main,
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 64px;
+  height: calc(64px * var(--scale));
   max-width: var(--page-width);
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 calc(24px * var(--scale));
 }
 
 .nav-logo {
   font-weight: 700;
-  letter-spacing: 2px;
+  letter-spacing: calc(2px * var(--scale));
   color: var(--color-brand);
-  font-size: 14px;
+  font-size: calc(14px * var(--scale));
   text-decoration: none;
   flex-shrink: 0;
 }
@@ -236,8 +260,8 @@ main,
 }
 
 .nav-vow {
-  margin-left: 12px;
-  padding-left: 12px;
+  margin-left: calc(12px * var(--scale));
+  padding-left: calc(12px * var(--scale));
   border-left: 1px solid var(--color-line);   /* 一条淡竖线，把「站名」和「引语」分开 */
   min-width: 0;
   font-size: var(--fs-caption);
@@ -250,7 +274,7 @@ main,
 }
 
 .nav-vow-src {
-  font-size: 11px;
+  font-size: calc(11px * var(--scale));
   letter-spacing: .06em;
 }
 
@@ -265,14 +289,14 @@ main,
 
 .nav-links {
   display: flex;
-  gap: 24px;
+  gap: calc(24px * var(--scale));
 }
 
 .nav-link {
   text-decoration: none;
   color: var(--color-muted);
-  font-size: 15px;
-  padding: 6px 4px;
+  font-size: calc(15px * var(--scale));
+  padding: calc(6px * var(--scale)) calc(4px * var(--scale));
   border-bottom: 2px solid transparent;
   transition: color 0.2s ease, border-color 0.2s ease;
 }
@@ -287,7 +311,7 @@ main,
 /* ---------- 4. 首屏 hero ---------- */
 #hero {
   position: relative;
-  padding: 96px 0 88px;
+  padding: calc(96px * var(--scale)) 0 calc(88px * var(--scale));
 }
 
 /* Hero 网格纹理：中心亮、四周淡出，营造科技感但不抢文字 */
@@ -298,7 +322,7 @@ main,
   background-image:
     linear-gradient(to right, rgb(var(--c-brand-rgb) / .07) 1px, transparent 1px),
     linear-gradient(to bottom, rgb(var(--c-brand-rgb) / .07) 1px, transparent 1px);
-  background-size: 64px 64px;
+  background-size: calc(64px * var(--scale)) calc(64px * var(--scale));
   -webkit-mask-image: radial-gradient(closest-side ellipse at 50% 40%, #000 25%, transparent 92%);
   mask-image: radial-gradient(closest-side ellipse at 50% 40%, #000 25%, transparent 92%);
 }
@@ -348,7 +372,7 @@ main,
 
 .hero-intro {
   margin: var(--sp-5) auto 0;
-  max-width: 580px;
+  max-width: calc(580px * var(--scale));
   color: var(--color-muted);
   font-weight: 400;
   /* 入场交给逐行系统（见 12.5），这里不再叠加整块淡入 */
@@ -394,7 +418,7 @@ main,
 .scroll-hint {
   position: relative;
   display: block;
-  width: 22px;
+  width: calc(22px * var(--scale));
   margin: var(--sp-7) auto 0;
   text-decoration: none;
 }
@@ -402,7 +426,7 @@ main,
 .scroll-hint-rail {
   display: block;
   width: 1px;
-  height: 52px;
+  height: calc(52px * var(--scale));
   margin: 0 auto;
   background: var(--color-line-strong);
   position: relative;
@@ -414,7 +438,7 @@ main,
   top: 0;
   left: 0;
   width: 1px;
-  height: 18px;
+  height: calc(18px * var(--scale));
   background: var(--color-brand);
   animation: scrollHint 1.9s ease-in-out infinite;
 }
@@ -490,7 +514,7 @@ main,
 /* ---------- 5. 通用区块 ---------- */
 section {
   padding-top: var(--section-pad);
-  scroll-margin-top: 72px;
+  scroll-margin-top: calc(72px * var(--scale));
 }
 
 #about,
@@ -501,7 +525,7 @@ section {
 
 /* 区块标题组：eyebrow 小标签 + 大标题 + 短渐变线 */
 .section-head {
-  margin-bottom: 40px;
+  margin-bottom: calc(40px * var(--scale));
 }
 
 .section-head--center {
@@ -529,11 +553,11 @@ section {
 .eyebrow::before {
   content: '';
   display: inline-block;
-  width: 24px;
+  width: calc(24px * var(--scale));
   height: 1px;
   background: var(--color-brand);
   vertical-align: middle;
-  margin-right: 10px;
+  margin-right: calc(10px * var(--scale));
 }
 
 .eyebrow--center::before,
@@ -551,8 +575,8 @@ section {
 .section-title::after {
   content: '';
   display: block;
-  width: 36px;
-  height: 3px;
+  width: calc(36px * var(--scale));
+  height: calc(3px * var(--scale));
   border-radius: 2px;
   margin-top: var(--sp-4);
   background: linear-gradient(90deg, var(--color-brand), var(--color-brand-deep));
@@ -674,8 +698,8 @@ section {
 
 /* 标题前的小方块：替代原来的 emoji，视觉更克制 */
 .card-dot {
-  width: 7px;
-  height: 7px;
+  width: calc(7px * var(--scale));
+  height: calc(7px * var(--scale));
   border-radius: 2px;
   background: linear-gradient(135deg, var(--color-brand), var(--color-brand-deep));
   flex-shrink: 0;
@@ -718,7 +742,7 @@ section {
 
 /* 「现在在做」的项目条目：这个主页本身就是编程能力的证据，所以单列一条并高亮 */
 .bento-item.bento-item--project {
-  padding: var(--sp-3) 14px;
+  padding: var(--sp-3) calc(14px * var(--scale));
   border-radius: var(--r-sm);
   background: rgb(var(--c-brand-rgb) / .07);
 }
@@ -735,11 +759,11 @@ section {
   color: var(--color-brand);
   background: rgb(var(--c-brand-rgb) / .16);
   border-radius: var(--r-pill);
-  padding: 2px 10px;
+  padding: calc(2px * var(--scale)) calc(10px * var(--scale));
 }
 
 .bento-item .item-track {
-  margin-top: 6px;
+  margin-top: calc(6px * var(--scale));
   font-size: 11px;
   letter-spacing: .04em;
   color: var(--color-brand);
@@ -750,7 +774,7 @@ section {
    不做成按钮——它是卡片里的一条路径，不是主行动点 */
 .bento-item .item-link {
   display: inline-block;
-  margin-top: 10px;
+  margin-top: calc(10px * var(--scale));
   font-size: var(--fs-caption);
   font-weight: 500;
   color: var(--color-brand);
@@ -768,7 +792,7 @@ section {
 .bento-item p {
   font-size: var(--fs-xs);
   color: var(--color-muted);
-  margin-top: 2px;
+  margin-top: calc(2px * var(--scale));
 }
 
 .tag-list {
@@ -783,7 +807,7 @@ section {
   background: var(--color-mint);
   color: var(--color-brand);
   border-radius: var(--r-pill);
-  padding: var(--sp-1) 14px;
+  padding: var(--sp-1) calc(14px * var(--scale));
   font-weight: 500;
 }
 
@@ -809,7 +833,7 @@ section {
 
 .chat-window {
   position: relative;
-  max-width: 640px;
+  max-width: calc(640px * var(--scale));
   margin: 0 auto;
   background: var(--color-surface);
   border: 1px solid var(--color-line);
@@ -841,7 +865,7 @@ section {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 14px 18px;
+  padding: calc(14px * var(--scale)) calc(18px * var(--scale));
   background: linear-gradient(135deg, var(--color-brand), var(--color-brand-deep));
   color: var(--color-surface);
 }
@@ -859,8 +883,8 @@ section {
       会露出聊天窗标题的青绿渐变。深色主题里那条覆写同理，不用动。
    ⚠️ 原来给文字用的 `font-weight: 700` 已去掉 —— 这一格现在没有文字了。 */
 .chat-avatar {
-  width: 38px;
-  height: 38px;
+  width: calc(38px * var(--scale));
+  height: calc(38px * var(--scale));
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.25);
   display: flex;
@@ -878,9 +902,9 @@ section {
 }
 
 .chat-messages {
-  height: 320px;
+  height: calc(320px * var(--scale));
   overflow-y: auto;
-  padding: 18px;
+  padding: calc(18px * var(--scale));
   display: flex;
   flex-direction: column;
   gap: var(--sp-3);
@@ -889,7 +913,7 @@ section {
 
 .msg {
   max-width: 80%;
-  padding: 10px 14px;
+  padding: calc(10px * var(--scale)) calc(14px * var(--scale));
   border-radius: var(--r-md);
   font-size: var(--fs-sm);
   line-height: 1.6;
@@ -923,8 +947,8 @@ section {
 .chat-quick {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  padding: 12px 18px 0;
+  gap: calc(8px * var(--scale));
+  padding: calc(12px * var(--scale)) calc(18px * var(--scale)) 0;
 }
 
 .quick-btn {
@@ -945,16 +969,16 @@ section {
 
 .chat-input-row {
   display: flex;
-  gap: 10px;
-  padding: 12px 18px 16px;
+  gap: calc(10px * var(--scale));
+  padding: calc(12px * var(--scale)) calc(18px * var(--scale)) calc(16px * var(--scale));
 }
 
 #chatInput {
   flex: 1;
   border: 1px solid var(--color-line);
   border-radius: var(--r-sm);
-  padding: 10px 14px;
-  font-size: 16px;  /* 不小于 16px，避免 iOS 聚焦时自动放大页面 */
+  padding: calc(10px * var(--scale)) calc(14px * var(--scale));
+  font-size: calc(16px * var(--scale));  /* 不小于 16px，避免 iOS 聚焦时自动放大页面 */
   font-family: inherit;
   outline: none;
   transition: border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
@@ -967,7 +991,7 @@ section {
 
 /* 外观交给 .btn--primary，这里只留尺寸 */
 #chatSend {
-  padding: 10px 22px;
+  padding: calc(10px * var(--scale)) calc(22px * var(--scale));
   font-size: var(--fs-body);
 }
 
@@ -975,14 +999,14 @@ section {
 #footer {
   border-top: 1px solid var(--color-line);
   text-align: center;
-  padding: var(--sp-7) var(--sp-5) 40px;
+  padding: var(--sp-7) var(--sp-5) calc(40px * var(--scale));
   color: var(--color-brand);
   font-size: var(--fs-sm);
 }
 
 .copyright {
   font-size: var(--fs-caption);
-  margin-top: 6px;
+  margin-top: calc(6px * var(--scale));
   color: var(--color-muted);
 }
 
@@ -1084,13 +1108,13 @@ section {
    ⚠️ 条码是**纯装饰**（CSS 画的，扫不出东西）⇒ 对读屏隐藏（aria-hidden）。
       它不是假数据，是纹理。 */
 .receipt {
-  max-width: 460px;
+  max-width: calc(460px * var(--scale));
   margin: var(--sp-7) auto 0;
   padding: var(--sp-6) var(--sp-5) var(--sp-5);
   background: #f4f1ea;
   color: #1c1a17;
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: calc(13px * var(--scale));
   line-height: 1.55;
   /* 上下齿孔：热敏小票撕下来那两道痕 */
   border-top: 2px dashed rgba(28, 26, 23, .28);
@@ -1099,7 +1123,7 @@ section {
 }
 
 .receipt-kicker {
-  font-size: 11px;
+  font-size: calc(11px * var(--scale));
   letter-spacing: .28em;
   text-align: center;
   color: rgba(28, 26, 23, .55);
@@ -1108,7 +1132,7 @@ section {
 .receipt-title {
   margin: 2px 0 var(--sp-5);
   font-family: var(--font-mono);
-  font-size: 26px;
+  font-size: calc(26px * var(--scale));
   font-weight: 700;
   letter-spacing: -.01em;
   text-align: center;
@@ -1122,7 +1146,7 @@ section {
 }
 
 .receipt-date {
-  font-size: 11px;
+  font-size: calc(11px * var(--scale));
   letter-spacing: .1em;
   color: rgba(28, 26, 23, .7);
 }
@@ -1137,8 +1161,8 @@ section {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 42px;
-  height: 42px;
+  width: calc(42px * var(--scale));
+  height: calc(42px * var(--scale));
   border: 1px solid rgba(28, 26, 23, .35);
   border-radius: 50%;
   overflow: hidden;
@@ -1153,7 +1177,7 @@ section {
 
 .receipt-store {
   margin-top: 4px;
-  font-size: 11px;
+  font-size: calc(11px * var(--scale));
   letter-spacing: .1em;
   color: rgba(28, 26, 23, .7);
 }
@@ -1162,8 +1186,8 @@ section {
 .receipt-head,
 .receipt-list li {
   display: grid;
-  grid-template-columns: 26px 1fr auto;
-  gap: 10px;
+  grid-template-columns: calc(26px * var(--scale)) 1fr auto;
+  gap: calc(10px * var(--scale));
   align-items: center;
 }
 
@@ -1171,7 +1195,7 @@ section {
   margin-top: var(--sp-4);
   padding-bottom: 4px;
   border-bottom: 1px solid rgba(28, 26, 23, .45);
-  font-size: 11px;
+  font-size: calc(11px * var(--scale));
   letter-spacing: .14em;
   color: rgba(28, 26, 23, .6);
 }
@@ -1187,7 +1211,7 @@ section {
 }
 
 .receipt-list li {
-  padding: 7px 0;
+  padding: calc(7px * var(--scale)) 0;
   border-bottom: 1px dotted rgba(28, 26, 23, .3);
 }
 
@@ -1196,7 +1220,7 @@ section {
 }
 
 .r-no {
-  font-size: 12px;
+  font-size: calc(12px * var(--scale));
   color: rgba(28, 26, 23, .55);
 }
 
@@ -1223,14 +1247,14 @@ section {
 .receipt-sum p {
   display: flex;
   justify-content: space-between;
-  font-size: 14px;
+  font-size: calc(14px * var(--scale));
   font-weight: 700;
   letter-spacing: .06em;
 }
 
 .receipt-foot {
   margin-top: var(--sp-4);
-  font-size: 11px;
+  font-size: calc(11px * var(--scale));
   line-height: 1.7;
   letter-spacing: .06em;
   color: rgba(28, 26, 23, .6);
@@ -1238,7 +1262,7 @@ section {
 
 /* 装饰条码：用不规则宽度的竖条拼出来，扫不出东西 */
 .receipt-barcode {
-  height: 44px;
+  height: calc(44px * var(--scale));
   margin: var(--sp-5) 0 var(--sp-3);
   background: repeating-linear-gradient(90deg,
       #1c1a17 0 2px, transparent 2px 5px,
@@ -1249,7 +1273,7 @@ section {
 }
 
 .receipt-thanks {
-  font-size: 11px;
+  font-size: calc(11px * var(--scale));
   letter-spacing: .22em;
   text-align: center;
   color: rgba(28, 26, 23, .6);
@@ -1352,9 +1376,9 @@ section {
 /* 球面上的一张卡：居中靠负 margin（宽高的一半），位置由 JS 用 translate3d 摆 */
 .sphere-card {
   position: absolute;
-  width: 150px;
-  height: 200px;
-  margin: -100px 0 0 -75px;
+  width: calc(150px * var(--scale));
+  height: calc(200px * var(--scale));
+  margin: calc(-100px * var(--scale)) 0 0 calc(-75px * var(--scale));
   overflow: hidden;
   border: 1px solid rgb(var(--c-brand-rgb) / .18);
   border-radius: var(--r-md);
@@ -1387,7 +1411,7 @@ section {
   bottom: var(--sp-7);
   left: 50%;
   transform: translateX(-50%);
-  padding: 6px 16px;
+  padding: calc(6px * var(--scale)) calc(16px * var(--scale));
   border-radius: var(--r-pill);
   background: rgb(var(--c-bg-rgb) / .72);
   backdrop-filter: blur(8px);
@@ -1410,7 +1434,7 @@ section {
   .sphere-scene {
     position: static;
     height: auto;
-    padding: var(--sp-7) 24px;      /* 24px = 站点的横向留白，和 .hero-content 一致 */
+    padding: var(--sp-7) calc(24px * var(--scale));      /* 24px = 站点的横向留白，和 .hero-content 一致 */
   }
 
   .sphere {
@@ -1426,8 +1450,8 @@ section {
   .sphere-card {
     position: static;
     margin: 0;
-    width: 128px;
-    height: 168px;
+    width: calc(128px * var(--scale));
+    height: calc(168px * var(--scale));
     transform: none !important;
     filter: none;
     opacity: 1;
@@ -1497,9 +1521,9 @@ section {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 36px;
-  height: 30px;
-  padding: 0 10px;
+  min-width: calc(36px * var(--scale));
+  height: calc(30px * var(--scale));
+  padding: 0 calc(10px * var(--scale));
   border-radius: var(--r-pill);
   background: rgba(255, 255, 255, .92);
   color: var(--color-brand);
@@ -1535,7 +1559,8 @@ section {
 }
 
 /* ---------- 14. 联系我板块 ---------- */
-/* 上间距交给上一个区块的 padding-bottom，避免两段 104px 叠成 168px */
+/* 上间距交给上一个区块的 padding-bottom —— 这里**刻意不加** padding-top，
+   否则两段 --section-pad 会在区块之间叠起来（值在 §20 的 :root 里，2026-09-22 起是 128px） */
 #contact {
   text-align: center;
   padding: 0 var(--sp-5) var(--section-pad);
@@ -1568,7 +1593,7 @@ section {
    就只剩这一条线了 —— 不收回来，两段内容之间会没有分隔。 */
 .marquee {
   overflow: hidden;
-  padding: 32px 0;
+  padding: calc(32px * var(--scale)) 0;
   border-top: 1px solid var(--color-line);
   border-bottom: 1px solid var(--color-line);
 }
@@ -1581,10 +1606,10 @@ section {
 
 /* 镂空描边字：比半透明实心字更有设计感，也不抢正文 */
 .marquee-track span {
-  font-size: 42px;
+  font-size: calc(42px * var(--scale));
   font-weight: 800;
   letter-spacing: 2px;
-  padding-right: 48px;
+  padding-right: calc(48px * var(--scale));
   color: transparent;
   -webkit-text-stroke: 1px rgb(var(--c-brand-rgb) / .55);
 }
@@ -1732,13 +1757,13 @@ section {
    表格放行到 880px 并支持横向滚动——否则 5 列的交互日志会把页面撑破。 */
 
 .log-main {
-  padding-top: 72px;
+  padding-top: calc(72px * var(--scale));
   padding-bottom: var(--sp-7);
 }
 
 /* ---- 页头 ---- */
 .log-head {
-  max-width: 680px;
+  max-width: calc(680px * var(--scale));
 }
 
 .log-title {
@@ -1781,7 +1806,7 @@ section {
 .log-meta li {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: calc(6px * var(--scale));
 }
 
 .log-meta-k {
@@ -1810,7 +1835,7 @@ section {
 
 /* ---- 目录 ---- */
 .log-toc {
-  max-width: 880px;
+  max-width: calc(880px * var(--scale));
   margin-top: var(--sp-7);
   padding: var(--sp-5) var(--sp-6);
   background: var(--color-surface);
@@ -1830,7 +1855,7 @@ section {
   list-style: none;
   margin-top: var(--sp-4);
   display: grid;
-  gap: 8px;
+  gap: calc(8px * var(--scale));
 }
 
 .log-toc a {
@@ -1847,7 +1872,7 @@ section {
 
 /* ---- 正文 ---- */
 .log-body {
-  max-width: 880px;
+  max-width: calc(880px * var(--scale));
   margin-top: var(--sp-7);
 }
 
@@ -1856,19 +1881,19 @@ section {
 .log-body > ul,
 .log-body > ol,
 .log-body > .log-quote {
-  max-width: 680px;
+  max-width: calc(680px * var(--scale));
 }
 
 .log-body h2 {
   /* 介于 --fs-h3(17px) 与 --fs-h2(26px+) 之间的文档级小标题 */
-  font-size: clamp(19px, 2.4vw, 22px);
+  font-size: clamp(calc(19px * var(--scale)), 2.4vw, calc(22px * var(--scale)));
   font-weight: 700;
   letter-spacing: -0.01em;
   margin: var(--sp-8) 0 var(--sp-5);
   padding-top: var(--sp-6);
   border-top: 1px solid var(--color-line);
   /* 点目录跳过来时，标题不至于被 sticky 导航盖住 */
-  scroll-margin-top: 88px;
+  scroll-margin-top: calc(88px * var(--scale));
 }
 
 .log-body h2:first-child {
@@ -1882,7 +1907,7 @@ section {
   font-weight: 500;
   color: var(--color-brand);
   margin: var(--sp-6) 0 var(--sp-4);
-  scroll-margin-top: 88px;
+  scroll-margin-top: calc(88px * var(--scale));
 }
 
 .log-body p {
@@ -1896,7 +1921,7 @@ section {
 }
 
 .log-body li {
-  margin: 6px 0;
+  margin: calc(6px * var(--scale)) 0;
 }
 
 .log-body li::marker {
@@ -1912,7 +1937,7 @@ section {
 }
 
 .log-body code {
-  padding: 2px 6px;
+  padding: calc(2px * var(--scale)) calc(6px * var(--scale));
   border-radius: 6px;
   background: var(--color-mint);
   color: var(--color-ink);
@@ -1975,7 +2000,7 @@ section {
 
 .log-table th,
 .log-table td {
-  padding: 10px 12px;
+  padding: calc(10px * var(--scale)) calc(12px * var(--scale));
   text-align: left;
   vertical-align: top;
   border-bottom: 1px solid var(--color-line);
@@ -2038,7 +2063,7 @@ section {
    变量挂在 #hero 上，因为 .hero-content（要让出的内边距）和 .hero-bubble（实际尺寸）
    都要用，自定义属性不能横向传递。 */
 #hero {
-  --bubble-size: clamp(180px, 21vw, 260px);
+  --bubble-size: clamp(calc(180px * var(--scale)), 21vw, calc(260px * var(--scale)));
   /* 1.5 而不是 1.42：主玻璃 + 两片小放大镜都比正圆占地方，环要再往外让 */
   --ring-size: calc(var(--bubble-size) * 1.5);
 }
@@ -2046,8 +2071,10 @@ section {
 .hero-bubble {
   position: absolute;
   top: 50%;
-  /* 右边缘对齐到 1080px 内容区，而不是贴窗口边 */
-  right: max(24px, calc(50% - var(--page-width) / 2 + 24px));
+  /* 右边缘对齐到**内容区的内边距**，而不是贴窗口边。
+     ⚠️ 这里的 24px 必须跟 `main, .hero-content` 的横向内边距同一个值 ——
+        两者都乘了 --scale，所以泡泡右缘和正文右缘永远咬得准，不会各走各的。 */
+  right: max(calc(24px * var(--scale)), calc(50% - var(--page-width) / 2 + 24px * var(--scale)));
   width: var(--ring-size);
   height: var(--ring-size);
   pointer-events: none;
@@ -2189,7 +2216,7 @@ section {
 /* ---- 窄屏：泡泡从「绝对定位的右侧」改成「文字下方的一个圆」 ---- */
 @media (max-width: 1099px) {
   #hero {
-    --bubble-size: min(230px, 58vw);
+    --bubble-size: min(calc(230px * var(--scale)), 58vw);
   }
 
   .hero-bubble {
@@ -2202,7 +2229,7 @@ section {
 /* ---- 宽屏：正文让出右侧空间给泡泡，文字仍在自己的区域内居中 ---- */
 @media (min-width: 1100px) {
   .hero-content {
-    padding-right: calc(var(--ring-size) + 48px);
+    padding-right: calc(var(--ring-size) + 48px * var(--scale));
   }
 }
 
@@ -2288,7 +2315,7 @@ body {
 
 /* 从兴趣标签点过来时，照片别被 sticky 导航挡住 */
 .photo-item {
-  scroll-margin-top: 88px;
+  scroll-margin-top: calc(88px * var(--scale));
 }
 
 /* ---------- 跳转到锚点：先亮一下（V2.7 续五十五，用户 2026-09-22）----------
@@ -2525,7 +2552,7 @@ body {
   width: min(100%, 380px);   /* 名片是竖的：窄一点才像卡，不像横条 */
   margin: var(--sp-7) auto 0;
   padding: var(--sp-6) var(--sp-5) var(--sp-5);
-  border-radius: 26px;
+  border-radius: calc(26px * var(--scale));
   overflow: hidden;          /* 位移会把像素推出去，裁掉才有干净的边 */
 
   /* 缩放用 `zoom` 而不是 `transform: scale()` —— 两条理由：
@@ -2589,8 +2616,8 @@ body {
    收紧任何一边都会切到人。 */
 .card-avatar {
   display: block;
-  width: 80px;
-  height: 80px;
+  width: calc(80px * var(--scale));
+  height: calc(80px * var(--scale));
   border-radius: 50%;
   overflow: hidden;
   border: 1px solid var(--color-line-strong);
@@ -2613,7 +2640,7 @@ body {
 }
 
 .card-handle {
-  margin-top: 2px;
+  margin-top: calc(2px * var(--scale));
   font-size: var(--fs-caption);
   font-family: var(--font-mono);        /* 照原卡：handle 用等宽 */
   color: var(--color-muted);
@@ -2646,7 +2673,7 @@ body {
 }
 
 .card-row dd {
-  margin: 3px 0 0;
+  margin: calc(3px * var(--scale)) 0 0;
   font-size: var(--fs-sm);
   color: var(--color-ink);
   overflow-wrap: anywhere;      /* 邮箱很长，别让它撑破卡片 */
@@ -2705,13 +2732,13 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;                  /* 44px = 触控最小尺寸。原卡是 28px，太小了 */
-  height: 44px;
+  width: calc(44px * var(--scale));                  /* 44px = 触控最小尺寸。原卡是 28px，太小了 */
+  height: calc(44px * var(--scale));
   border-radius: 50%;
   border: 1px solid var(--color-line-strong);
   background: rgb(255 255 255 / .06);
   color: var(--color-ink);
-  font-size: 20px;
+  font-size: calc(20px * var(--scale));
   line-height: 1;
   cursor: pointer;
   transition: background var(--dur-fast) var(--ease-out),
