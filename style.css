@@ -1041,8 +1041,11 @@ section {
   }
 }
 
-/* ---------- 16b. 歌单小票（V2.7 续四十四） ----------
-   用户 2026-09-22 给了一张 QQ音乐 的歌单小票截图，要求「以这种模板把歌单呈现出来」。
+/* ---------- 16b. 每日推荐 = 一张小票（V2.7 续四十四/四十五） ----------
+   用户 2026-09-22 给了一张 QQ音乐 的歌单小票截图。第一版我理解成「另做一张『常听的』」
+   （V2.7 续四十四），用户随即澄清（续四十五）：**要的是「每日推荐那一栏」按小票风格来** ——
+   那 15 首是备选池，自动化每天从池子里取 3 首放进这一栏。所以这块样式现在服务于
+   `#music` 里由 tools/build-daily.py 生成的「今日推荐」小票（独立那张已撤掉）。
 
    ⚠️ 只借**排版语言**（热敏小票 = 等宽字 + 三列 + 合计 + 装饰条码）。
       截图里的二维码与 QQ音乐 logo **都没搬** —— 别人的码、别人的商标。
@@ -1055,7 +1058,6 @@ section {
    ⚠️ 刻意**没有**做锯齿撕口：那要用 mask-image 拼两段 conic-gradient，
       而这个环境里我看不到渲染结果 ⇒ 拼错就是一张歪卡。
       改用虚线齿孔 + 纸阴影 + 纯 CSS 条码，一样一眼就是小票。
-      （想要撕口效果可以让用户看过再迭代。）
 
    ⚠️ 条码是**纯装饰**（CSS 画的，扫不出东西）⇒ 对读屏隐藏（aria-hidden）。
       它不是假数据，是纹理。 */
@@ -1103,7 +1105,12 @@ section {
   color: rgba(28, 26, 23, .7);
 }
 
-/* 原本是二维码那一格 —— 换成他自己的字 */
+/* 原本是小票模板里二维码那一格。
+   ⚠️ 二维码与 QQ音乐 logo 都没搬（别人的码、别人的商标）——
+   第一版放的是他自己的单字印「释」，用户 2026-09-22 要求换成**他的头像** ✓
+   （就是联系卡那张 images/avatar.jpg，同一张，没另存一份）。
+   ⚠️ 尺寸给了 width/height 属性（84 = 显示 42px 的 2 倍）避免高分屏发虚；
+   这一格是装饰（紧下方就是他的名字）⇒ alt 留空 + 外层 aria-hidden ✓ */
 .receipt-mark {
   display: inline-flex;
   align-items: center;
@@ -1111,10 +1118,15 @@ section {
   width: 42px;
   height: 42px;
   border: 1px solid rgba(28, 26, 23, .35);
-  border-radius: var(--r-sm);
-  font-family: var(--font-serif);
-  font-size: 22px;
-  color: var(--color-brand);
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.receipt-mark img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .receipt-store {

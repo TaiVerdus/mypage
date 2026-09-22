@@ -41,20 +41,26 @@ def zh_date(iso, long_form=True):
     return "%d月%d日" % (m, d)
 
 
-def item_html(it, first=False):
-    """一首歌：第一首用 h3（页面大纲里它是标题级），其余用 p"""
-    tag = "h3" if first else "p"
-    meta_bits = [it.get("artist", ""), it.get("album", ""), str(it.get("year", ""))]
-    meta = " · ".join(b for b in meta_bits if b)
-    out = []
-    out.append('          <li class="daily-item">')
-    out.append('            <%s class="daily-title">%s</%s>' % (tag, esc(it.get("title", "")), tag))
-    out.append('            <p class="daily-meta">%s</p>' % esc(meta))
-    note = (it.get("note") or "").strip()
-    if note:
-        out.append('            <p class="daily-note">%s</p>' % esc(note))
-    out.append('          </li>')
-    return "\n".join(out)
+def secs_of(dur):
+    """把 'm:ss' 变成秒；格式不对或缺失返回 None（**不猜**）"""
+    m = re.match(r"^(\d+):(\d\d)$", (dur or "").strip())
+    return int(m.group(1)) * 60 + int(m.group(2)) if m else None
+
+
+def item_html(it, idx):
+    """一行小票条目：序号 / 歌名 — 歌手 / 时长。
+
+    ⚠️ 这一版按用户 2026-09-22 的要求改成小票风格（V2.7 续四十五）：
+       他要的是「**每日推荐那一栏**按小票风格来」，不是另做一张「常听的」。
+       ⚠️ 时长缺失时写 `--:--`，不猜（此时整张票也不输出 TOTAL 行，见 build()）。"""
+    secs = secs_of(it.get("duration"))
+    artist = ('<span class="r-artist"> — %s</span>' % esc(it.get("artist", ""))) if it.get("artist") else ""
+    return ('            <li><span class="r-no">%02d</span>'
+            '<span class="r-name">%s%s</span>'
+            '<span class="r-amt">%s</span></li>'
+            % (idx, esc(it.get("title", "")), artist,
+               esc(it.get("duration", "")) if secs is not None else "--:--"))
+
 
 
 def build(data):
@@ -62,18 +68,50 @@ def build(data):
     parts = []
     parts.append('      <div class="daily reveal">')
 
-    # ---------- 今日推荐 ----------
+    # ---------- 今日推荐：一张小票（V2.7 续四十五，用户要的就是这个）----------
+    # ⚠️ 用户 2026-09-22 澄清：「读取小票里的歌单做备选池，每天选 3 首加进每日推荐，
+    #    每日推荐那一栏按截图的（小票）风格来」⇒ 小票不是独立区块，就是这一栏本身。
     if hist:
         today = hist[0]
         items = today.get("items") or []
-        parts.append('        <article class="daily-today">')
-        parts.append('          <p class="daily-today-k">今日推荐 · '
-                     '<time datetime="%s">%s</time></p>'
-                     % (esc(today.get("date", "")), zh_date(today.get("date", "1970-01-01"))))
-        parts.append('          <ol class="daily-items">')
-        for i, it in enumerate(items):
-            parts.append(item_html(it, first=(i == 0)))
+        iso = today.get("date", "")
+        secs = [secs_of(it.get("duration")) for it in items]
+        total_ok = all(s is not None for s in secs) and items
+        total = sum(s for s in secs if s is not None)
+        parts.append('        <article class="receipt">')
+        parts.append('          <p class="receipt-kicker">DAILY PICKS</p>')
+        parts.append('          <h3 class="receipt-title">今日推荐</h3>')
+        parts.append('          <div class="receipt-top">')
+        parts.append('            <p class="receipt-date">AS OF %s</p>' % esc(iso))
+        # 右上角那格：用户 2026-09-22 要求从小票模板的二维码位置换成**他的头像**
+        # （先前放的是他自己的单字印「释」）。就用联系卡那张 images/avatar.jpg ——
+        # **同一张，不另存一份**（文件只 10 KB，直接复用）。
+        # width/height 写 84（显示 42px 的 2 倍）避免高分屏发虚；
+        # alt 留空 + 外层 aria-hidden：紧下方就是他的名字，这一格是装饰。
+        parts.append('            <span class="receipt-mark" aria-hidden="true">'
+                     '<img src="images/avatar.jpg" alt="" width="84" height="84"></span>')
+        parts.append('          </div>')
+        parts.append('          <p class="receipt-store">00 WANG SHIXIAN · MYPAGE</p>')
+        parts.append('          <div class="receipt-head" aria-hidden="true">')
+        parts.append('            <span>QTY</span><span>ITEM</span><span>AMT</span>')
+        parts.append('          </div>')
+        parts.append('          <ol class="receipt-list" role="list">')
+        for i, it in enumerate(items, 1):
+            parts.append(item_html(it, i))
         parts.append('          </ol>')
+        parts.append('          <div class="receipt-sum">')
+        parts.append('            <p><span>COUNT:</span><span>%d</span></p>' % len(items))
+        if total_ok:
+            parts.append('            <p><span>TOTAL:</span><span>%d:%02d</span></p>'
+                         % (total // 60, total % 60))
+        parts.append('          </div>')
+        parts.append('          <div class="receipt-foot">')
+        parts.append('            <p>PICKED: %s · 选自备选池</p>' % esc(iso))
+        parts.append('            <p>EDITED BY: 释贤</p>')
+        parts.append('          </div>')
+        parts.append('          <!-- 条码纯装饰（CSS 画的，扫不出东西）⇒ 对读屏隐藏 -->')
+        parts.append('          <div class="receipt-barcode" aria-hidden="true"></div>')
+        parts.append('          <p class="receipt-thanks">THANK YOU FOR LISTENING</p>')
         parts.append('        </article>')
     else:
         # 备选池还没开张 —— 如实说，别放假内容
@@ -132,7 +170,7 @@ def main():
     args = sys.argv[1:]
     check_only = "--check" in args
     advance = "--advance" in args
-    count = 1
+    count = 3                                  # 用户 2026-09-22 定：一天 3 首（原来是 1）
     if "--count" in args:
         count = int(args[args.index("--count") + 1])
 
@@ -146,15 +184,18 @@ def main():
         if not take:
             print("备选池是空的 —— 今天跳过（页面保持原样，history 里最后一条继续显示）")
             return 0
-        for it in take:
-            data["history"] = [{"date": date.today().isoformat(), "items": [it]}] + (data.get("history") or [])
-            moved.append(it)
-        # 同一天多条并成一条
-        same = [h for h in data["history"] if h["date"] == date.today().isoformat()]
-        if len(same) > 1:
-            data["history"] = [{"date": same[0]["date"],
-                                "items": [i for h in same for i in h["items"]]}] + \
-                               [h for h in data["history"] if h["date"] != date.today().isoformat()]
+        # 一次性把今天的这一批放进去 —— ⚠️ **保持 take 的顺序**。
+        #    原来是「逐条 prepend、再把同一天的合并起来」，一份 3 首的批次会被**倒过来** ✗
+        #    （一首歌的时候看不出来；2026-09-22 改成一天 3 首才露出来）。
+        #    今天已经推过就**接着往后加**：不覆盖、也不重排已有的。
+        today_iso = date.today().isoformat()
+        hist = data.get("history") or []
+        if hist and hist[0].get("date") == today_iso:
+            hist[0]["items"] = (hist[0].get("items") or []) + list(take)
+        else:
+            hist = [{"date": today_iso, "items": list(take)}] + list(hist)
+        data["history"] = hist
+        moved = list(take)
         data["pool"] = pool[len(take):]
 
     body = build(data)
