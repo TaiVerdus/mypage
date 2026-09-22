@@ -64,6 +64,7 @@
 | 🔸 中 | **数字分身的 6 个快捷按钮里有 3 个，点了只会得到「我不知道」** | 用户 2026-09-22 亲自换的新问法（*你和王释贤是什么关系 / 他生气的时候什么样 / 你有不知道的事吗*）在知识库里**没有对应关键词**。⚠️ **快捷按钮是最显眼的入口，落到兜底语 = 入口是坏的**；要修得给知识库补条目，而**内容必须用户确认**（不替他编）。`tools/test-chat-kb.js` 现在会**从 `index.html` 现读按钮**并自动发现这类错位 |
 | 🔸 中 | Jarvis + EEG 的一句话介绍（做什么 / 技术栈 / 链接） | 顶替已撤下的 CarbonBrain；现在它只有名字 ⇒ 页面**唯一一处「只有声明、没有证据」** |
 | 🔸 中 | **接入 WeClone 的「后半条链路」**（页面侧已就绪，等后端）：装环境 → 导微信记录 → 清洗 → 微调 → `weclone-cli server` → 填 `CHAT_BACKEND.url` | 六步与**三个必踩的坑**（CORS / 混合内容 / 隧道换域名）都写在 `WECLONE.md`。⚠️ 填之前先想清楚那两条红线：**隐私**（训练集是别人的话，而页面是公开的）+ **AGPL-3.0**（别把它的代码抄进本站） |
+| 🔸 中 | **本机跑 WeClone 的两个硬门槛**（2026-09-23 实测，见 `WECLONE.md` §3.1 / §3.2） | ① WeClone 钉 `torch==2.7.1+cu126`，而 **cu126 不含 `sm_120` kernel** ⇒ 本机 RTX 5070 必失败，得换 cu128 ② `vllm`/`triton` 是 Linux-only，本机 WSL 只有 `docker-desktop`、**没有 Linux 发行版**。**已定推荐路线**：**训练租云 GPU + 服务用本机 ollama**（核过官方文档：ollama 支持 RTX 50xx、不需要管理员、自带 CUDA 运行时、OpenAI 兼容 ⇒ 页面一字不改）。**唯一该选本机 WSL 的硬理由 = 不想让聊天记录离开本机** |
 | 🔸 中 | 图片压缩：`1.jpg` **748 KB** 仍是最大的一张（首屏泡泡图已单独压到 35.8 KB） | 摄影集 **10 张**原图合计 **2647 KB**（≈2.6 MB），首屏加载仍偏重 |
 | ⬜ 低 | 微积分学习笔记整理后补入「现在在做」卡 | 依赖用户自行整理 |
 | ⬜ 低 | 「借鉴台账」 | 与 AI 使用日志部分重叠，需先定是否还要单独做 |
@@ -159,7 +160,8 @@
 | 75 | `2397de2` | 09-22 | V2.7 续五十九: 照片改回原件尺寸（立「入库不改尺寸」的规矩） |
 | 76 | `92c34fc` | 09-22 | **用户本人改的**（无 AI 参与）：数字分身的快捷问题 5 → 6 条，换成 6 个更有意思的问题 |
 | 77 | `3fbb762` | 09-22 | V2.7 续六十: 整体尺寸明显调大（新增 `--scale` 总旋钮 ×1.16；页宽 1080 → 1253）+ 新增 `tools/check-doc-vs-css.py` |
-| 78 | — | 09-23 | V2.7 续六十一: 数字分身改成「两个大脑」（本地知识库当地板 + WeClone 微调分身当天花板，掉线自动降级 + 断路器）+ `WECLONE.md` + `tools/test-chat-backend.js`（本次提交，哈希见 `git log`） |
+| 78 | `d20d235` | 09-23 | V2.7 续六十一: 数字分身改成「两个大脑」（本地知识库当地板 + WeClone 微调分身当天花板，掉线自动降级 + 断路器）+ `WECLONE.md` + `tools/test-chat-backend.js` |
+| 79 | — | 09-23 | V2.7 续六十二: WeClone 后端起步 —— 环境勘察（查出 cu126 不支持 sm_120、WSL 无发行版）+ `tools/openai-stub.py` + `tools/probe-openai-endpoint.js` + `?chat=` 临时覆盖；端到端跑通（本次提交，哈希见 `git log`） |
 
 ### 仓库分布与分支（2026-09-17 整理）
 
@@ -169,7 +171,7 @@
 | 仓库 | 分支 | 内容 | 提交数 |
 | --- | --- | --- | --- |
 | `github.com/TaiVerdus/mypage` | `main` | V1 版本线（V1.0 → V1.1，2026-09-06） | 2 |
-| `github.com/TaiVerdus/mypage` | **`v2`**（设为默认分支） | V2 版本线（V2.0 → V2.7） | 80 |
+| `github.com/TaiVerdus/mypage` | **`v2`**（设为默认分支） | V2 版本线（V2.0 → V2.7） | 82 |
 
 - **两条分支没有共同祖先**：V2.0 是 2026-09-16 在新文件夹里重新 `git init` 的，不是从 V1.1 拉出来的分支。
   唯一完全相同的文件是 `PROJECT.md`（两边 blob 哈希一致 `9cf01743…`），说明当时是把 V1.1 的文件拷过来再改
@@ -234,6 +236,45 @@ python tools/sync-version.py --check   # 提交后核对：按 git 真实条数�
 `--check` 则按 git 现在的真实条数比对，是**提交之后**用的。
 
 ## 迭代日志
+
+### 2026-09-23 · V2.7 续六十二（WeClone 后端起步：环境勘察 + 用联调桩把链路跑通）
+
+**用户**：「直接开始后端吧」。⇒ 先勘察本机，**再动手**（不猜能不能跑）。
+
+**勘察结果（三条里两条会直接决定成败）**：
+
+| 项 | 实测 | 影响 |
+| --- | --- | --- |
+| GPU | **RTX 5070 Laptop**，8151 MiB，驱动 591.91 | Blackwell `sm_120`，8GB（比台式 5070 的 12GB 更紧） |
+| **torch 钉** | WeClone 钉 `torch==2.7.1+cu126` | ⚠️⚠️ **cu126 的 wheel 里没有 `sm_120` kernel** ⇒ 在这张卡上一定报 `no kernel image is available`。必须换 cu128 index + `+cu128`（torch 版本不用变） |
+| WSL | 只有 `docker-desktop`，**没有 Linux 发行版** | `vllm` / `triton` 都标了 Linux-only ⇒ 官方 `weclone-cli server` 要先装 WSL Ubuntu（**管理员 + 可能重启**） |
+| GitHub | 直连不通（`000`） | 克隆改走镜像 `ghfast.top`（实测通） |
+| PyPI / `download.pytorch.org` | `200` ✓ | 装包与下 cu128 wheel 没问题 |
+| `hf-mirror.com` | 不通 | 模型走 **ModelScope** |
+
+**这一步先把「不需要 WSL、不需要模型」的那段做完了** —— 也就是我上一轮在浏览器里
+**没法验证**的部分：**页面 → HTTP → OpenAI 兼容接口**。新增：
+
+- **`tools/openai-stub.py`**：最小的 OpenAI 兼容端点（**只用标准库、零依赖**），
+  并且**把 CORS 做对了** —— 页面可能是 `file://` 打开的（origin 为 `null`），
+  服务端不放行跨域就永远连不上，而 curl 看着又好。它同时是「真服务该怎么配 CORS」的参考实现。
+  `--fail` / `--delay` 两个开关能人为把后端弄坏，用来**在真浏览器里**看降级和跳闸
+- **`tools/probe-openai-endpoint.js`**：探测任意端点的**响应形状 / CORS / 耗时**，
+  接真后端之前先跑它 —— 这三条正是「curl 明明是好的、页面上就是不动」的三大原因
+- **`script.js` 加 `?chat=` 临时覆盖**：`index.html?chat=<地址>` 就能改后端、`?chat=off` 强制走知识库，
+  **不用改文件、不会被提交**。⚠️ 带 `typeof location !== 'undefined'` 守卫，
+  否则两个回归测试把这段抽到 node 里跑会直接抛错（已验证不受影响）
+
+**端到端验证（不是只跑假 fetch）**：用 `script.js` 里**真实的 `askBackend`** 去打真起的桩 ⇒
+拿到回答、`backendFails = 0`；再把地址指向没人监听的端口 ⇒ 返回 `null` 并计入失败 ✓。
+`probe-openai-endpoint.js` 对桩是 **6/6**（预检 204 + ACAO `*`、形状对、耗时 5ms）。
+
+**结论 / 下一步（待用户定）**：本机这条路要么 `wsl --install -d Ubuntu`（管理员 + 重启，
+且 cu128 与 vLLM 在 sm_120 上仍需实测），要么**训练租云 GPU**；`WECLONE.md` §3.1 已把这批
+实测结论与绕法写下来，免得下次重新踩。
+
+**验收**：`node --check` 通过 · `test-chat-backend` 26/26 · `test-chat-kb` 17/17 ·
+`probe-openai-endpoint` 6/6（对桩）· `check-doc-vs-css` 一致 · `build-daily --check` 一致。
 
 ### 2026-09-23 · V2.7 续六十一（数字分身改成「两个大脑」：本地知识库 + WeClone 微调分身）
 

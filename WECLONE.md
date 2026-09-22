@@ -47,6 +47,39 @@
 
 ---
 
+### 2.1 先跑通链路：本地联调桩（**不需要 WSL、不需要模型**）
+
+在装那一大堆东西（WSL / CUDA / vLLM / 模型）之前，**先用一个假端点把
+「页面 → HTTP → OpenAI 兼容接口」这一段跑通**。这一步能在你自己的浏览器里验证
+三件最容易翻车的事：**URL 形状 / CORS / 超时**。
+
+```bash
+# 另开一个终端，在仓库根目录：
+python tools/openai-stub.py
+
+# 然后在浏览器里打开（不改任何文件、也不会被提交）：
+#   index.html?chat=http://127.0.0.1:8005/v1/chat/completions
+```
+
+- 回答应该来自桩（会写明「我是本地假服务」），**且气泡下没有「离线版回答」标记**
+- 验**降级**：`python tools/openai-stub.py --fail 500` ⇒ 回答变回知识库 + 出现标记；
+  **连问两句后第三句不再等待**（断路器跳闸）
+- 验**超时**：`python tools/openai-stub.py --delay 12`（比页面默认的 8 秒长）
+- 强制走知识库：`index.html?chat=off`
+
+> `?chat=` 只影响你自己那次打开；公开页面不带这个参数，一切照旧。
+
+**接真后端之前，先用这个探一下它能不能被页面用上：**
+
+```bash
+node tools/probe-openai-endpoint.js http://127.0.0.1:8005/v1/chat/completions
+```
+
+它检查 **响应形状 / CORS 有没有放行 / 耗时有没有超过页面的 8 秒超时** ——
+这三条正是「curl 明明是好的，页面上就是不动」最常见的三个原因。
+
+---
+
 ## 3. 后端：六步
 
 ### 第 0 步 · 环境
@@ -117,6 +150,67 @@ curl http://127.0.0.1:8005/v1/chat/completions \
 ### 第 6 步 · 接上页面
 
 把地址填进 `CHAT_BACKEND.url`（末尾 `/v1/chat/completions`），刷新页面即可。
+
+---
+
+### 3.1 本机现状（2026-09-23 实测，**装之前先看这段**）
+
+| 项 | 实测结果 | 影响 |
+| --- | --- | --- |
+| GPU | **RTX 5070 Laptop**，8151 MiB，驱动 591.91 | 是 **Blackwell `sm_120`**；显存 8GB（比台式 5070 的 12GB 更紧） |
+| **torch 钉** | WeClone 钉 `torch==2.7.1+cu126` | ⚠️⚠️ **cu126 的 wheel 里没有 `sm_120` 的 kernel，在这张卡上一定跑不起来** —— 报 `no kernel image is available for execution on the device`。必须把 `pyproject.toml` 里的 index 换成 `.../whl/cu128` 并把钉改成 `+cu128`（torch 版本不用变） |
+| WSL | 只有 `docker-desktop`，**没有 Linux 发行版** | `vllm` / `triton` 都标了 `platform_system == 'Linux'` ⇒ 官方那条 `weclone-cli server` 需要先 `wsl --install -d Ubuntu`（**管理员权限 + 可能重启**） |
+| GitHub | 直连 `000`（不通） | 克隆走镜像：`https://ghfast.top/https://github.com/...`（实测通） |
+| PyPI / `download.pytorch.org` | 都 `200` ✓ | 装依赖、下 cu128 wheel 没问题 |
+| `hf-mirror.com` | 不通 | 模型走 **ModelScope**（LLaMA-Factory 设 `USE_MODELSCOPE_HUB=1`） |
+| 磁盘 | C: 空 619GB / D: 空 73GB | 装在 C:（venv + 模型 ≈ 30GB 起） |
+
+⚠️ 另有一条 Blackwell 的坑：**FlashAttention-2 目前没有 `sm_120` 的预编译 wheel**。
+如果哪个教程让你加 `attn_implementation="flash_attention_2"`，改成 `"sdpa"` 或 `"eager"`。
+
+---
+
+### 3.2 两条路怎么选（2026-09-23）
+
+**如果只在这两条里选：选租云。** 本机那条有三个未知数，每一个都能吃掉一小时：
+
+| 未知数 | 为什么危险 |
+| --- | --- |
+| WSL2 GPU 透传 | 要现场验；而且 WSL2 默认只给 50% 内存，还得改 `.wslconfig` |
+| **vLLM 0.10.0 在 `sm_120` 上有没有 kernel** | **最大的一条** —— `weclone-cli server` 就是 vLLM，而它的预编译 wheel 对 Blackwell 的支持没有保证 |
+| 8GB 能不能真训 7B | README 说 QLoRA 4bit ≈6GB，但那是**纯文本 7B**；WeClone 默认 `Qwen2.5-VL-7B`，多一个视觉塔、更胖。WSL / Windows 桌面还要占 0.5~1.5GB |
+
+云上这三个未知数直接消失：24GB 卡 ⇒ 7B 用**常规 LoRA（不量化）**，效果好一档、还更快。代价：1–3 小时卡时，几块钱。
+
+**但这个选择可以绕开 —— 训练和服务不必在同一台机器上：**
+
+| 环节 | 放哪 | 代价 |
+| --- | --- | --- |
+| 训练 | **租云 GPU** | 几块钱 |
+| **服务** | **本机 ollama** | 0 元、**不需要 WSL、不需要管理员** |
+
+ollama 这条路核过官方文档，四条都对得上：
+
+- **明确支持 compute capability `12.0` = RTX 50xx**（5070 在列），要求驱动 531+（本机 591.91 ✓）
+- Windows 装到 `%LOCALAPPDATA%\Programs\Ollama`，**不需要管理员**（官方验证命令就是「PowerShell，不是管理员」）
+- **自带 CUDA 运行时，不用手装 CUDA**
+- 8–12GB 是 8B 模型的甜点区（`qwen3:8b` 的 Q4_K_M 只有 5.2GB）⇒ 8GB 能全量上卡
+- 提供 **OpenAI 兼容的 `/v1/chat/completions`** ⇒ 页面一个字都不用改
+
+⇒ **推荐顺序（把风险摊开）**：
+
+1. **今晚 / 0 元 / 半小时**：装 ollama + 拉一个 8B 量化模型，用系统提示词让它扮演分身 ⇒ 页面接上。
+   得到的是**真·大模型版分身**（会推理、能答开放问题），**但还不是他的语气**。
+   好处：所有「运行时」的坑（CORS / 8GB 够不够 / 页面链路）在**花钱之前**全部验完
+2. **有空时 / 几块钱**：租卡跑 WeClone 微调出他的语气 ⇒ 合并 LoRA ⇒ 转 GGUF ⇒ 换进 ollama。
+   这时只剩「数据」和「训练」两件新事，其余都已跑通
+
+**只有一种情况该选本机 WSL**：**你不想让聊天记录离开本机** —— 这是唯一的硬理由。
+那就得认下上面那三个未知数，外加 8GB 训练要降配（文本版 7B + QLoRA 4bit + batch 1 + 短 `cutoff_len`）。
+装的时候注意两条：**只装 `cuda-toolkit`，不要装整个 `cuda` 包**（会覆盖 WSL 的 `libcuda.so` stub）；
+torch 用 **cu130**（12.8 已被 PyTorch 的构建矩阵淘汰）。
+
+**一句话**：在意隐私 → 本机；在意成功率与时间 → 云；**想最快看到东西 → 先走第 1 步（两条路都不用）**。
 
 ---
 

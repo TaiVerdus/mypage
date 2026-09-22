@@ -127,6 +127,22 @@ var backendDownUntil = 0;   // 跳闸到期时间戳（0 = 没跳闸）
 var backendFails = 0;       // 连续失败计数
 var chatHistory = [];       // 只记「微调分身真答过」的轮次 —— 见 remember()
 
+// ---- 本地联调用的临时覆盖（2026-09-23）----
+// 在地址栏加 `?chat=` 就能临时改后端，**不用改这个文件、也不会被提交**：
+//   index.html?chat=http://127.0.0.1:8005/v1/chat/completions   → 指向本地桩 / 真服务
+//   index.html?chat=off                                         → 强制走知识库（演示降级）
+// 公开页面不带这个参数 ⇒ 一切照旧（走 `CHAT_BACKEND.url`，默认空 = 只用知识库）。
+//
+// ⚠️ 必须留 `typeof location !== 'undefined'` 这层守卫：两个回归测试会把这段代码
+//    抽到 node 里执行，那里没有 `location`，不守卫就会直接抛错。
+if (typeof location !== 'undefined' && location.search) {
+  var chatOverride = /[?&]chat=([^&]*)/.exec(location.search);
+  if (chatOverride) {
+    var chatOverrideVal = decodeURIComponent(chatOverride[1]);
+    CHAT_BACKEND.url = (chatOverrideVal === 'off') ? '' : chatOverrideVal;
+  }
+}
+
 var KNOWLEDGE = [
   {
     keywords: ['study', 'studying', 'course', 'calculus', 'linear', 'algebra', 'program', 'programming', 'major', 'class', 'classes',
