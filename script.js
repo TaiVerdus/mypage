@@ -20,6 +20,47 @@ document.querySelectorAll('.nav-link').forEach(function (link) {
   });
 });
 
+// ---------- 交互十二：跳转到锚点后，让落点亮一下（V2.7 续五十五，用户 2026-09-22）----------
+// 用户要求「给兴趣中的所有跳转加一个动画」。
+// ⚠️ 做的是「**落点反馈**」而不是给链接本身加动效：兴趣标签会跳到三个很不一样的地方
+//    （照片墙 / 球体画廊 / 每日推荐小票），让链接抖一下只能表达「我按了」，
+//    而「跳过去之后一眼认出目标」才是真问题（球体要滚 200vh、小票在很深的地方）。
+// 做法：给落点加一次性的 `.flash`（样式见 style.css §12.6），到时间自动摘掉。
+// ⚠️ 摘 class 的定时器：颜色过渡本身是 500ms，到点后**颜色自己回到常态**，
+//    所以这里只负责「把 class 拿掉」，不需要写两段动画。
+(function () {
+  var ANCHORED = '#photo-travel, #photo-drums, #photo-calligraphy, #photo-photography, ' +
+                 '#photo-basketball, #photo-performance, #music';
+  var FLASH_MS = 1300;        // class 挂 1.3s：够看清亮起来 + 抬起来，又不至于赖着不走
+  var flashTimer = null;
+
+  document.querySelectorAll('a[href^="#"]').forEach(function (link) {
+    link.addEventListener('click', function () {
+      var href = this.getAttribute('href');
+      if (!href || href === '#' || href.length < 2) return;
+      var target = document.querySelector(href);
+      if (!target) return;
+
+      // 只有「真正要跳的地方」才亮 —— 导航项会跳到整个区块，整块亮一下太吵
+      var flashTarget = target.closest(ANCHORED) || document.querySelector(ANCHORED.split(',')[0]);
+      if (!flashTarget) return;
+
+      // ⚠️ 复用同一个 class、同一段时间：连点两次时先清掉上一次的定时器与 class，
+      //    否则第二次点击会「继承」上一次的剩余时间（看起来像没反应）
+      if (flashTimer) clearTimeout(flashTimer);
+      document.querySelectorAll('.flash').forEach(function (el) { el.classList.remove('flash'); });
+      // ⚠️ 强制一次回流再挂 class —— 同一元素连续点两次时，浏览器会把
+      //    「摘掉又立刻挂上」合并成一次变化，动画就不重放了
+      void flashTarget.offsetWidth;
+      flashTarget.classList.add('flash');
+      flashTimer = setTimeout(function () {
+        flashTarget.classList.remove('flash');
+        flashTimer = null;
+      }, FLASH_MS);
+    });
+  });
+})();
+
 // ---------- 交互二：滚动高亮当前区块 ----------
 // 只跟踪「导航里真实存在」的区块，避免漏加导航项的区块抢走高亮
 var navLinks = Array.prototype.slice.call(document.querySelectorAll('.nav-link'));

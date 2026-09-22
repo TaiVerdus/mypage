@@ -192,11 +192,11 @@
               <p>纯静态 · 无框架 · 自己的一套设计系统</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 71 条 + main 分支 2 条（V1.0 / V1.1）
+                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 72 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
               <!-- ⚠️ 这一行带提交数，由 tools/sync-version.py 自动写 ——
                    别手改数字，改完在提交前跑一次那个脚本。 -->
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 截至 2026-09-22 共 73 次提交</p>
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 截至 2026-09-22 共 74 次提交</p>
               <a class="item-link" href="ai-log.html">这个页面是怎么做出来的 →</a>
             </div>
             <!-- ⚠️ 这里原来是 CarbonBrain（写着「课程 / 比赛项目 · 已有可演示版本」）——
@@ -242,7 +242,10 @@
               <!-- ⚠️ 旅游没有照片 ⇒ **只做普通标签、不带那个箭头**：
                    箭头在全站的含义是「点了会跳到一张照片」，没有证据可跳就不该给这个暗示。
                    （早点没给篮球挂箭头也是同一个道理；后来它有了照片才挂上。） -->
-              <li>旅游</li>
+              <!-- 旅游：用户 2026-09-22 给了照片（照片墙第 10 张）⇒ 从普通标签变成链接。
+                   ⚠️ 跳转动画由全站规则统一给（见 style.css 的「跳转到锚点：先亮一下」），
+                      这里不用挂任何类。 -->
+              <li><a href="#photo-travel" title="看夜市那张照片">旅游 <span aria-hidden="true">↘</span></a></li>
             </ul>
           </div>
 
@@ -327,6 +330,16 @@
         <figure class="photo-item">
           <img src="images/9.jpg" alt="草地上的步道指示牌，牌面是列车线描造型，背后是绿树与城市高楼" loading="lazy" decoding="async">
           <figcaption><span class="photo-no">09</span></figcaption>
+        </figure>
+        <!-- 10：用户 2026-09-22 发来的一张（兴趣里的「旅游」要跳到这里）。
+             ⚠️ 画面上有手机相机的「Leica / Live Moment / 23mm / Xiaomi」水印 ——
+                **按项目既有口径不做后处理**：不修图、不裁掉别人的商标；水印本身也是「用什么拍的」的线索。
+             ⚠️ 这张比例是 4:3 横拍，所以单独存成 images/entry-street.jpg（没挤进 1–9 的编号文件里），
+                也暂时**没有做球体缩略图**（球体是一整圈竖版 3:4 卡片，混一张横的会显歪）。
+                想让它在球体里也出现，说一声我单独处理。 -->
+        <figure class="photo-item" id="photo-travel">
+          <img src="images/entry-street.jpg" alt="从台阶高处俯看夜晚的街边夜市：成排的餐桌、人群与灯箱，画面下方是伸出去的鞋" loading="lazy" decoding="async">
+          <figcaption><span class="photo-no">10</span></figcaption>
         </figure>
       </div>
     </section>

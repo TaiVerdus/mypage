@@ -2243,6 +2243,37 @@ body {
   scroll-margin-top: 88px;
 }
 
+/* ---------- 跳转到锚点：先亮一下（V2.7 续五十五，用户 2026-09-22）----------
+   用户要求「给兴趣中的所有跳转加一个动画」。
+   ⚠️ 这里加的是「**落点反馈**」而不是给链接本身加动效，原因是：
+      兴趣标签的链接会跳到三个很不一样的地方（照片墙 / 球体画廊 / 每日推荐小票），
+      给链接加动效只能表达「我按了」，而**跳过去之后能一眼认出目标**才是真问题
+      （尤其球体画廊要滚 200vh，小票在很深的地方）。
+   做法：JS 给落点加一次性的 `.flash`（见 script.js 交互十二），这里只负责渲染：
+     ① 落点整块**淡青底**亮一下，然后作为「退场」自然回到常态
+        （颜色过渡用 --dur-slow = 500ms，不加 transition-delay ⇒ 到时间就平滑退回，
+         不用再加第二个定时器去摘 class）
+     ② 照片类落点再轻微抬起一下 —— 和 hover 是同一个动作、同一个 -3px 档
+   ⚠️ 只亮一次、用完就摘 class —— 它不进 DOM 结构，也不跟 `.reveal` 抢 backdrop 的背景根
+   ⚠️ 关掉动效的人：transition 已被 .photo-item 的 reduce 规则关掉 ⇒ 颜色直接亮、直接灭，不闪 */
+.photo-item.flash,
+.daily.flash {
+  background: var(--color-mint);
+  box-shadow: 0 0 0 4px rgb(var(--c-brand-rgb) / .22), var(--sh-2);
+}
+
+.photo-item.flash {
+  transform: translateY(-3px);
+}
+
+/* 给这两个落点补上 background 过渡（原来只过渡 transform / box-shadow）。
+   ⚠️ .daily 已有的那条同名规则在后面，会覆盖这里 —— 所以 .daily 的过渡写在它自己那条里。 */
+.photo-item {
+  transition: background var(--dur-slow) var(--ease-out),
+              box-shadow var(--dur-slow) var(--ease-out),
+              transform var(--dur-base) var(--ease-out);
+}
+
 /* ---------- 20.6 三片各自摆动（V2.7 续十） ---------- */
 /* 幅度比初版大一倍：之前 ±6px / ±1.2° 太轻，「不细看都看不出来」。
    三片的周期与初相都错开（负 delay），永远不同步，看不出循环。
@@ -2290,7 +2321,16 @@ body {
 .daily {
   display: grid;
   gap: var(--sp-7);
+  /* ⚠️ background 这一项是给「跳转到锚点先亮一下」用的（见 §12.6 / 交互十二）；
+     它比那条 .photo-item 的版本靠后，所以 .daily 的过渡以这条为准。 */
+  transition: background var(--dur-slow) var(--ease-out),
+              box-shadow var(--dur-slow) var(--ease-out),
+              transform var(--dur-base) var(--ease-out);
 }
+
+/* ⚠️ 「跳转到锚点先亮一下」只给 .photo-item / .daily 加了 background 过渡，
+   其它落点（球体画廊等）本来就没有 background 过渡 —— 它们只需要 JS 把 .flash 挂上去，
+   颜色是瞬变的，同样看得见。 */
 
 /* 今日推荐：一块卡片，焦点落在一首（或两三首）歌上。
    左边那道青 + 圆角只留右侧，和「说明块」用同一套语言。 */
