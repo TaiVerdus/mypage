@@ -165,37 +165,58 @@
         <h2 class="section-title" data-lines>关于我</h2>
       </div>
       <div class="info-grid bento-grid reveal">
-        <!-- 大卡：现在在做（末条把「这个主页」本身作为编程能力的证据） -->
+        <!-- 大卡：现在在做（内容由用户 2026-09-22 更新；MYPAGE 那条同时是「编程能力」的证据） -->
         <div class="info-card bento-large">
           <h3><span class="card-dot"></span>现在在做的事</h3>
           <div class="bento-items">
+            <!-- 课程（用户给的那组「Lecture」）：课程名 · 授课老师。
+                 ⚠️ 老师姓名按用户给的字面写 —— 这类事实只有他知道，不替他改字。 -->
             <div class="bento-item">
-              <strong>微积分 <span class="item-idx">01</span></strong>
+              <strong>微积分 · 张骅 <span class="item-idx">01</span></strong>
               <p>理解变化与极限</p>
             </div>
             <div class="bento-item">
-              <strong>线性代数 <span class="item-idx">02</span></strong>
+              <strong>线性代数 · 唐锦鸿 <span class="item-idx">02</span></strong>
               <p>向量、矩阵与空间</p>
             </div>
             <div class="bento-item">
-              <strong>计算机编程 <span class="item-idx">03</span></strong>
+              <strong>计算机编程 · 杨磊 <span class="item-idx">03</span></strong>
               <p>从零动手做东西</p>
             </div>
+            <!-- 项目条目：淡青底 + 徽章（见 CSS .bento-item--project） -->
             <div class="bento-item bento-item--project">
               <strong>MYPAGE · 个人主页 <span class="item-badge">建设中</span></strong>
               <p>纯静态 · 无框架 · 自己的一套设计系统</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 69 条 + main 分支 2 条（V1.0 / V1.1）
+                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 70 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
               <!-- ⚠️ 这一行带提交数，由 tools/sync-version.py 自动写 ——
                    别手改数字，改完在提交前跑一次那个脚本。 -->
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 截至 2026-09-22 共 71 次提交</p>
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 截至 2026-09-22 共 72 次提交</p>
               <a class="item-link" href="ai-log.html">这个页面是怎么做出来的 →</a>
             </div>
+            <!-- ⚠️ 这里原来是 CarbonBrain（写着「课程 / 比赛项目 · 已有可演示版本」）——
+                 用户 2026-09-22 说**去掉它**，换成下面这条。
+                 ⚠️ 不给它加状态徽章：「建设中 / 已有可演示版本」这类话只有本人能确认，不替他写。
+                 想加一句介绍或标个状态，给一句话就能补。 -->
             <div class="bento-item bento-item--project">
-              <strong>CarbonBrain <span class="item-badge">建设中</span></strong>
-              <p>课程 / 比赛项目 · 已有可演示版本</p>
+              <strong>Jarvis + EEG</strong>
+              <p>AI for Science</p>
+            </div>
+            <!-- 学习 / 生活（用户给的后半段）：
+                 ⚠️ 用户原话里还有一项「科学上网」，**按他的选择换掉了**（这页以后要给 HR / 面试官看，
+                    那个词不适合放在公开页上）⇒ 这里只留 Python。想换别的措辞说一声。
+                 ⚠️ 探店与王者那两条**不给描述**：没有他确认过的话，不自己编。 -->
+            <div class="bento-item">
+              <strong>Python <span class="item-idx">04</span></strong>
+              <p>自学</p>
+            </div>
+            <div class="bento-item">
+              <strong>在深圳探店 <span class="item-idx">05</span></strong>
+            </div>
+            <div class="bento-item">
+              <strong>冲司空震万战 <span class="item-idx">06</span></strong>
             </div>
           </div>
         </div>
@@ -212,10 +233,12 @@
           </ul>
         </div>
 
-        <!-- 大卡：关注方向 -->
+        <!-- 大卡：关注方向（用户 2026-09-22 明确为「AI、BCI」）
+             ⚠️ 缩写与全称都给：BCI 是用户自己的说法，括号里补全称是为了能被搜到
+                （同 .hero-meta 那条「窄处用 BCI、正文用脑机接口」的分工，见 DESIGN-SYSTEM）。 -->
         <div class="info-card bento-large">
           <h3><span class="card-dot"></span>关注方向</h3>
-          <p class="info-text">AI × 脑机接口——探索心智与机器如何相连，跟着这个领域的前沿走。</p>
+          <p class="info-text">AI × BCI（脑机接口）—— 探索心智与机器如何相连，跟着这个领域的前沿走。</p>
         </div>
       </div>
     </section>
