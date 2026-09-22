@@ -825,6 +825,13 @@ section {
   font-weight: 400;
 }
 
+/* 2026-09-22：`.chat-avatar` 原来放的是单字印「释」，用户要求换成**他的头像**
+   —— 复用联系卡那张 images/avatar.jpg（同一张，不另存一份；小票右上角也是它）。
+   ⚠️ 圆形裁切交给 `overflow: hidden`，**图片本身不裁** —— 那张照片发顶顶边、
+      下巴近底边，收紧任何一边都会切到人（与 `.card-avatar` 同一个道理）。
+   ⚠️ 那层半透明白底**保留**：它是图片加载出来之前的占位色，否则头像闪出来之前
+      会露出聊天窗标题的青绿渐变。深色主题里那条覆写同理，不用动。
+   ⚠️ 原来给文字用的 `font-weight: 700` 已去掉 —— 这一格现在没有文字了。 */
 .chat-avatar {
   width: 38px;
   height: 38px;
@@ -833,8 +840,15 @@ section {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
+  overflow: hidden;
   flex-shrink: 0;
+}
+
+.chat-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .chat-messages {
@@ -1479,12 +1493,8 @@ section {
   line-height: var(--lh-tight);
 }
 
-.contact-subtitle {
-  margin-top: var(--sp-3);
-  font-size: var(--fs-h3);
-  color: var(--color-muted);
-  font-weight: 400;
-}
+/* 2026-09-22：`.contact-subtitle`（「聊聊吧——不用有压力。」）按用户要求删掉了，
+   这条样式一并清掉 —— 留着就是死代码（同类处理见下面那条注释）。 */
 
 /* ⚠️ 原来的 `.contact-btn` / `.contact-links` / `.contact-link` 三条在本轮删掉了 ——
    那个「Say Hello」按钮和三个联系方式都搬进了玻璃名片（见 §22 的 .card-cta / .card-rows），

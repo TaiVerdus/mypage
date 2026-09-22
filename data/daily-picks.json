@@ -138,5 +138,5 @@
   "classics_updated": "2026-09-22",
   "_classics 已废弃": "「常听的」那张独立小票按用户要求撤掉了（V2.7 续四十五）——他要的是「每日推荐那一栏按小票风格」。原 15 首已搬进 pool。",
   "_duration": "pool 里每条的 duration（'m:ss'）用于小票的 AMT 列与 TOTAL；总时长由 tools/build-daily.py 现算，绝不抄外部数字。缺 duration 的条目会被标成 --:--，且此时不输出 TOTAL 行。",
-  "_每天几首": "默认一天 3 首（build-daily.py --advance 的 --count 默认值）。自动化每天 09:00 跑一次。"
+  "_每天几首": "默认一天**随机**抽 3 首（build-daily.py --advance 的 --count 默认值）。自动化每天 09:00 跑一次。"
 }

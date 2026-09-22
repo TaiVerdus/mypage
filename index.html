@@ -188,11 +188,11 @@
               <p>纯静态 · 无框架 · 自己的一套设计系统</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 62 条 + main 分支 2 条（V1.0 / V1.1）
+                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 63 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
               <!-- ⚠️ 这一行带提交数，由 tools/sync-version.py 自动写 ——
                    别手改数字，改完在提交前跑一次那个脚本。 -->
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 截至 2026-09-22 共 64 次提交</p>
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 截至 2026-09-22 共 65 次提交</p>
               <a class="item-link" href="ai-log.html">这个页面是怎么做出来的 →</a>
             </div>
             <div class="bento-item bento-item--project">
@@ -363,7 +363,10 @@
       </div>
       <div class="chat-window reveal">
         <div class="chat-header">
-          <span class="chat-avatar">释</span>
+          <!-- 头像：与联系卡、小票右上角同一张 images/avatar.jpg（已有文件，不另存）。
+               圆形裁切交给 CSS 的 overflow；width/height 写 76 = 显示 38px 的 2 倍，防高分屏发虚。
+               alt 留空：紧右边的标题已经写着「释贤的数字分身」，这一格是装饰。 -->
+          <span class="chat-avatar"><img src="images/avatar.jpg" alt="" width="76" height="76"></span>
           <div>
             <strong>释贤的数字分身</strong>
             <small>· 本地知识库 · 离线运行</small>
@@ -388,7 +391,6 @@
     <section id="contact">
       <span class="eyebrow eyebrow--center reveal">05 — 联系</span>
       <h2 class="contact-title" data-lines>有什么想法？</h2>
-      <p class="contact-subtitle" data-lines>聊聊吧——不用有压力。</p>
 
       <!-- 液态玻璃名片（V2.7 续二十三）：三个联系方式落在这张会折射背景的玻璃卡上。
            骨架照 Abdughafur 那张卡来（头像 / 名字 / @handle / 分隔线 / 数据 / 主按钮 / 缩放），

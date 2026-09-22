@@ -6,16 +6,19 @@
 
 用法：
     python tools/build-daily.py            只按当前数据重生成页面
-    python tools/build-daily.py --advance  从备选池取今天的一批，挪进 history 再重生成
-    python tools/build-daily.py --advance --count 3   一天取三首
+    python tools/build-daily.py --advance  从歌单里**随机抽**今天的一批，记进 history 再重生成
+    python tools/build-daily.py --advance --count 3   一天随机抽三首
     python tools/build-daily.py --check    只检查页面与数据是否一致，不一致退出码 1
 
 ⚠️ 生成物不手改：改内容要改 data/daily-picks.json，然后重跑本脚本。
 ⚠️ 版权口径：只存事实（歌名 / 歌手 / 专辑 / 年份）。不放音频、不放歌词、不复刻封面。
+⚠️ 「歌单」是长期不消耗的来源（用户 2026-09-22 定）：每天从 pool 里**随机**抽 3 首写进
+   history，pool 本身**不会减少** —— 所以「每天更新」能一直成立，不会第五天就见底。
 """
 import io
 import json
 import os
+import random
 import re
 import sys
 from datetime import date
@@ -170,7 +173,7 @@ def main():
     args = sys.argv[1:]
     check_only = "--check" in args
     advance = "--advance" in args
-    count = 3                                  # 用户 2026-09-22 定：一天 3 首（原来是 1）
+    count = 3                                  # 用户 2026-09-22 定：一天**随机**抽 3 首（原来是 1）
     if "--count" in args:
         count = int(args[args.index("--count") + 1])
 
@@ -180,10 +183,16 @@ def main():
     moved = []
     if advance and not check_only:
         pool = data.get("pool") or []
-        take = pool[:count]
-        if not take:
-            print("备选池是空的 —— 今天跳过（页面保持原样，history 里最后一条继续显示）")
+        if not pool:
+            print("歌单是空的 —— 今天跳过（页面保持原样，history 里最后一条继续显示）")
             return 0
+        # ⚠️ 取歌方式（用户 2026-09-22 明确）：**每天从歌单里随机抽 3 首**。
+        #    原来是「按顺序取前 3 条、取走就删」——那样第 5 天歌单就见底了 ✗。
+        #    现在改成 random.sample（一次抽 3 首、**同一批里不重样**），
+        #    并且**歌单不消耗**（下面不再有 data["pool"] = ... 那一步）——
+        #    「每天随机选三首更新」才能长期成立。
+        #    注意：抽签是「有放回」的 —— 隔几天可能撞上同一首歌，这正是随机该有的样子。
+        take = random.sample(pool, min(count, len(pool)))
         # 一次性把今天的这一批放进去 —— ⚠️ **保持 take 的顺序**。
         #    原来是「逐条 prepend、再把同一天的合并起来」，一份 3 首的批次会被**倒过来** ✗
         #    （一首歌的时候看不出来；2026-09-22 改成一天 3 首才露出来）。
@@ -196,7 +205,7 @@ def main():
             hist = [{"date": today_iso, "items": list(take)}] + list(hist)
         data["history"] = hist
         moved = list(take)
-        data["pool"] = pool[len(take):]
+        # ⚠️ 这里**故意没有** data["pool"] = pool[len(take):]（歌单不消耗，见上）
 
     body = build(data)
     new_page = inject(page, body)
