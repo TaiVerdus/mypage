@@ -63,6 +63,12 @@ global.fetch = function (url, init) {
   if (fetchMode === 'empty') {
     return Promise.resolve({ ok: true, json: function () { return Promise.resolve({ choices: [{ message: { content: '   ' } }] }); } });
   }
+  if (fetchMode === 'firstFails') {          // 第一个后端失败、后面的成功（验「依次降级」）
+    if (calls === 1) {
+      return Promise.resolve({ ok: false, status: 403, json: function () { return Promise.resolve({}); } });
+    }
+    return Promise.resolve({ ok: true, json: function () { return Promise.resolve({ choices: [{ message: { content: '来自云端' } }] }); } });
+  }
   return Promise.resolve({
     ok: true,
     json: function () {
@@ -258,32 +264,79 @@ function reset() {
   // 期望值从 script.js 里现读，不写死 —— 以后改默认模型不用来改测试
   var defaultModel = (/localModel:\s*'([^']+)'/.exec(src) || [, '(读不到)'])[1];
 
-  global.location = { protocol: 'file:', hostname: '', search: '?model=deepseek-r1:7b' };
-  eval(cfg);
-  ok(CHAT_BACKEND.localModel === 'deepseek-r1:7b', '?model= ⇒ localModel 被覆盖（本机 ollama 换模型）',
-    '实际：' + CHAT_BACKEND.localModel);
-  ok(CHAT_BACKEND.model === 'deepseek-r1:7b', '?model= ⇒ model 一起覆盖（本机与公网语义一致）');
+  // ⚠️ 在**独立作用域**里跑配置段（`new Function`），**不要用直接 eval**：
+  //    直接 eval 会重新声明 `CHAT_BACKEND`，让「eval 出来的函数」和「测试里引用的变量」
+  //    变成**两组绑定** —— 后面几节就会拿着两个不同的 CHAT_BACKEND 在比对，结论全是假的。
+  //    （这个坑当场踩了：第 11 节因此整节全红。）
+  function parseCfg(search) {
+    return new Function('location', cfg + '\n; return CHAT_BACKEND;')(
+      { protocol: 'file:', hostname: '', search: search }
+    );
+  }
 
-  global.location = { protocol: 'file:', hostname: '', search: '' };
-  eval(cfg);
-  ok(CHAT_BACKEND.localModel === defaultModel, '不带 ?model= ⇒ 保持默认（' + defaultModel + '）',
-    '实际：' + CHAT_BACKEND.localModel);
+  var c1 = parseCfg('?model=deepseek-r1:7b');
+  ok(c1.localModel === 'deepseek-r1:7b', '?model= ⇒ localModel 被覆盖（本机 ollama 换模型）',
+    '实际：' + c1.localModel);
+  ok(c1.model === 'deepseek-r1:7b', '?model= ⇒ model 一起覆盖（本机与公网语义一致）');
 
-  global.location = { protocol: 'file:', hostname: '', search: '?chat=off' };
-  eval(cfg);
-  ok(CHAT_BACKEND.url === '' && CHAT_BACKEND.localUrl === '' && CHAT_BACKEND.cloudUrl === '',
+  var c2 = parseCfg('');
+  ok(c2.localModel === defaultModel, '不带 ?model= ⇒ 保持默认（' + defaultModel + '）',
+    '实际：' + c2.localModel);
+
+  var c3 = parseCfg('?chat=off');
+  ok(c3.url === '' && c3.localUrl === '' && c3.cloudUrl === '',
     '?chat=off ⇒ 三条路全关（本机 / 云端 / 显式），强制走知识库',
-    'url=' + CHAT_BACKEND.url + ' localUrl=' + CHAT_BACKEND.localUrl + ' cloudUrl=' + CHAT_BACKEND.cloudUrl);
+    'url=' + c3.url + ' localUrl=' + c3.localUrl + ' cloudUrl=' + c3.cloudUrl);
 
-  global.location = {
-    protocol: 'file:', hostname: '',
-    search: '?chat=http://127.0.0.1:8005/v1/chat/completions&model=deepseek-r1:7b'
-  };
-  eval(cfg);
-  ok(CHAT_BACKEND.url === 'http://127.0.0.1:8005/v1/chat/completions' && CHAT_BACKEND.localModel === 'deepseek-r1:7b',
-    '?chat= 与 ?model= 能并用', 'url=' + CHAT_BACKEND.url + ' model=' + CHAT_BACKEND.localModel);
-  ok(CHAT_BACKEND.localUrl === '' && CHAT_BACKEND.cloudUrl === '',
+  var c4 = parseCfg('?chat=http://127.0.0.1:8005/v1/chat/completions&model=deepseek-r1:7b');
+  ok(c4.url === 'http://127.0.0.1:8005/v1/chat/completions' && c4.localModel === 'deepseek-r1:7b',
+    '?chat= 与 ?model= 能并用', 'url=' + c4.url + ' model=' + c4.localModel);
+  ok(c4.localUrl === '' && c4.cloudUrl === '',
     '?chat= 出现 ⇒ 本机与云端都关掉（显式指定了就别自作主张回落）');
+
+  console.log('\n=== 11. ★ 依次降级：前一个后端不通，就自动试下一个 ===');
+  // 这条是修一个**真踩过的坑**：以前是「选中一个、失败就直接落回知识库」，
+  // 于是**双击 index.html** 打开时（file:// 下 ollama 必然 403）——
+  // 明明能用的云端**永远轮不到**，用户看到的就是「没接入」。
+
+  // 11.1 file:// 打开时，候选里有没有云端？云端用的是不是绝对地址？
+  reset();
+  CHAT_BACKEND.url = '';
+  global.location = { protocol: 'file:', hostname: '', search: '' };
+  var cands = backendCandidates();
+  ok(cands.length === 2, 'file:// 打开 ⇒ 两个候选（本机 ollama + 云端）', JSON.stringify(cands));
+  ok(cands[1].url === CHAT_BACKEND.localCloudBase + CHAT_BACKEND.cloudUrl,
+    '★ file:// 下云端用**绝对地址**（相对路径在 file:// 下没意义）', '实际：' + cands[1].url);
+
+  // 11.2 第一个（ollama）403 ⇒ 必须自动落到云端
+  reset();
+  CHAT_BACKEND.url = '';
+  global.location = { protocol: 'file:', hostname: '', search: '' };
+  fetchMode = 'firstFails';
+  var ans3 = await askBackend('x');
+  ok(ans3 === '来自云端', '★ ollama 403 ⇒ 自动落到云端（而不是掉进知识库）', '实际：' + ans3);
+  ok(calls === 2, '确实依次试了两个后端', '实际调了 ' + calls + ' 次');
+  ok(backendFails === 0, '★ 有后端成功 ⇒ 不算失败（断路器不该乱跳）');
+
+  // 11.3 两个都不通 ⇒ 才算「失败一次」（不是两次）
+  reset();
+  CHAT_BACKEND.url = '';
+  global.location = { protocol: 'https:', hostname: 'x.test', search: '' };
+  fetchMode = 'http500';
+  var ans4 = await askBackend('y');
+  ok(ans4 === null, '公网 + 云端也挂 ⇒ null（落回知识库）');
+  ok(backendFails === 1, '★ 全部候选都不通 ⇒ 只计 1 次失败（不是按候选数算）',
+    '实际 ' + backendFails);
+
+  // 11.4 公网时不该出现本机候选
+  reset();
+  CHAT_BACKEND.url = '';
+  global.location = { protocol: 'https:', hostname: 'x.test', search: '' };
+  var pub = backendCandidates();
+  ok(pub.every(function (c) { return !/127\.0\.0\.1|localhost|\[::1\]/.test(c.url); }),
+    '★★ 公网的候选列表里**没有任何本机地址**', JSON.stringify(pub));
+
+  fetchMode = 'ok';
   delete global.location;
 
   console.log('\n知识库那侧不受影响；用例 %d / 失败 %d', pass + fail, fail);

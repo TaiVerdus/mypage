@@ -141,6 +141,9 @@ var CHAT_BACKEND = {
         （跟 system 一样 —— 免得有人改前端就把人设或模型换掉）。 */
   cloudUrl: '/api/chat',
   cloudModel: 'deepseek-flash',
+  /* ⚠️ `file://` 打开的页面上，`/api/chat` 这种相对路径会被解析成 `file:///api/chat`（无意义）
+     ⇒ 这种情况要用本机代理的**绝对地址**。`server.js` 默认跑在 8080。 */
+  localCloudBase: 'http://127.0.0.1:8080',
 
   /* ---- ③ 人物设定 ----
      ⚠️ 发给模型的前提词。**只写了这个页面上已经公开的事，没有添任何新事实** ——
@@ -301,23 +304,42 @@ function isLocalPage() {
   return /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname || '');
 }
 
-// 这次该用哪个后端？逐级往下挑，都没有则 null（走知识库）：
-//   ① `url`       —— 显式指定的（WeClone 地址 / 地址栏 `?chat=` 临时覆盖）
-//   ② `localUrl`  —— **只有本机打开时**才用（`file://` / localhost / 127.0.0.1）
-//   ③ `cloudUrl`  —— 公网访客用（部署后的云端代理，同源相对路径）
-// ⚠️ ② 在 ③ 前面是**故意的**：本机开发时用本地模型（免费、快），公网访客才走云端。
-//    而 ① 永远最优先，所以 `?chat=` 的语义没变 —— 它会把 localUrl 清掉、直接指定地址。
-function resolvedBackend() {
+// 云端地址。部署后用**同源相对路径**最省事；但 `file://` 打开的页面上相对路径没意义
+// ⇒ 那时改用本机代理的绝对地址（`localCloudBase`，于是双击 index.html 也能连上云端）。
+function cloudTarget() {
+  if (!CHAT_BACKEND.cloudUrl) return null;
+  var u = CHAT_BACKEND.cloudUrl;
+  if (u.charAt(0) === '/' && typeof location !== 'undefined' && location.protocol === 'file:') {
+    u = CHAT_BACKEND.localCloudBase + u;
+  }
+  return { url: u, model: CHAT_BACKEND.cloudModel };
+}
+
+// 这次**可以试**的后端，按优先级排（空数组 ⇒ 直接走知识库）：
+//   ① `url`      —— 显式指定的（`?chat=` 临时覆盖 / 将来的 WeClone 地址）
+//   ② `localUrl` —— 本机 ollama，**只有本机打开时**（`file://` / localhost / 127.0.0.1）
+//   ③ 云端代理   —— 部署后的同源 `/api/chat`
+// ⚠️ ② 排在 ③ 前面是**故意的**：开发时用本地模型（免费、快）。
+//    但它俩现在是**依次尝试**的（见 askBackend）—— ②不通就自动试 ③，
+//    不会像以前那样"第一个失败就直接落回知识库"。
+function backendCandidates() {
+  var list = [];
   if (CHAT_BACKEND.url) {
-    return { url: CHAT_BACKEND.url, model: CHAT_BACKEND.model };
+    list.push({ url: CHAT_BACKEND.url, model: CHAT_BACKEND.model });
   }
   if (CHAT_BACKEND.localUrl && isLocalPage()) {
-    return { url: CHAT_BACKEND.localUrl, model: CHAT_BACKEND.localModel };
+    list.push({ url: CHAT_BACKEND.localUrl, model: CHAT_BACKEND.localModel });
   }
-  if (CHAT_BACKEND.cloudUrl) {
-    return { url: CHAT_BACKEND.cloudUrl, model: CHAT_BACKEND.cloudModel };
-  }
-  return null;
+  var c = cloudTarget();
+  if (c) list.push(c);
+  return list;
+}
+
+// 优先级最高的那个（保留这个名字：文档与回归测试都在用它）。
+// ⚠️ 「有几个候选」和「用哪个」是两件事 —— 前者看 backendCandidates()。
+function resolvedBackend() {
+  var list = backendCandidates();
+  return list.length ? list[0] : null;
 }
 
 // 后端现在能不能用：解析得出地址、且不在跳闸冷却里
@@ -343,27 +365,20 @@ function addOfflineNote() {
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
-// 调 WeClone（OpenAI 兼容）。成功返回文本；**任何**异常都返回 null，由调用方落回知识库。
+// 打**一个**后端。成功返回文本；**任何**异常都返回 null（由调用方决定要不要试下一个）。
 // ⚠️ 三种最常见的失败（部署时一定会碰到，`WECLONE.md` 里也写了怎么绕）：
 //    ① **CORS** —— 页面与 API 不同源时，服务端必须放行 Access-Control-Allow-Origin
 //    ② **混合内容** —— 页面走 https 就不能调 http 的地址（浏览器直接拦掉）
 //    ③ 服务没起 / 隧道断了 —— 连接直接失败
-//    这三种在这里**表现完全一样**：返回 null、落回知识库。分不出原因是有意的 ——
+//    这三种在这里**表现完全一样**：返回 null。分不出原因是有意的 ——
 //    访客不该看到技术细节，而主人看「离线版回答」出现得频繁就知道要去查。
-function askBackend(question) {
-  var backend = resolvedBackend();
-  if (!backend || !window.fetch) return Promise.resolve(null);
-
+function requestOnce(backend, msgs) {
   var ctrl = window.AbortController ? new AbortController() : null;
   var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, CHAT_BACKEND.timeoutMs);
 
-  var msgs = [];
-  if (CHAT_BACKEND.system) msgs.push({ role: 'system', content: CHAT_BACKEND.system });
-  msgs = msgs.concat(chatHistory, [{ role: 'user', content: question }]);
-
   var init = {
     method: 'POST',
-    // 真实服务不校验 key（WeClone 的 api_service 与 ollama 都不校验），
+    // 真实服务不校验 key（WeClone 的 api_service、ollama、我们自己的 server.js 都不校验），
     // 但 OpenAI 客户端习惯带一个，填什么都行
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer none' },
     body: JSON.stringify({ model: backend.model, messages: msgs, stream: false })
@@ -378,13 +393,43 @@ function askBackend(question) {
     var c = data && data.choices && data.choices[0] && data.choices[0].message;
     var text = c && c.content;
     if (!text || !String(text).trim()) throw new Error('空回复');
-    backendFails = 0;          // 成功 ⇒ 清零，并解除跳闸
-    backendDownUntil = 0;
     return String(text).trim();
   }).catch(function () {
     clearTimeout(timer);
-    backendFails++;
-    if (backendFails >= CHAT_BACKEND.breakerMax) {   // 连续失败够数 ⇒ 跳闸
+    return null;
+  });
+}
+
+// 问分身。**依次试候选后端**，第一个成功的就用它。
+// ⚠️ 为什么要"依次试"而不是"挑一个就走"：
+//    最常见的坏状态不是"全挂"，而是**中间那个后端在、却用不了** ——
+//    最典型的就是**双击 index.html** 打开：这时本机 ollama 一定回 403
+//    （`file://` 页面发的 Origin 是 `null`，不在 ollama 的默认白名单里）。
+//    以前"选中一个、失败就落回知识库"的写法，会让**明明可用的云端永远轮不到** ← 这个坑真踩了。
+//    代价是极端情况多等一轮；但本地服务失败通常是**即时**的（403 / 连接拒绝），不会真等满超时。
+function askBackend(question) {
+  var list = backendCandidates();
+  if (!list.length || !window.fetch) return Promise.resolve(null);
+
+  var msgs = [];
+  if (CHAT_BACKEND.system) msgs.push({ role: 'system', content: CHAT_BACKEND.system });
+  msgs = msgs.concat(chatHistory, [{ role: 'user', content: question }]);
+
+  function attempt(i) {
+    if (i >= list.length) return Promise.resolve(null);
+    return requestOnce(list[i], msgs).then(function (text) {
+      return text !== null ? text : attempt(i + 1);
+    });
+  }
+
+  return attempt(0).then(function (text) {
+    if (text !== null) {                 // 有一个成功 ⇒ 清零并解除跳闸
+      backendFails = 0;
+      backendDownUntil = 0;
+      return text;
+    }
+    backendFails++;                      // ★ 全都不通，才算「后端失败一次」
+    if (backendFails >= CHAT_BACKEND.breakerMax) {
       backendDownUntil = Date.now() + CHAT_BACKEND.breakerCoolMs;
       backendFails = 0;
     }
