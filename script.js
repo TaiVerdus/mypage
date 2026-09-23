@@ -1615,3 +1615,322 @@ window.addEventListener('resize', function () {
     }
   }
 })();
+
+
+// ---------- 交互十：反馈抽屉（V3 新增） ----------
+// 先告诉 CSS「JS 活着」：<html> 上没有这个类时触发按钮不显示。
+// 这样关掉 JS 的访客看到的是一个干净页面，而不是一个点了没反应的按钮。
+document.documentElement.classList.add('js-ready');
+
+(function () {
+  /* ============================================================
+     后端配置
+     ------------------------------------------------------------
+     publishable key 是「设计上就可以公开」的密钥，放在前端是正常的。
+     ⚠️ secret key / service_role / 数据库密码 —— 永远不要写在这里，
+     也不要提交进 git。前端代码是全网可见的。
+     ============================================================ */
+  var SUPABASE_CONFIG = {
+    url: '',              // 形如 https://abcdefghijklmn.supabase.co
+    publishableKey: ''    // 形如 sb_publishable_xxxxxxxxxxxx
+  };
+
+  var PAGE_VERSION = 'V3.0';
+  var MAX_LEN = 1000;
+
+  // ---------- 取元素 ----------
+  function el(id) { return document.getElementById(id); }
+
+  var trigger   = el('fbTrigger');
+  var drawer    = el('fbDrawer');
+  var scrim     = el('fbScrim');
+  var closeBtn  = el('fbClose');
+  var form      = el('fbForm');
+  var noticeEl  = el('fbNotice');
+  var errorEl   = el('fbError');
+  var statusEl  = el('fbStatus');
+  var submitBtn = el('fbSubmit');
+  var submitTxt = el('fbSubmitText');
+  var doneEl    = el('fbDone');
+  var againBtn  = el('fbAgain');
+  var doneClose = el('fbDoneClose');
+  var msgEl     = el('fbMessage');
+  var countEl   = el('fbCount');
+  var nameEl    = el('fbName');
+
+  if (!trigger || !drawer || !scrim || !closeBtn || !form) return;
+
+  var isOpen = false;
+  var isSubmitting = false;
+
+  // ---------- 后端就绪判断 ----------
+  // 没配好就老实说「还没接上」，绝不假装成功——
+  // 假成功比报错更糟：用户以为反馈送到了，你这边一条都收不到
+  function backendReady() {
+    return /^https?:\/\//.test(SUPABASE_CONFIG.url) && !!SUPABASE_CONFIG.publishableKey;
+  }
+
+  // ---------- 开合 ----------
+  function open() {
+    if (isOpen) return;
+    isOpen = true;
+
+    // 上次提交成功后直接关掉抽屉，再打开时要回到表单，
+    // 而不是停在那张「收到了，谢谢」上
+    if (doneEl && !doneEl.hidden) resetForm();
+
+    scrim.hidden  = false;
+    drawer.hidden = false;
+    trigger.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';   // 锁住背景，避免在抽屉里滚动时穿透到页面
+
+    // 焦点必须跟进来：不然键盘用户按一下 Tab 就跑到背后的页面里去了。
+    // 聚焦容器本身（它有 aria-labelledby），朗读软件会先念出标题
+    drawer.focus();
+  }
+
+  function close() {
+    if (!isOpen) return;
+    isOpen = false;
+
+    scrim.hidden  = true;
+    drawer.hidden = true;
+    trigger.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+
+    // 焦点还给触发按钮。preventScroll 防止页面被猛地拽回按钮所在的位置
+    trigger.focus({ preventScroll: true });
+  }
+
+  // ---------- 焦点陷阱 ----------
+  // aria-modal="true" 等于向辅助技术承诺了「外面的内容不算数」，
+  // 那就得真的拦住 Tab。不拦的话，键盘用户 Tab 几下就掉进背后那张看不见的页面里，
+  // 越按越迷路，最后只能刷新
+  drawer.addEventListener('keydown', function (e) {
+    if (e.key !== 'Tab') return;
+
+    var nodes = drawer.querySelectorAll(
+      'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), a[href]'
+    );
+    // 被 hidden 藏起来的（表单或成功态）不算数
+    var list = Array.prototype.filter.call(nodes, function (n) {
+      return n.offsetParent !== null;
+    });
+    if (!list.length) return;
+
+    var first = list[0];
+    var last  = list[list.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
+
+  // ---------- 字数计数 ----------
+  // 这个数字带 aria-hidden：每敲一个字都念一遍计数，对朗读软件用户是折磨。
+  // 真正的上限由 maxlength 兜底，计数只是给人看的
+  function updateCount() {
+    if (!msgEl || !countEl) return;
+    var n = msgEl.value.length;
+    countEl.textContent = n + ' / ' + MAX_LEN;
+    countEl.classList.toggle('is-near-limit', n > MAX_LEN * 0.9);   // 过九成变色，别等提交才说超长
+  }
+
+  // ---------- 提示 ----------
+  function showError(text) {
+    if (!errorEl) return;
+    errorEl.textContent = text;
+    errorEl.hidden = false;
+  }
+
+  function clearError() {
+    if (!errorEl) return;
+    errorEl.hidden = true;
+    errorEl.textContent = '';
+  }
+
+  function setStatus(text) {
+    if (statusEl) statusEl.textContent = text || '';
+  }
+
+  function setLoading(on) {
+    isSubmitting = on;
+    if (submitBtn) submitBtn.classList.toggle('is-loading', on);
+    if (submitTxt) submitTxt.textContent = on ? '提交中…' : '提交反馈';
+  }
+
+  // ---------- 读表单 ----------
+  function collect() {
+    function picked(name) {
+      var node = form.querySelector('input[name="' + name + '"]:checked');
+      return node ? node.value : '';
+    }
+    return {
+      name:         nameEl ? nameEl.value.trim() : '',
+      relation:     picked('relation'),
+      device:       picked('device'),
+      message:      msgEl ? msgEl.value.trim() : '',
+      page_version: PAGE_VERSION
+    };
+  }
+
+  // ---------- 校验 ----------
+  // 一次把所有问题都摆出来。填一次被驳回一次是最招人烦的表单行为
+  function validate(data) {
+    var problems = [];
+
+    if (!data.relation) problems.push({ id: 'relation', text: '「我们是什么关系」还没选' });
+    if (!data.device)   problems.push({ id: 'device',   text: '「你用什么设备看的」还没选' });
+
+    if (!data.message) {
+      problems.push({ id: 'message', text: '「想说什么」还是空的' });
+    } else if (data.message.length < 4) {
+      problems.push({ id: 'message', text: '正文只有两三个字，我看不出问题在哪' });
+    }
+
+    return problems;
+  }
+
+  // 焦点直接跳到第一个出问题的地方——光给一行红字，人还得自己找
+  var PROBLEM_BOX = { relation: 'fbRelationField', device: 'fbDeviceField', message: 'fbMessage' };
+
+  function focusProblem(id) {
+    var box = el(PROBLEM_BOX[id] || '');
+    if (!box) return;
+    var input = box.querySelector('input, textarea');
+    if (input) input.focus();
+  }
+
+  // ---------- 提交 ----------
+  function onSubmit(e) {
+    e.preventDefault();
+    if (isSubmitting) return;          // 防重复：连点两下也只发一条
+
+    clearError();
+    setStatus('');
+
+    var data = collect();
+    var problems = validate(data);
+
+    if (problems.length) {
+      showError('还差 ' + problems.length + ' 处：' +
+                problems.map(function (p) { return p.text; }).join('；') + '。');
+      focusProblem(problems[0].id);
+      return;
+    }
+
+    setLoading(true);
+
+    // ---- 后端还没接上：走本地演示，明确告知，不假装成功 ----
+    if (!backendReady()) {
+      setTimeout(function () {
+        setLoading(false);
+        showDone(true);
+      }, 650);
+      return;
+    }
+
+    // ---- 真提交 ----
+    sendToBackend(data, function (err) {
+      setLoading(false);
+      if (err) {
+        showError('没发出去：' + err);
+        setStatus('你写的内容还在，可以直接再试一次。');
+        return;                        // 失败时一个字都不清空，这是基本礼貌
+      }
+      showDone(false);
+    });
+  }
+
+  // ---------- 发往 Supabase ----------
+  // 单独拎一层：库没加载、网络断了、表不存在、权限被拒……
+  // 全部在这里收口成「成功 / 失败 + 人话原因」，上层不用关心细节
+  function sendToBackend(data, cb) {
+    if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
+      cb('客户端库没加载出来');
+      return;
+    }
+
+    var client;
+    try {
+      client = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.publishableKey);
+    } catch (err) {
+      cb('客户端初始化失败，检查一下项目地址和密钥');
+      return;
+    }
+
+    // 用 Promise.resolve 包一层：supabase 返回的是 thenable，
+    // 这样能保证 then / catch 两套接口都在
+    Promise.resolve(client.from('feedback').insert(data))
+      .then(function (res) {
+        if (res && res.error) {
+          cb(res.error.message || '数据库拒绝了这条记录');
+        } else {
+          cb(null);
+        }
+      })
+      .catch(function () {
+        cb('网络连不上，检查一下网络再试');
+      });
+  }
+
+  // ---------- 成功态 ----------
+  var DONE_TEXT_REAL = '已经进到我的后台，只有我能看到。下一轮迭代我会一条条读。';
+  var DONE_TEXT_DEMO = '演示模式：这条没真的发出去，只在本地走了一遍流程。接上数据库后才算数。';
+
+  function showDone(isDemo) {
+    if (!doneEl || !form) return;
+
+    var p = doneEl.querySelector('p');
+    if (p) p.textContent = isDemo ? DONE_TEXT_DEMO : DONE_TEXT_REAL;
+
+    form.hidden = true;
+    doneEl.hidden = false;
+    setStatus('');
+
+    // 焦点挪到成功提示上。否则抽屉里安安静静，朗读软件用户不知道发生了什么
+    var h3 = doneEl.querySelector('h3');
+    if (h3) {
+      h3.setAttribute('tabindex', '-1');
+      h3.focus();
+    }
+  }
+
+  function resetForm() {
+    if (!form) return;
+    form.reset();
+    clearError();
+    setStatus('');
+    setLoading(false);
+    form.hidden = false;
+    if (doneEl) doneEl.hidden = true;
+    updateCount();
+  }
+
+  // ---------- 事件 ----------
+  trigger.addEventListener('click', open);
+  closeBtn.addEventListener('click', close);
+  scrim.addEventListener('click', close);
+  form.addEventListener('submit', onSubmit);
+
+  if (msgEl) msgEl.addEventListener('input', updateCount);
+
+  if (againBtn) againBtn.addEventListener('click', function () {
+    resetForm();
+    if (msgEl) msgEl.focus();
+  });
+
+  if (doneClose) doneClose.addEventListener('click', close);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && isOpen) close();
+  });
+
+  // ---------- 初始化 ----------
+  if (noticeEl) noticeEl.hidden = backendReady();   // 后端没就绪时才提示
+  updateCount();
+})();

@@ -42,6 +42,8 @@ MYPAGE-V2.0/
 ├── data/
 │   ├── daily-picks.json 「每日推荐」的歌单与历史（小票的数据源）
 │   └── persona.json     ⭐ 数字分身的**事实档**：它能说什么、离线怎么答，只有这一份源
+├── supabase/
+│   └── feedback.sql     V3 的**建表 + RLS 策略**脚本（在 Supabase SQL Editor 里跑；不含任何密钥）
 ├── tools/
 │   ├── build-ai-log.py 把 AI 使用日志的 Markdown 源生成 ai-log.html（只用标准库）
 │   ├── sync-version.py 把「共 N 次提交」这类易过时的数字从 git 读出来写回文档
@@ -60,7 +62,8 @@ MYPAGE-V2.0/
 ├── package.json        npm start / npm test（发布沙箱按它识别这是个 Node 项目）
 ├── .env                ⚠️ **机密，不进 git**：DEEPSEEK_API_KEY（怎么建见 DEPLOY.md §2）
 ├── DESIGN-SYSTEM.md    设计系统：配色 / 字体尺度 / 间距 / 组件 / 无障碍底线
-├── DEPLOY.md           部署到公网：拿 DeepSeek key、为什么 key 不能进前端、上线检查清单
+├── DEPLOY.md           部署到公网：拿 DeepSeek key、为什么 key 不能进前端、上线检查清单、**GitHub Pages 发布（§8）**
+├── FEEDBACK.md         **V3 反馈后台**：数据流、表结构、建表脚本逐句、RLS 与两种密钥、你的操作步骤与排查
 ├── WECLONE.md          把分身的「大脑」换成自建微调模型（WeClone）的完整链路与坑
 └── PROJECT.md          项目进度大脑：进度记录、迭代日志、版本说明、提交历史
 ```
@@ -254,7 +257,7 @@ python tools/openai-stub.py
 
 | 分支 | 内容 | 提交数 |
 | --- | --- | --- |
-| `v2` | V2 版本线：`V2.0` → `V2.7`，当前成果在这里 | 74 |
+| `v2` | V2 版本线：`V2.0` → `V2.7`，当前成果在这里 | 75 |
 | `main` | V1 版本线：`V1.0` / `V1.1` | 2 |
 
 **两条分支没有共同祖先。** V2.0 是在新文件夹里重新 `git init` 开始的，不是从 V1.1 拉出来的分支
@@ -262,7 +265,7 @@ python tools/openai-stub.py
 哈希全部改变，已经记录在文档里的提交号会集体失效。保持两条独立历史、并在这里说明原因，
 比「看起来整齐」更重要。
 
-页面上写的「共 76 次提交」＝ `v2` 的 74 条 ＋ `main` 的 2 条。
+页面上写的「共 77 次提交」＝ `v2` 的 75 条 ＋ `main` 的 2 条。
 
 ## 设计上几个刻意的决定
 

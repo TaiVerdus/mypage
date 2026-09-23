@@ -24,6 +24,8 @@
   /* ---- 派生通道：同一色相配不同透明度，等价于色阶但不新增颜色 ---- */
   --c-brand-rgb: 15 118 110;
   --c-bg-rgb:    240 253 250;
+  --c-surface-rgb: 255 255 255;   /* 卡片色的派生通道（反馈抽屉的选中标记用到） */
+  --c-scrim-rgb:   15 23 42;      /* 反馈抽屉的遮罩：浅色主题下用墨色压暗 */
 
   /* ---- 派生色（不是新颜色，只是透明度不同） ---- */
   --c-line:        rgb(var(--c-brand-rgb) / .14);  /* 默认描边 / 分隔线 */
@@ -98,6 +100,7 @@
   --dur-fast: 150ms;
   --dur-base: 220ms;
   --dur-slow: 500ms;
+  --dur-drawer: 320ms;   /* 反馈抽屉滑入：比 --dur-base 慢一点，注视感更强 */
   --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
 
   /* ---- 布局 ---- */
@@ -136,6 +139,8 @@
   /* 派生通道 */
   --c-brand-rgb: 94 234 212;
   --c-bg-rgb:    0 0 0;
+  --c-surface-rgb: 11 18 17;      /* 同浅色主题，随主题换成深底 */
+  --c-scrim-rgb:   0 0 0;         /* 深色主题下遮罩用纯黑，压暗才对 */
 
   /* 渐变的暗端：深色主题里「deep」该更暗，而不是更亮 */
   --c-brand-deep:  #14B8A6;
@@ -2842,3 +2847,549 @@ body {
     filter: none;
   }
 }
+
+/* ============================================================
+   反馈抽屉（V3 新增，2026-09-24）
+   入口在右下角、点开是抽屉（桌面右侧滑入 / 手机底部升起），不跳转页面。
+   ⚠️ 颜色全部走 token —— 浅色主题与深色主题（当前默认 data-theme="dark"）自动各自成立，
+      所以这里**不要**出现写死的色值（遮罩用的是 --c-scrim-rgb，随主题翻转）。
+   ============================================================ */
+.fb-trigger {
+  display: none;
+  position: fixed;
+  right: var(--sp-5);
+  bottom: var(--sp-5);
+  z-index: 890;              /* 压在遮罩 900 之下：抽屉一开自动被盖住，不用额外逻辑 */
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-5);
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--color-surface);
+  background: linear-gradient(135deg, var(--color-brand), var(--color-brand-deep));
+  border: none;
+  border-radius: var(--r-pill);
+  box-shadow: 0 6px 20px rgb(var(--c-brand-rgb) / .28);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out),
+              opacity var(--dur-fast) var(--ease-out);
+}
+
+html.js-ready .fb-trigger {
+  display: inline-flex;
+}
+
+.fb-trigger:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgb(var(--c-brand-rgb) / .34);
+}
+
+.fb-trigger:active {
+  transform: translateY(0);
+}
+
+.fb-trigger-icon {
+  flex: none;
+}
+
+/* 抽屉开着时让位。直接挂在 aria-expanded 上，
+   不再额外维护一个 .is-open 类——状态只留一处真相 */
+.fb-trigger[aria-expanded="true"] {
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+}
+
+/* 遮罩：点它关闭。这是手机上最顺手的关闭方式 */
+.fb-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  background: rgb(var(--c-ink-rgb) / .42);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  animation: fbScrimIn var(--dur-base) var(--ease-out) both;
+}
+
+@keyframes fbScrimIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* 抽屉本体
+   ⚠️ 这条 [hidden] 覆盖必须写：下面给 .fb-drawer 设了 display:flex，
+   而类选择器优先级高于浏览器给 [hidden] 的 display:none。
+   漏掉它的后果是「页面一打开抽屉就是开的」，而且代码看着毫无问题 */
+.fb-scrim[hidden],
+.fb-drawer[hidden] {
+  display: none;
+}
+
+.fb-drawer {
+  position: fixed;
+  z-index: 950;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  box-shadow: var(--sh-2);
+  /* 基础尺寸 = 移动端：贴底、限高、只留上面两个圆角 */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 88vh;
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  padding: var(--sp-5) var(--sp-4) calc(var(--sp-5) + env(safe-area-inset-bottom));
+  animation: fbDrawerUp var(--dur-drawer) var(--ease-out) both;
+}
+
+/* 位移只给 28px 而不是 100%：小位移 + 淡入比整屏滑入轻快得多，
+   长距离滑动反而拖沓 */
+@keyframes fbDrawerUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fbDrawerRight {
+  from { opacity: 0; transform: translateX(28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* 桌面：改成右侧滑出，占满高度、限宽 */
+@media (min-width: 641px) {
+  .fb-drawer {
+    left: auto;
+    top: 0;
+    bottom: 0;
+    width: min(440px, 92vw);
+    max-height: none;
+    border-radius: var(--r-lg) 0 0 var(--r-lg);
+    padding: var(--sp-6);
+    animation-name: fbDrawerRight;
+  }
+}
+
+/* 头部：标题 + 隐私说明 + 关闭键 */
+.fb-head {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding-bottom: var(--sp-4);
+  margin-bottom: var(--sp-5);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.fb-title {
+  font-size: var(--fs-h3);
+  font-weight: 700;
+  line-height: var(--lh-tight);
+  color: var(--color-ink);
+}
+
+/* 隐私说明是 12px 小字，选色要盯对比度：
+   brand #0F766E 在白底 5.5:1、在浅青底 5.3:1，都过 WCAG AA；
+   muted #475569 更高，7.3:1。
+   真正不够用的是已经删掉的 #0D9488（3.3:1）——记住这个数，别再放它回来 */
+.fb-privacy {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+  font-size: var(--fs-caption);
+  color: var(--color-brand);
+}
+
+.fb-privacy svg {
+  flex: none;
+}
+
+.fb-close {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin: -6px -6px 0 0;     /* 视觉上贴齐卡片角，但点击区一点没缩 */
+  color: var(--color-muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out);
+}
+
+.fb-close:hover {
+  color: var(--color-ink);
+  background: var(--color-mint);
+}
+
+/* 移动端：触发胶囊收窄，别在窄屏上占掉太多正文 */
+@media (max-width: 640px) {
+  .fb-trigger {
+    right: var(--sp-4);
+    bottom: var(--sp-4);
+    padding: var(--sp-3) var(--sp-4);
+  }
+}
+
+/* ---- 表单区 ---- */
+
+/* 头部固定、表单区自己滚。
+   ⚠️ min-height: 0 不能省：flex 子项默认 min-height:auto，
+   内容一多就会把抽屉顶出屏幕外，滚动条压根不出现。
+   这是 flex 布局里最经典的一个坑，症状是「手机上按钮不见了」 */
+.fb-form {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  overflow-y: auto;
+  padding-right: var(--sp-1);
+  margin-right: calc(var(--sp-1) * -1);   /* 滚动条不外露，内容仍与头部对齐 */
+}
+
+/* ⚠️ 凡是自己设了 display 的元素，[hidden] 都会失灵——
+   这是这套代码里反复出现的同一个坑（抽屉、成功态、表单、错误提示都中招），
+   所以集中放在一起，改的时候一眼能看到 */
+.fb-form[hidden],
+.fb-error[hidden],
+.fb-notice[hidden] {
+  display: none;
+}
+
+/* 后端没接上时的横幅。
+   用虚线框而不是实线，视觉上就是「这是临时状态」的意思 */
+.fb-notice {
+  flex: none;
+  margin-bottom: var(--sp-4);
+  padding: var(--sp-2) var(--sp-3);
+  font-size: var(--fs-caption);
+  line-height: 1.55;
+  color: var(--color-ink);
+  background: var(--color-bg);
+  border: 1px dashed var(--color-line-strong);
+  border-radius: var(--r-sm);
+}
+
+.fb-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: none;          /* fieldset 自带一圈边框，必须去掉 */
+}
+
+.fb-label {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 0;            /* legend 在 fieldset 里默认带内边距 */
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--color-ink);
+}
+
+/* 「必选 / 选填」小标签。11px 是全站最小字号，
+   所以颜色必须挑够深的：brand 在白底 5.5:1，过 AA */
+.fb-tag {
+  display: inline-block;
+  padding: 1px var(--sp-2);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.6;
+  white-space: nowrap;
+  border-radius: var(--r-pill);
+}
+
+.fb-tag--req {
+  color: var(--color-brand);
+  background: var(--color-mint);
+}
+
+.fb-tag--opt {
+  color: var(--color-muted);
+  background: rgb(var(--c-brand-rgb) / .07);
+}
+
+/* 输入框：默认浅青底，聚焦时转白。
+   底色变化本身就是一句「你现在在这里」的提示，不用加额外装饰 */
+.fb-input,
+.fb-textarea {
+  width: 100%;
+  padding: var(--sp-3) var(--sp-4);
+  font-family: inherit;
+  font-size: var(--fs-body);
+  line-height: 1.5;
+  color: var(--color-ink);
+  background: var(--color-bg);
+  border: 1px solid var(--color-line);
+  border-radius: var(--r-sm);
+  transition: border-color var(--dur-fast) var(--ease-out),
+              background var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.fb-input::placeholder,
+.fb-textarea::placeholder {
+  color: var(--color-muted);
+  opacity: .65;
+}
+
+.fb-input:focus,
+.fb-textarea:focus {
+  outline: none;
+  background: var(--color-surface);
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px rgb(var(--c-brand-rgb) / .12);
+}
+
+/* 键盘操作时回到全站统一的 outline 规范，比柔和光环更明确 */
+.fb-input:focus-visible,
+.fb-textarea:focus-visible {
+  outline: 3px solid rgb(var(--c-brand-rgb) / 0.45);
+  outline-offset: 2px;
+}
+
+.fb-textarea {
+  min-height: 96px;
+  resize: vertical;      /* 只许纵向拉——横向拉会把抽屉整个撑变形 */
+  line-height: var(--lh-body);
+}
+
+/* ---- 胶囊单选组 ---- */
+.fb-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.fb-chip {
+  position: relative;
+  display: inline-flex;
+  cursor: pointer;
+}
+
+/* 原生 radio 藏起来，但绝不能 display:none/visibility:hidden——
+   那样键盘和朗读软件就彻底够不到它了。
+   留 1px + opacity:0，它还在原地、还能被聚焦、还能被朗读 */
+.fb-chip input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.fb-chip span {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--sp-2) var(--sp-4);
+  font-size: var(--fs-sm);
+  color: var(--color-muted);
+  background: var(--color-bg);
+  border: 1px solid var(--color-line);
+  border-radius: var(--r-pill);
+  transition: color var(--dur-fast) var(--ease-out),
+              background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+
+.fb-chip:hover input:not(:checked) + span {
+  color: var(--color-ink);
+  border-color: var(--color-line-strong);
+}
+
+.fb-chip input:checked + span {
+  color: var(--color-surface);
+  background: var(--color-brand);
+  border-color: var(--color-brand);
+}
+
+/* 焦点环只能画在 span 上——input 已经缩成 1px 且全透明，
+   画在它身上等于没画，键盘用户会完全失去位置感 */
+.fb-chip input:focus-visible + span {
+  outline: 3px solid rgb(var(--c-brand-rgb) / 0.45);
+  outline-offset: 2px;
+}
+
+/* ---- 字数提示行 ---- */
+.fb-under {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  margin-top: var(--sp-1);
+}
+
+.fb-hint {
+  font-size: var(--fs-caption);
+  line-height: 1.5;
+  color: var(--color-muted);
+}
+
+.fb-count {
+  flex: none;
+  font-size: var(--fs-caption);
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;   /* 数字等宽：计数跳动时不会左右晃 */
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.fb-count.is-near-limit {
+  font-weight: 500;
+  color: var(--color-brand);
+}
+
+/* ---- 错误提示 ---- */
+/* 故意不用红色。全站只有 6 个颜色，这是 V2.3 定下的纪律。
+   靠「深字 + 浅青底 + 左侧色条 + 感叹号」来抢注意力，够了 */
+.fb-error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--color-ink);
+  background: var(--color-mint);
+  border-left: 3px solid var(--color-brand);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+}
+
+/* 用纯 CSS 画一个感叹号，省一次请求也省一个文件 */
+.fb-error::before {
+  content: "!";
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-surface);
+  background: var(--color-brand);
+  border-radius: 50%;
+}
+
+/* ---- 提交 ---- */
+/* 外观全部交给 .btn--primary，这里只管尺寸 */
+.fb-submit {
+  width: 100%;
+  padding: var(--sp-3) var(--sp-5);
+  font-size: var(--fs-body);
+}
+
+.fb-submit.is-loading {
+  pointer-events: none;
+  opacity: .75;
+}
+
+.fb-spinner {
+  display: none;
+  width: 14px;
+  height: 14px;
+  margin-right: var(--sp-2);
+  border: 2px solid rgb(var(--c-surface-rgb) / .35);
+  border-top-color: var(--color-surface);
+  border-radius: 50%;
+  animation: fbSpin .7s linear infinite;
+}
+
+.fb-submit.is-loading .fb-spinner {
+  display: inline-block;
+}
+
+@keyframes fbSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* 进度播报，aria-live 会念出来 */
+.fb-status {
+  min-height: 1em;
+  font-size: var(--fs-caption);
+  text-align: center;
+  color: var(--color-muted);
+}
+
+/* ---- 成功态 ---- */
+/* ⚠️ 同样要补 [hidden] 覆盖，原因和抽屉那边一模一样 */
+.fb-done[hidden] {
+  display: none;
+}
+
+.fb-done {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-4);
+  padding: var(--sp-6) var(--sp-4);
+  text-align: center;
+  animation: fbScrimIn var(--dur-base) var(--ease-out) both;
+}
+
+.fb-done-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  color: var(--color-surface);
+  background: linear-gradient(135deg, var(--color-brand), var(--color-brand-deep));
+  border-radius: 50%;
+  box-shadow: 0 8px 24px rgb(var(--c-brand-rgb) / .28);
+}
+
+.fb-done h3 {
+  font-size: var(--fs-h3);
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.fb-done p {
+  max-width: 28ch;
+  font-size: var(--fs-sm);
+  line-height: var(--lh-body);
+  color: var(--color-muted);
+}
+
+.fb-done-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--sp-3);
+  margin-top: var(--sp-2);
+}
+
+.fb-done-actions .btn {
+  padding: var(--sp-2) var(--sp-5);
+  font-size: var(--fs-sm);
+}
+
+/* 窄屏：胶囊收紧一点，关系那 7 个选项在小屏上要占两三行，别太占地方 */
+@media (max-width: 640px) {
+  .fb-chip span {
+    padding: var(--sp-2) var(--sp-3);
+  }
+
+  .fb-under {
+    flex-direction: column;
+    gap: var(--sp-1);
+  }
+
+  .fb-count {
+    align-self: flex-end;
+  }
