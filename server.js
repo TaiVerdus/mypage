@@ -280,7 +280,12 @@ function readBody(req, limit) {
 }
 
 function send(res, code, type, body) {
-  res.writeHead(code, { 'Content-Type': type, 'Access-Control-Allow-Origin': ALLOW_ORIGIN });
+  res.writeHead(code, {
+    'Content-Type': type,
+    'Access-Control-Allow-Origin': ALLOW_ORIGIN,
+    /* PNA 也给上（说明见上面 OPTIONS 那段）：某些 Chrome 版本连**正式响应**也要看这个头 */
+    'Access-Control-Allow-Private-Network': 'true'
+  });
   res.end(body);
 }
 
@@ -391,7 +396,8 @@ async function handleChat(req, res) {
         'Cache-Control': 'no-cache',
         'Connection': 'keep-alive',
         'X-Accel-Buffering': 'no',      // 别让反向代理把流攒起来再一次性发（那流式就白做了）
-        'Access-Control-Allow-Origin': ALLOW_ORIGIN
+        'Access-Control-Allow-Origin': ALLOW_ORIGIN,
+        'Access-Control-Allow-Private-Network': 'true'   // ⚠️ 见上面 OPTIONS 段：file:// 页面调本机要走 PNA
       });
       var rs = Readable.fromWeb(r.body);
       rs.on('error', function (e) {
@@ -454,7 +460,14 @@ var server = http.createServer(function (req, res) {
         'Access-Control-Allow-Origin': ALLOW_ORIGIN,
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'Access-Control-Max-Age': '43200'
+        'Access-Control-Max-Age': '43200',
+        /* ⚠️ 补丁（V2.7 续八十）：Chrome 的「私有网络访问」（PNA）——
+           从 `file://` 打开的页面去调 `127.0.0.1` 属于「非安全来源访问本机地址」，
+           浏览器会先发一个带 `Access-Control-Request-Private-Network: true` 的预检；
+           **服务端必须回同样这个头**，否则请求在浏览器里就被拦掉了。
+           ⚠️ 那种失败最难查：**服务端日志里什么都没有**（请求压根没到），
+           页面上只看到「离线版回答」——就像今天这样。 */
+        'Access-Control-Allow-Private-Network': 'true'
       });
       return res.end();
     }

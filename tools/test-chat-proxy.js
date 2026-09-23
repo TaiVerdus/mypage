@@ -173,6 +173,25 @@ function startProxy(port, ratePerMin, extraEnv) {
   ok(hz.stats && typeof hz.stats.chat === 'number', '/healthz 报出运行计数（能一眼分清被刷 / 上游错 / 余额拦）',
     JSON.stringify(hz.stats));
 
+  /* ⚠️ V2.7 续八十：`file://` 页面调本机代理，Chrome 的「私有网络访问」（PNA）会先拦一道 ——
+     预检必须回 `Access-Control-Allow-Private-Network: true`，否则请求**压根到不了服务端**
+     （服务端日志里一片安静、页面上只显示「离线版回答」，是最难查的一类失败）。 */
+  var pre = await fetch('http://127.0.0.1:' + PROXY_PORT + '/api/chat', {
+    method: 'OPTIONS',
+    headers: {
+      'Origin': 'null',
+      'Access-Control-Request-Method': 'POST',
+      'Access-Control-Request-Headers': 'content-type',
+      'Access-Control-Request-Private-Network': 'true'
+    }
+  });
+  ok(pre.status === 204, '预检（Origin: null）⇒ 204', String(pre.status));
+  ok((pre.headers.get('access-control-allow-origin') || '') === '*',
+    '预检放行 file:// 页面（Access-Control-Allow-Origin: *）');
+  ok((pre.headers.get('access-control-allow-private-network') || '') === 'true',
+    '★ 预检回了 Access-Control-Allow-Private-Network: true（Chrome 从 file:// 调本机地址的必需项）',
+    String(pre.headers.get('access-control-allow-private-network')));
+
   console.log('\n=== 2. 静态托管：白名单制 —— 该给的给，名单外一律不给 ===');
   var r1 = await fetch('http://127.0.0.1:' + PROXY_PORT + '/');
   ok(r1.status === 200 && (r1.headers.get('content-type') || '').indexOf('text/html') === 0,
