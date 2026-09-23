@@ -26,6 +26,9 @@ var ROOT = path.join(__dirname, '..');
 var PROXY_PORT = 8123;      // 功能用例（限速放宽，免得几个用例互相抢配额）
 var RATE_PORT = 8125;       // 限速用例（单独一个实例，配额干净）
 var UP_PORT = 8124;
+var BAL_PORT = 8126;   // 余额那一组用的代理实例（独立的余额缓存）
+// ⚠️ 8125 是 RATE_PORT —— 第一版把 BAL_PORT 也写成 8125，于是余额那几节实际问的是
+//    限速实例（连问 4 次被 429），八条断言全红。**端口撞了症状很像"业务坏了"**。
 
 var pass = 0, fail = 0;
 function ok(cond, name, extra) {
@@ -37,7 +40,20 @@ function ok(cond, name, extra) {
 
 var got = [];   // { url, auth, body }
 
+/* 余额接口（GET /user/balance）也要能演。
+   ⚠️ 三种模式都是**真实会遇到的**：够用 / 余额偏低 / 接口自己挂了（探针要能区分它们）。 */
+var balanceMode = 'ok';   // ok / low / http500 / notjson
+var BAL_OK = { is_available: true, balance_infos: [{ currency: 'CNY', total_balance: '6.34', granted_balance: '0.00', topped_up_balance: '6.34' }] };
+var BAL_LOW = { is_available: true, balance_infos: [{ currency: 'CNY', total_balance: '0.42', granted_balance: '0.00', topped_up_balance: '0.42' }] };
+
 var up = http.createServer(function (req, res) {
+  if (req.url === '/user/balance') {
+    got.push({ url: req.url, auth: req.headers.authorization });
+    if (balanceMode === 'http500') { res.writeHead(500); return res.end('boom'); }
+    if (balanceMode === 'notjson') { res.writeHead(200, { 'Content-Type': 'application/json' }); return res.end('not json'); }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify(balanceMode === 'low' ? BAL_LOW : BAL_OK));
+  }
   var chunks = [];
   req.on('data', function (c) { chunks.push(c); });
   req.on('end', function () {
@@ -88,12 +104,14 @@ function grabList(src, marker) {
 
 /* ── 主流程 ───────────────────────────────────────────────────────── */
 
-var proxy, rateProxy;
+var proxy, rateProxy, balProxy;
 
 // 起一个代理实例。
 // ⚠️ 限速状态在**进程内存**里、没法重置 ⇒ 功能用例和限速用例必须用两个实例，
 //    否则前面几个用例就把配额吃光、后面全被 429（这个坑第一版就踩了）。
-function startProxy(port, ratePerMin) {
+// ⚠️ 余额也是**进程内存里的缓存** ⇒ 余额那几节同样要自己的实例（用 extraEnv 传 BALANCE_TTL_MS=0，
+//    这样每条请求都重查，我才好在一个实例里依次演「余额够 / 不够 / 查不到」）。
+function startProxy(port, ratePerMin, extraEnv) {
   var p = spawn(process.execPath, [path.join(ROOT, 'server.js')], {
     env: Object.assign({}, process.env, {
       PORT: String(port),
@@ -103,7 +121,7 @@ function startProxy(port, ratePerMin) {
       MAX_OUTPUT_TOKENS: '400',
       MAX_HISTORY_MSGS: '12',
       MAX_INPUT_CHARS: '600'
-    }),
+    }, extraEnv || {}),
     stdio: ['ignore', 'ignore', 'pipe']
   });
   p.stderr.on('data', function (d) { process.stderr.write('[server] ' + d); });
@@ -117,10 +135,13 @@ function startProxy(port, ratePerMin) {
   up.listen(UP_PORT);
   proxy = startProxy(PROXY_PORT, '1000');
   rateProxy = startProxy(RATE_PORT, '3');
+  // 余额那一组：TTL 设 0 ⇒ 每条请求都重查，好在同一个实例里依次演三种余额状态
+  balProxy = startProxy(BAL_PORT, '1000', { BALANCE_TTL_MS: '0', BALANCE_MIN: '1' });
 
   try {
     await waitReady('http://127.0.0.1:' + PROXY_PORT + '/healthz', 30);
     await waitReady('http://127.0.0.1:' + RATE_PORT + '/healthz', 30);
+    await waitReady('http://127.0.0.1:' + BAL_PORT + '/healthz', 30);
   } catch (e) {
     console.log('无法启动 server.js：' + e.message);
     process.exit(1);
@@ -261,14 +282,80 @@ function startProxy(port, ratePerMin) {
   ok(up2.messages[0].content.indexOf('数字分身') >= 0 && up2.messages[0].content.indexOf('通用助手') < 0,
     '★ 即使前端被改成「通用助手」，上游收到的仍是分身人设（服务端兜住了）');
 
+  console.log('\n=== 9. ★ 余额护栏（2026-09-23 用户定；BALANCE_MIN=1）===');
+  // ⚠️ 这条护栏的意义：key **不能设额度上限**，能兜住的只有「限速」与「余额」。
+  //    所以余额低就该干脆不接活 —— 让页面自动落回知识库，而不是等上游报错。
+  function balChat() {
+    return fetch('http://127.0.0.1:' + BAL_PORT + '/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: [{ role: 'user', content: '你好' }] })
+    });
+  }
+  function chatCalls() { return got.filter(function (g) { return g.url === '/chat/completions'; }).length; }
+  function balCalls() { return got.filter(function (g) { return g.url === '/user/balance'; }).length; }
+
+  balanceMode = 'ok';                       // ¥6.34，够
+  got.length = 0;
+  var rOk = await balChat();
+  ok(rOk.status === 200, '余额充足 ⇒ 正常回答（HTTP 200）', '实际 ' + rOk.status);
+
+  balanceMode = 'low';                      // ¥0.42，低于阈值 1
+  var nBefore = chatCalls();
+  var rLow = await balChat();
+  var msg = await rLow.json().catch(function () { return {}; });
+  ok(rLow.status === 503, '★ 余额不足 ⇒ 503（页面会自动落回知识库）', '实际 ' + rLow.status);
+  ok(chatCalls() === nBefore, '★ 而且**没往上游发**请求（不为注定失败的请求花钱）',
+    '上游收到的对话请求数从 ' + nBefore + ' 变成了 ' + chatCalls());
+  ok(JSON.stringify(msg).indexOf('余额') >= 0, '503 的说明里写清了原因（不是含糊的错误）',
+    JSON.stringify(msg).slice(0, 80));
+
+  balanceMode = 'http500';                  // 余额接口自己挂了
+  var rBad = await balChat();
+  ok(rBad.status === 200, '★ 余额查不到 ⇒ **不拦**（fail-open：网络抖一下不该让分身停摆）',
+    '实际 ' + rBad.status);
+
+  balanceMode = 'ok';
+  /* ⚠️ 这里必须**先发一条请求**再去读 /healthz —— 因为 `/healthz` 只报**最近一次查到**的状态，
+      它自己不会主动去查余额（这点是对的：健康检查不该打上游）。第一版没注意，读到的是
+      上一次失败留下的 ok:false，断言白红了一条。 */
+  var bBefore = balCalls();
+  var rBack = await balChat();
+  ok(rBack.status === 200, '余额恢复正常 ⇒ 立刻又接活（不需要重启）', '实际 ' + rBack.status);
+  ok(balCalls() === bBefore + 1, 'TTL=0 ⇒ 这条请求重新查了一次余额（缓存是会过期的）',
+    '查了 ' + (balCalls() - bBefore) + ' 次');
+
+  var rHealth = await fetch('http://127.0.0.1:' + BAL_PORT + '/healthz').then(function (r) { return r.json(); });
+  ok(rHealth.balance && rHealth.balance.ok === true && rHealth.balance.value === 6.34,
+    '/healthz 报得出余额（运维一眼能看到）', JSON.stringify(rHealth.balance));
+  ok(rHealth.thinking === 'disabled', '★ /healthz 能看到思考模式 = disabled（关掉这件事是可见的）',
+    String(rHealth.thinking));
+
+  console.log('\n=== 10. ★ 关掉 thinking 这件事真的发出去了 ===');
+  balanceMode = 'ok';
+  got.length = 0;
+  await balChat();
+  var sentBody = got.filter(function (g) { return g.url === '/chat/completions'; })[0];
+  ok(sentBody && sentBody.body.thinking && sentBody.body.thinking.type === 'disabled',
+    '★ 上游收到的 body 里 thinking.type = disabled',
+    sentBody ? JSON.stringify(sentBody.body.thinking) : '没收到对话请求');
+  ok(sentBody && sentBody.body.temperature === 0.8,
+    '① 关掉 thinking 后 temperature 才真正生效（0.8 已带上）',
+    sentBody ? String(sentBody.body.temperature) : '—');
+  ok(sentBody && sentBody.body.reasoning_effort === undefined,
+    '② 没开 thinking 就不发 reasoning_effort（官方文档：那个参数只在思考模式有意义）',
+    sentBody ? String(sentBody.body.reasoning_effort) : '—');
+
   console.log('\n用例 %d / 失败 %d', pass + fail, fail);
   proxy.kill();
   rateProxy.kill();
+  balProxy.kill();
   up.close();
   process.exit(fail ? 1 : 0);
 })().catch(function (e) {
   console.error('测试自身出错：', e);
   if (proxy) proxy.kill();
   if (rateProxy) rateProxy.kill();
+  if (balProxy) balProxy.kill();
   process.exit(1);
 });

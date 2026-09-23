@@ -30,6 +30,10 @@
  *   MAX_INPUT_CHARS    默认 600（单条提问长度上限）
  *   RATE_PER_MIN       默认 8（每个 IP 每分钟最多问几次）
  *   ALLOW_ORIGIN       默认 *（跨域放行；同源部署时其实用不到）
+ *   THINKING           默认 disabled（关掉思考模式 —— 理由见下面 handleChat 里的注释）
+ *   THINKING_EFFORT    仅 THINKING=enabled 时有意义：low / high / max
+ *   BALANCE_MIN        默认 1（余额低于这个数就暂时不接活，单位同账户币种）
+ *   BALANCE_TTL_MS     默认 900000（15 分钟查一次余额；查不到**不拦**）
  *
  * ⚠️ 人设文案（下面的 PERSONA）必须与 script.js 里 CHAT_BACKEND.system 保持一致 ——
  *    两处不一致的话，「本机 ollama 版分身」和「云端版分身」说话方式会不一样。
@@ -76,6 +80,10 @@ var MAX_MSGS = Number(process.env.MAX_HISTORY_MSGS || 12);
 var MAX_INPUT_CHARS = Number(process.env.MAX_INPUT_CHARS || 600);
 var RATE_PER_MIN = Number(process.env.RATE_PER_MIN || 8);
 var ALLOW_ORIGIN = process.env.ALLOW_ORIGIN || '*';
+var THINKING = (process.env.THINKING || 'disabled').toLowerCase();
+var EFFORT = process.env.THINKING_EFFORT || '';
+var BALANCE_MIN = Number(process.env.BALANCE_MIN || 1);
+var BALANCE_TTL = Number(process.env.BALANCE_TTL_MS || 900000);
 var ROOT = __dirname;
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -180,6 +188,55 @@ setInterval(function () {
   });
 }, 300000).unref();
 
+/* ── 余额护栏（V2.7 续六十九，用户 2026-09-23 定）──────────────────────
+   为什么要有它：页面对公网开放之后，**key 不能设额度上限**（DeepSeek 没有这个能力），
+   能兜住的只有两件事 —— 按 IP 限速（上面）与**余额本身**。所以再加一道：
+   余额低于阈值时干脆不接活，让页面自动落回本地知识库，而不是等到上游报错。
+
+   ⚠️ **查不到余额时不拦（fail-open）**，这是刻意的：
+      网络抖一下、或这个接口临时抽风，不该让分身停摆。真没余额时上游也会报错 ⇒
+      页面照样自动落回知识库，最坏情况只是「晚一点才降级」。
+   ───────────────────────────────────────────────────────────────────── */
+
+var balance = { value: null, currency: '', available: true, ok: false, checkedAt: 0 };
+
+function refreshBalance(force) {
+  if (!API_KEY) return Promise.resolve(balance);
+  if (!force && Date.now() - balance.checkedAt < BALANCE_TTL) return Promise.resolve(balance);
+
+  var ctrl = new AbortController();
+  var timer = setTimeout(function () { ctrl.abort(); }, 8000);
+
+  return fetch(BASE + '/user/balance', {
+    headers: { 'Authorization': 'Bearer ' + API_KEY },
+    signal: ctrl.signal
+  }).then(function (r) {
+    clearTimeout(timer);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }).then(function (d) {
+    var list = Array.isArray(d.balance_infos) ? d.balance_infos : [];
+    var pick = list.filter(function (x) { return x && x.currency === 'CNY'; })[0] || list[0] || null;
+    balance.checkedAt = Date.now();
+    balance.ok = true;
+    balance.available = d.is_available !== false;
+    balance.value = pick ? Number(pick.total_balance) : null;
+    balance.currency = pick ? String(pick.currency) : '';
+    return balance;
+  }).catch(function (e) {
+    clearTimeout(timer);
+    balance.checkedAt = Date.now();     // 记一下时间，别每条请求都重试
+    balance.ok = false;
+    console.warn('[balance] 查询失败（不拦）：' + (e && e.message));
+    return balance;
+  });
+}
+
+// 余额够不够（false 才拦；查不到或没配阈值 ⇒ 放行）
+function balanceBlocked() {
+  return balance.ok && balance.value !== null && balance.value < BALANCE_MIN;
+}
+
 /* ── /api/chat ────────────────────────────────────────────────────── */
 
 function readBody(req, limit) {
@@ -222,6 +279,15 @@ async function handleChat(req, res) {
 
   if (!API_KEY) return fail(res, 503, '服务端没有配置 DEEPSEEK_API_KEY');
 
+  /* 余额护栏：不够就**先**拒掉（页面会自动落回知识库并标「离线版回答」）。
+     ⚠️ 放在限速之后、打上游之前 —— 别为一次注定失败的请求花掉限速额度，
+        也别为它花钱。 */
+  await refreshBalance(false);
+  if (balanceBlocked()) {
+    return fail(res, 503, '分身暂时下线：账户余额低于 ' + BALANCE_MIN + ' ' + (balance.currency || '') +
+      '（页面会自动用本地知识库顶一会儿）');
+  }
+
   /* ⚠️ 关键的一步：**只取客户端的 user / assistant 轮次，system 一律丢掉**。
      人设由服务端注入 —— 否则任何人抓到这个地址，都能塞一个「你是通用助手」的
      system 进来，把我的模型当免费 ChatGPT 用。 */
@@ -238,13 +304,23 @@ async function handleChat(req, res) {
     return fail(res, 400, '最后一条必须是用户的提问');
   }
 
-  var body = JSON.stringify({
+  var payload = {
     model: MODEL,
     messages: [{ role: 'system', content: PERSONA }].concat(history),
     stream: false,
     max_tokens: MAX_OUT,        // 限长 = 限制有人拿它写长文烧额度
-    temperature: 0.8
-  });
+    temperature: 0.8,
+    /* ⚠️ **关掉 thinking**（官方文档：默认开启、档位 high）。三条理由都是实测/文档来的：
+       ① 思考过程**占的是同一份 max_tokens 预算** —— 实测少了人设时会正好撞上 400、
+          把回答截断（有实例）
+       ② 输出 token 实测 **75 → 48**（约省 35%，输出是按 token 计费的）
+       ③ ⚠️ **thinking 模式下 `temperature` 是被官方忽略的** —— 而分身这种闲聊恰恰需要
+          一点温度差（同一句话别每次答得一模一样）。关掉之后上面那行 0.8 才真正生效。
+       想改回：环境变量 `THINKING=enabled`（可再配 `THINKING_EFFORT=low` 走降档）。 */
+    thinking: { type: THINKING === 'enabled' ? 'enabled' : 'disabled' }
+  };
+  if (THINKING === 'enabled' && EFFORT) payload.reasoning_effort = EFFORT;   // low / high / max
+  var body = JSON.stringify(payload);
 
   var ctrl = new AbortController();
   var timer = setTimeout(function () { ctrl.abort(); }, 30000);
@@ -279,7 +355,17 @@ var server = http.createServer(function (req, res) {
 
   if (urlPath === '/healthz') {
     return send(res, 200, 'application/json; charset=utf-8', JSON.stringify({
-      ok: true, model: MODEL, keyConfigured: !!API_KEY, ratePerMin: RATE_PER_MIN
+      ok: true, model: MODEL, keyConfigured: !!API_KEY, ratePerMin: RATE_PER_MIN,
+      thinking: THINKING,
+      // 余额护栏的现状（只读、不含 key）：ok=false 表示**没查到**（不拦）
+      balance: {
+        ok: balance.ok,
+        value: balance.value,
+        currency: balance.currency,
+        min: BALANCE_MIN,
+        blocked: balanceBlocked(),
+        checkedAt: balance.checkedAt ? new Date(balance.checkedAt).toISOString() : null
+      }
     }));
   }
 
@@ -308,6 +394,14 @@ server.listen(PORT, function () {
   console.log('  API key     : ' + (API_KEY ? '已配置' : '⚠️ 未配置 —— /api/chat 会返回 503'));
   console.log('  限速        : 每 IP 每分钟 ' + RATE_PER_MIN + ' 次');
   console.log('  输出上限    : ' + MAX_OUT + ' tokens');
+  console.log('  思考模式    : ' + THINKING + (THINKING === 'enabled' && EFFORT ? '（effort=' + EFFORT + '）' : ''));
+  console.log('  余额护栏    : 低于 ' + BALANCE_MIN + ' 就不接活（查不到不拦）');
+  // 启动时先查一次余额（不阻塞、失败也不影响启动）
+  refreshBalance(true).then(function (b) {
+    console.log('  账户余额    : ' + (b.ok
+      ? (b.value === null ? '查到了但没读到数额' : b.value + ' ' + b.currency + (balanceBlocked() ? '  ⚠️ 低于阈值，当前不接活' : ''))
+      : '没查到（不拦，按超时/网络问题处理）'));
+  });
   if (API_KEY && BASE === 'https://api.deepseek.com') {
     console.log('\n本机自测：打开 http://localhost:' + PORT + '/');
   }
