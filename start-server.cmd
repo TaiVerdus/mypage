@@ -74,5 +74,7 @@ if %errorlevel%==0 (
 echo.
 echo   Server stopped unexpectedly. Restarting in 5 seconds ...
 echo   (close this window to stop it for good)
-timeout /t 5 /nobreak >nul
+rem ⚠️ 用 ping 等 5 秒，不用 timeout：timeout 在「stdin 被重定向」时会立刻退出
+rem    ⇒ 重启循环会变成空转（2026-09-24 测出来的：14 秒转了 30 圈）。ping 与输入无关。
+ping -n 6 127.0.0.1 >nul
 goto run
