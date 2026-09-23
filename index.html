@@ -192,11 +192,11 @@
               <p>纯静态 · 无框架 · 自己的一套设计系统</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 88 条 + main 分支 2 条（V1.0 / V1.1）
+                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 89 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
               <!-- ⚠️ 这一行带提交数，由 tools/sync-version.py 自动写 ——
                    别手改数字，改完在提交前跑一次那个脚本。 -->
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 截至 2026-09-23 共 90 次提交</p>
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 截至 2026-09-23 共 91 次提交</p>
               <a class="item-link" href="ai-log.html">这个页面是怎么做出来的 →</a>
             </div>
             <!-- ⚠️ 这里原来是 CarbonBrain（写着「课程 / 比赛项目 · 已有可演示版本」）——
@@ -457,16 +457,20 @@
           <span class="chat-avatar"><img src="images/avatar.jpg" alt="" width="76" height="76"></span>
           <div>
             <strong>释贤的数字分身</strong>
-            <small>· 本地知识库 · 离线运行</small>
+            <small>· AI 分身</small>
           </div>
+          <!-- 清空记忆（V2.7 续六十八，用户 2026-09-23 定）：
+               记忆存在**访客自己的浏览器**里（localStorage），所以「清空」这件事由访客自己掌控。
+               ⚠️ 默认 `hidden` —— 没东西可清时不出现在标题栏（不空占位置，也不吓人）。
+               ⚠️ 用 `type="button"`：它在表单概念里不是提交键。 -->
+          <button class="chat-clear" id="chatClear" type="button" hidden>清空记忆</button>
         </div>
         <div class="chat-messages" id="chatMessages"></div>
         <div class="chat-quick" id="chatQuick">
-          <button class="quick-btn">你和王释贤是什么关系？</button>
           <button class="quick-btn">陶喆、薛之谦、Bieber他最爱谁？</button>
           <button class="quick-btn">打鼓和书法哪个更难？</button>
           <button class="quick-btn">脑机接口能让我用意念打字吗？</button>
-          <button class="quick-btn">他生气的时候什么样？</button>
+          <button class="quick-btn">他平时怎么放松？</button>
           <button class="quick-btn">你有不知道的事吗？</button>
         </div>
         <div class="chat-input-row">

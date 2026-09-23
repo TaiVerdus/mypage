@@ -875,6 +875,34 @@ section {
   font-weight: 400;
 }
 
+/* 「清空记忆」（V2.7 续六十八，用户 2026-09-23 定）
+   ⚠️ 默认 `hidden`，由 JS 控制显隐 —— 没东西可清时不出现（不空占位置、也不吓人）。
+   ⚠️ 它坐在青绿渐变标题栏上 ⇒ 只能用**白色系半透明**，**不能**用语义色
+      （那套 --c-* / --color-brand 是给浅底算的对比度，放这儿读不清）。
+   ⚠️ 小字号 + 半透明底是刻意的：它是**次要操作**，不该跟主对话抢注意力。 */
+.chat-clear {
+  margin-left: auto;        /* 推到标题栏右端 */
+  flex-shrink: 0;
+  font-family: inherit;
+  font-size: var(--fs-caption);
+  color: var(--color-surface);
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: var(--r-pill);
+  padding: calc(5px * var(--scale)) calc(11px * var(--scale));
+  cursor: pointer;
+  transition: background var(--dur-base) var(--ease-out);
+}
+
+.chat-clear:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.chat-clear:focus-visible {
+  outline: 2px solid var(--color-surface);
+  outline-offset: 2px;
+}
+
 /* 2026-09-22：`.chat-avatar` 原来放的是单字印「释」，用户要求换成**他的头像**
    —— 复用联系卡那张 images/avatar.jpg（同一张，不另存一份；小票右上角也是它）。
    ⚠️ 圆形裁切交给 `overflow: hidden`，**图片本身不裁** —— 那张照片发顶顶边、
@@ -949,6 +977,31 @@ section {
   margin-top: calc(-8px * var(--scale));
   font-size: var(--fs-caption);
   color: var(--color-muted);
+}
+
+/* 「上次聊到这儿」的分隔线（V2.7 续六十八）
+   ⚠️ 它同时兼一份**告知**的职责：记忆存在访客自己的浏览器里，这事写在明面上、不藏着。
+   ⚠️ 小字号的颜色仍走 §4 那条硬规矩：**只能 `--color-muted` 或 `--color-brand`**。
+      浅色 7.27:1 / 深色 9.45:1，两套主题都过 AA。
+      ⚠️ 这里原来是按记忆里的「`--c-700`」写的 —— **那个 token 早就不存在了**
+         （V2.3 就收敛掉了，设计文档 §4 明写着）。未定义 token 不报错、只静默失效 ⇒
+         颜色会退回继承值，看着"差不多"、实际对比度没人保证。已改正。
+   ⚠️ 两侧的细线用伪元素 + `flex: 1` 撑出来，不额外加标签。 */
+.msg-divider {
+  display: flex;
+  align-items: center;
+  gap: calc(10px * var(--scale));
+  font-size: var(--fs-caption);
+  color: var(--color-muted);
+  margin: calc(2px * var(--scale)) 0;
+}
+
+.msg-divider::before,
+.msg-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-line);
 }
 
 @keyframes bubbleIn {

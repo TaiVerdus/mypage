@@ -166,6 +166,9 @@ var CHAT_BACKEND = {
     '必须遵守：',
     '· **三个人称别搞混**：你是分身（不是他本人）、访客是来看页面的人（也不是他）、',
     '  你和访客口中的「他 / 释贤」才是本人 —— 别把访客当成他，也别说「等你告诉我」这类话',
+    /* V2.7 续六十八：记忆上了之后补这条。⚠️ 必须与 server.js 的 PERSONA **逐行一致**
+       （`tools/test-chat-proxy.js` 第 7 节会比对），改一处就得改两处。 */
+    '· 上面可能带你之前和这位访客聊过的几轮（存在他自己的浏览器里）；有就顺着接，没有就当作第一次见面，别假装记得没发生的事',
     '· 不知道就直说不知道，**绝不要编造**关于他的任何事——他没告诉过我的，我不替他说',
     '· 不报私人信息（住址、电话、具体年龄这类）；联系方式让他自己给',
     '· 回答尽量短，两三句就够',
@@ -185,6 +188,17 @@ var CHAT_BACKEND = {
 var backendDownUntil = 0;   // 跳闸到期时间戳（0 = 没跳闸）
 var backendFails = 0;       // 连续失败计数
 var chatHistory = [];       // 只记「微调分身真答过」的轮次 —— 见 remember()
+
+/* ---- 记忆：存在**访客自己的浏览器**里，不上服务器（V2.7 续六十八，用户 2026-09-23 定）----
+   ⚠️ **刻意只存本机**：这个页面是公开的，一旦把对话存到服务端，所有人说的话就混在一堆了
+      —— 访客 A 说过的事，可能被访客 B 问出来。存 localStorage 没有这个问题：
+      数据出不了他自己的机器，你我都不需要知道别人聊过什么。
+   ⚠️ **只存两样**：「访客看得见的对话」与「要带回模型的那几轮」。
+      **不存人设、不存配置、不存任何服务端的东西**（有一条回归测试专门盯着这点）。
+   ⚠️ 存不下（配额满 / 隐私模式 / 被策略禁用）就静默退化成「不记忆」—— **绝不因为这个功能把聊天弄坏**。 */
+var MEM_KEY = 'mypage.chat.v1';   // 带 v1：以后改结构就换 key，老数据自动作废，不用写迁移
+var MEM_MAX = 40;                 // 界面上的对话最多留几条（气泡数，不是轮数）
+var chatLog = [];                 // 访客看得见的对话（含知识库答的），用来把界面恢复回去
 
 // ---- 本地联调用的临时覆盖（2026-09-23）----
 // 在地址栏加参数就能临时改后端与模型，**不用改这个文件、也不会被提交**：
@@ -231,7 +245,10 @@ var KNOWLEDGE = [
   },
   {
     keywords: ['interest', 'hobby', 'hobbies', 'drum', 'drums', 'calligraphy', 'basketball', 'fun', 'free time', 'do for fun',
-      '爱好', '兴趣爱好', '玩什么', '平时玩', '喜欢什么', '打鼓', '书法', '篮球'],
+      '爱好', '兴趣爱好', '玩什么', '平时玩', '喜欢什么', '打鼓', '书法', '篮球',
+      // V2.7 续六十八：快捷按钮「他生气的时候什么样？」换成「他平时怎么放松？」
+      // ⇒ 补这两个词。答的仍是同一条（已有证据的爱好），没有新增任何事实。
+      '放松', '怎么放松'],
     answer: '他课余挺满的：听音乐、打鼓、练书法、打篮球。安静的吵闹的都有——打鼓和篮球是吵的，书法是静的。'
   },
   {
@@ -262,6 +279,14 @@ var KNOWLEDGE = [
     //    「只说告诉过我的事，不编」的口径（那句兜底语就是这么写的）。
     keywords: ['多大', '年龄', '几岁', '多少岁', 'how old', 'age'],
     answer: '他大一在读。具体多大他没告诉过我——我不替他编，你想知道直接问他。'
+  },
+
+  {
+    // 新增（V2.7 续六十八，用户 2026-09-23 定）：快捷按钮「你有不知道的事吗？」原来落兜底语。
+    // ⚠️ 这条答的是**它自己的边界**，不是关于释贤的事实 —— 用户原话是「照实说」。
+    // ⚠️ 关键词都带「不」字，避免把普通的提问（如「他住哪」）吸过来。
+    keywords: ['不知道的事', '不知道的', '你不知道', '有没有不知道', '什么不知道', '不知道什么', '不懂的'],
+    answer: '有，而且挺多。他没告诉过我的，我就直说不知道——这是我的规矩，不是偷懒。'
   }
 ];
 
@@ -437,10 +462,103 @@ function askBackend(question) {
   });
 }
 
+/* ---------- 记忆的存取层（V2.7 续六十八）----------
+   ⚠️ 这一层**只碰 localStorage 和 JSON，不碰 DOM** —— 分开的理由很实际：
+      纯存取能在 node 里单测（`tools/test-chat-memory.js`），而带上屏就得有浏览器。
+   ⚠️ 三个函数都**不会抛异常**：拿不到存储就返回 null / false，调用方据此退化成「不记忆」。 */
+
+// 拿得到 localStorage 吗？⚠️ 隐私模式或被策略禁用时，**读取 localStorage 本身就会抛异常**
+// （不是返回 null）⇒ 必须包在 try 里。
+function memoryStore() {
+  try {
+    if (typeof localStorage === 'undefined' || !localStorage) return null;
+    return localStorage;
+  } catch (e) {
+    return null;   // 被禁用的浏览器（如某些隐私模式）在这里就退化了
+  }
+}
+
+// 读回上次的对话。结构不对 / 解析失败 / 被禁用 ⇒ 一律返回 null（当作「没记忆」，不报错）
+function memoryRead() {
+  var st = memoryStore();
+  if (!st) return null;
+  try {
+    var raw = st.getItem(MEM_KEY);
+    if (!raw) return null;
+    var d = JSON.parse(raw);
+    if (!d || d.v !== 1 || !Array.isArray(d.log) || !d.log.length) return null;
+    return d;
+  } catch (e) {
+    return null;
+  }
+}
+
+// 写回。`log` = 访客看得见的对话；`ctx` = 要带回模型的那几轮。
+function memoryWrite(log, ctx) {
+  var st = memoryStore();
+  if (!st) return false;
+  try {
+    var payload = {
+      v: 1,
+      at: Date.now(),
+      log: (log || []).slice(-MEM_MAX).map(function (m) {
+        return {
+          who: m && m.who === 'user' ? 'user' : 'bot',
+          text: String((m && m.text) || ''),
+          offline: !!(m && m.offline)
+        };
+      }),
+      // ⚠️ ctx 是唯一会被送进模型的东西 ⇒ 形状在这里就卡死。
+      //    localStorage 里的内容是**可以被改的**（访客自己按 F12 就能编辑），
+      //    所以「只收 user / assistant 的纯文本」这条等于一道本地防线；
+      //    服务端还有第二道（它也会丢掉客户端的 system），两边都不指望对方。
+      ctx: (ctx || []).filter(function (m) {
+        return m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string';
+      })
+    };
+    st.setItem(MEM_KEY, JSON.stringify(payload));
+    return true;
+  } catch (e) {
+    return false;   // 配额满 / 被禁用 ⇒ 静默退化成「不记忆」
+  }
+}
+
+function memoryClear() {
+  var st = memoryStore();
+  if (!st) return;
+  try { st.removeItem(MEM_KEY); } catch (e) { /* 清不掉也不影响用 */ }
+}
+
+// 「上次聊到这儿」的分隔线。顺带把「存在哪」写出来 —— 记忆这件事不藏着。
+function addDivider(text) {
+  var el = document.createElement('div');
+  el.className = 'msg-divider';
+  el.textContent = text;
+  messagesEl.appendChild(el);
+  return el;
+}
+
+// 把上次的对话铺回界面，并把上下文接上。
+// 返回 true 表示确实恢复了（调用方据此决定要不要显示「清空记忆」）。
+function restoreMemory() {
+  var d = memoryRead();
+  if (!d) return false;
+  chatLog = d.log.slice();
+  // ⚠️ 只接最近几轮（与 historyTurns 一致）—— 存着的不必全带进提示词
+  if (d.ctx && d.ctx.length) chatHistory = d.ctx.slice(-CHAT_BACKEND.historyTurns * 2);
+  addDivider('上次聊到这儿 · 只存在你这台设备上');
+  d.log.forEach(function (m) {
+    addMessage(m.text, m.who === 'user' ? 'user' : 'bot');
+    if (m.offline) addOfflineNote();
+  });
+  return true;
+}
+
 function ask(question) {
   if (!question.trim()) return;
 
   addMessage(question, 'user');          // 1. 先显示用户的问题
+  chatLog.push({ who: 'user', text: question });   // 记账：记忆要恢复的是「访客看见了什么」
   inputEl.value = '';                     // 2. 清空输入框
 
   var typing = addMessage('正在输入…', 'bot typing'); // 3. 打字指示
@@ -449,6 +567,13 @@ function ask(question) {
     typing.remove();
     addMessage(answer, 'bot');
     if (fromFallback) addOfflineNote();
+    /* 落盘放在**这里**而不是 remember() 里，因为两件事要分开：
+       ① 无论这条是分身答的还是知识库兜底的，访客都看见了 ⇒ 界面恢复时要一样铺回去（chatLog）
+       ② 而 chatHistory（要带回模型的那几轮）只由 remember() 记
+       —— 混在一起的话，知识库的罐头话会被当成它自己说过的，把语气带偏。 */
+    chatLog.push({ who: 'bot', text: answer, offline: !!fromFallback });
+    memoryWrite(chatLog, chatHistory);
+    syncClearBtn();
   }
 
   // 没配后端、或正在跳闸冷却里 ⇒ 直接走知识库，延迟与接后端之前一模一样（700ms）
@@ -488,6 +613,31 @@ quickEl.querySelectorAll('.quick-btn').forEach(function (btn) {
 
 // 开场白：分身先打招呼
 addMessage('嗨，我是释贤的数字分身！你可以问他正在学什么、是个什么样的人，或者他有什么爱好——不知道的事我会直说。', 'bot');
+
+/* ---------- 记忆的上屏部分（V2.7 续六十八）----------
+   ⚠️ 这段**必须放在文件末尾**，不能放进 <function isLocalPage … function ask(> 那个区间：
+      两个回归测试会把那段代码抽出来在 node 里 eval，而这里的 `document.getElementById`
+      在 node 里会直接抛错（测试里只桩了 createElement，而且 messagesEl 是手工给的）。
+   ⚠️ `syncClearBtn` 是函数声明 ⇒ 会提升，所以上面 `land()` 里调用它没问题。 */
+var clearBtn = document.getElementById('chatClear');
+
+function syncClearBtn() {
+  if (clearBtn) clearBtn.hidden = chatLog.length === 0;
+}
+
+if (clearBtn) {
+  clearBtn.addEventListener('click', function () {
+    memoryClear();
+    chatLog = [];
+    chatHistory = [];              // 上下文也一起清 —— 否则「忘了」只是嘴上忘了
+    messagesEl.innerHTML = '';
+    addMessage('好了，我把记得的都忘了。重新开始吧。', 'bot');
+    syncClearBtn();
+  });
+}
+
+// 有上次的对话就铺回来（开场白在上、分隔线在下，读起来像「接了上一次」）
+if (restoreMemory()) syncClearBtn();
 
 
 // ---------- 交互四：全屏形状场（光标效果） ----------
