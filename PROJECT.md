@@ -170,7 +170,7 @@
 | 仓库 | 分支 | 内容 | 提交数 |
 | --- | --- | --- | --- |
 | `github.com/TaiVerdus/mypage` | `main` | V1 版本线（V1.0 → V1.1，2026-09-06） | 2 |
-| `github.com/TaiVerdus/mypage` | **`v2`**（设为默认分支） | V2 版本线（V2.0 → V2.7）；**V2 线到 2026-09-24 冻结** | 75 |
+| `github.com/TaiVerdus/mypage` | **`v2`**（设为默认分支） | V2 版本线（V2.0 → V2.7）；**V2 线到 2026-09-24 冻结** | 74 |
 | `github.com/TaiVerdus/mypage` | `v3`（V3.0 起步，2026-09-24） | V3 版本线：反馈后台（Supabase）+ 发布到 GitHub Pages；**Pages 从这条分支发布** | 见 `git log` |
 
 - **两条分支没有共同祖先**：V2.0 是 2026-09-16 在新文件夹里重新 `git init` 的，不是从 V1.1 拉出来的分支。

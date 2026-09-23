@@ -39,8 +39,15 @@ PARENT = os.path.dirname(SITE)
 V1_FOLDER = os.path.join(PARENT, "MYPAGE")   # V1 线所在的文件夹（仓库外的同级目录）
 V1_FALLBACK = 2                              # 读不到就用它——V1 已冻结
 
-V2_BRANCH = "v2"
+V2_BRANCH = "v2"          # V2 版本线（已冻结）—— 只用来填「分支表里的 v2 行」
 MAIN_BRANCH = "main"
+
+# ⚠️ 2026-09-24（V3.0 起步）：数字原来跟着写死的 `v2` 走。V3 开了 `v3` 分支之后，
+#    提交数在 v3 上增长、脚本却还在数 v2 ⇒ 页面上的「共 N 次提交」永远停在旧值、`--check` 立刻报不一致。
+#    现在改成**跟着当前分支走**（V4 再开 v4 分支也一样），读不到分支名（detached HEAD）才回退 v2。
+def work_branch():
+    b = git("rev-parse", "--abbrev-ref", "HEAD")
+    return b if b and b != "HEAD" else V2_BRANCH
 
 
 def git(*args):
@@ -66,29 +73,32 @@ def count_in_repo(repo, branch):
 
 
 def counts():
-    """v2 条数从本仓库读；main（V1 线）在隔壁文件夹，读不到就用兜底常量"""
+    """工作分支（当前版本线）条数从本仓库读；main（V1 线）在隔壁文件夹，读不到就用兜底常量"""
+    br = work_branch()
+    work = count_in_repo(SITE, br)
+    if work is None:
+        work = git("rev-list", "--count", br)
+        work = int(work) if work else 0
     v2 = count_in_repo(SITE, V2_BRANCH)
-    if v2 is None:
-        v2 = git("rev-list", "--count", V2_BRANCH)
-        v2 = int(v2) if v2 else 0
+    v2 = int(v2) if v2 else 0
     main = count_in_repo(V1_FOLDER, MAIN_BRANCH)
     main_src = "读自 %s 文件夹" % os.path.basename(V1_FOLDER)
     if main is None:
         main, main_src = V1_FALLBACK, "兜底常量（读不到 V1 文件夹）"
-    return v2, main, main_src
+    return work, v2, main, main_src
 
 
 def counts_with_pending(check_only):
     """写入时把「正在准备的这一次提交」也算上——见文件头那个自引用问题。
     数字描述的是「提交之后」的状态，不 +1 的话提交完立刻就差 1。"""
-    v2, main, src = counts()
+    work, v2, main, src = counts()
     if check_only:
-        return v2, main, src
+        return work, v2, main, src
     if git("status", "--porcelain") == "":
         print("  ⚠️  工作区是干净的，没有待提交内容。默认仍按 +1 算；")
         print("     如果你并不是准备提交，请改用 --check 核对。")
         print("")
-    return v2 + 1, main, src
+    return work + 1, v2, main, src
 
 
 # 「截至 <日期>」那个日期取哪个值，两种模式不一样（2026-09-22 修）。
@@ -121,42 +131,54 @@ def stamp_date():
 
 
 # (文件名, 说明, 正则, 替换用的组)
+# ⚠️ repl 的签名统一是 (m, work, v2, main, br)：
+#    work = 当前版本线的提交数（V3 起跟着 HEAD 分支走）、v2 = 已冻结的 v2 线、br = 当前分支名。
 RULES = [
     # ⚠️ 这一条的正则跟的是**页面上那句中文**（V2.7 续三十整站中文化时同步改的）。
     #    原来是 `· NN commits as of`，中文换成 `· 截至 <日期> 共 NN 次提交` ——
     #    正则不改的话，这句就再也匹配不上，提交数会停在旧值上变假。
     ("index.html", "项目条目的提交数",
      r"(· 截至 )(\d{4}-\d{2}-\d{2})( 共 )(\d+)( 次提交)",
-     lambda m, v2, mn: (m.group(1) + stamp_date() + m.group(3)
-                        + str(v2 + mn) + m.group(5))),
+     lambda m, work, v2, mn, br: (m.group(1) + stamp_date() + m.group(3)
+                                  + str(work + mn) + m.group(5))),
 
+    # 「= v2 分支 75 条 + main 分支 2 条」——分支名也要跟着走（V3 起是 v3）
     ("index.html", "注释里的分支条数",
-     r"(v2 分支 )(\d+)( 条 \+ main 分支 )(\d+)( 条)",
-     lambda m, v2, mn: m.group(1) + str(v2) + m.group(3) + str(mn) + m.group(5)),
+     r"(= )[a-zA-Z0-9._/-]+( 分支 )(\d+)( 条 \+ main 分支 )(\d+)( 条)",
+     lambda m, work, v2, mn, br: (m.group(1) + br + m.group(2) + str(work)
+                                  + m.group(4) + str(mn) + m.group(6))),
 
+    # V2 线已冻结 ⇒ 这一行永远按 v2 的条数写，不跟当前分支
     ("README.md", "分支表 v2 行",
      r"^(\| `v2` \|[^\n|]*\| )(\d+)( \|\s*)$",
-     lambda m, v2, mn: m.group(1) + str(v2) + m.group(3)),
+     lambda m, work, v2, mn, br: m.group(1) + str(v2) + m.group(3)),
+
+    # 当前版本线那一行（V3 起加）——跟着 HEAD 分支走。⚠️ 开 V4 分支时给它补一行同名规则即可
+    ("README.md", "分支表当前版本行",
+     r"^(\| `v3` \|[^\n|]*\| )(\d+)( \|\s*)$",
+     lambda m, work, v2, mn, br: m.group(1) + str(work) + m.group(3)),
 
     ("README.md", "「共 N 次提交」说明",
-     r"(「共 )(\d+)( 次提交」＝ `v2` 的 )(\d+)( 条 ＋ `main` 的 )(\d+)( 条)",
-     lambda m, v2, mn: (m.group(1) + str(v2 + mn) + m.group(3)
-                        + str(v2) + m.group(5) + str(mn) + m.group(7))),
+     r"(「共 )(\d+)( 次提交」＝ `)[a-zA-Z0-9._/-]+(` 的 )(\d+)( 条 ＋ `main` 的 )(\d+)( 条)",
+     lambda m, work, v2, mn, br: (m.group(1) + str(work + mn) + m.group(3) + br
+                                  + m.group(4) + str(work) + m.group(6) + str(mn) + m.group(8))),
 
+    # V2 线已冻结 ⇒ 同上
     ("PROJECT.md", "「仓库分布与分支」表的 v2 行",
      r"^(\| `github\.com/TaiVerdus/mypage` \| \*\*`v2`\*\*.*\| )(\d+)( \|\s*)$",
-     lambda m, v2, mn: m.group(1) + str(v2) + m.group(3)),
+     lambda m, work, v2, mn, br: m.group(1) + str(v2) + m.group(3)),
 ]
 
 
 def main():
     check_only = "--check" in sys.argv
     _MODE["check"] = check_only          # ⚠️ 必须在套用 RULES 之前设好：日期取哪个值取决于它
-    v2c, mc, src = counts_with_pending(check_only)
-    total = v2c + mc
+    work, v2c, mc, src = counts_with_pending(check_only)
+    br = work_branch()
+    total = work + mc
 
-    print("口径：v2 分支 %d 条%s + main 分支 %d 条 = 共 %d 次提交"
-          % (v2c, "" if check_only else "（含正在准备的这一次）", mc, total))
+    print("口径：%s 分支 %d 条%s + main 分支 %d 条 = 共 %d 次提交（v2 线另有 %d 条，已冻结）"
+          % (br, work, "" if check_only else "（含正在准备的这一次）", mc, total, v2c))
     print("      main 条数来源：%s" % src)
     print("")
 
@@ -169,7 +191,7 @@ def main():
             missing += 1
             continue
         text = io.open(path, encoding="utf-8").read()
-        new_text, n = re.subn(pattern, lambda m: repl(m, v2c, mc), text,
+        new_text, n = re.subn(pattern, lambda m: repl(m, work, v2c, mc, br), text,
                               flags=re.M)
         if n == 0:
             print("  ?? %-32s 没匹配到 —— 是不是被改写过？" % label)
