@@ -117,38 +117,49 @@ var PERSONA = [
 
 /* ── 静态文件 ─────────────────────────────────────────────────────── */
 
+/* MIME 表只列白名单内的类型 —— 表里没有的类型本来就出不了下面那道闸 */
 var MIME = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
-  '.json': 'application/json; charset=utf-8',
   '.svg': 'image/svg+xml',
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
   '.png': 'image/png',
   '.webp': 'image/webp',
   '.ico': 'image/x-icon',
-  '.woff2': 'font/woff2',
-  '.txt': 'text/plain; charset=utf-8',
-  '.md': 'text/plain; charset=utf-8'
+  '.woff2': 'font/woff2'
 };
 
-// ⚠️ 这些路径**不给公网访客看**（源码 / 开发文档 / 工具 / 机密文件）
+/* ── 静态文件的「白名单」防护（V2.7 续七十二）──────────────────────────
+   ⚠️ 旧版是**黑名单**：枚举要挡的文件名（PROJECT.md / server.js / package.json …）。
+      实测有洞 —— 以后**新加**的 .md / .json 文档不在名单里，就会被原样公开
+      （本次实测：新造一个 .md 直接 200、全文可读）。文档和源码只会越加越多，
+      每加一个就漏一个，这条路堵不完。
+   ⚠️ 白名单反过来：公网只放行「页面真正用得到」的类型（html / css / js / 图片 / svg），
+      名单外一律 404 —— 以后再加新文档、新配置，**默认就是不给看的**，不会因为
+      「忘了进名单」而泄露。四道闸：
+      ① 私有目录（工具 / 数据 / 备份 / git）—— 连里面的白名单类型也不给
+      ② 点开头的路径 —— `.env`（存 key）/ `.gitignore` 等，一次全盖住；
+         这类洞本地看不出来（你本来就知道自己的 key），上线当天就会被扫到
+      ③ 扩展名不在册 —— .md / .json / .txt 等文档默认 404
+      ④ 例外名单 —— server.js 虽是 .js（类型在白名单里），但它是服务端源码，必须显式挡死 */
 var PRIVATE = /^\/(?:\.git|tools|data|backups)\//i;
-var PRIVATE_FILES = /^\/(?:PROJECT|README|WECLONE|DEPLOY|DESIGN-SYSTEM|server|package(-\w+)?)\.(md|js|json)$/i;
-
-/* ⚠️⚠️ 机密文件必须单独挡死。
-   `.env` 里存着 DEEPSEEK_API_KEY，而静态托管默认是把目录里的文件**原样发出去**的 ——
-   不挡的话，**任何人访问 `/.env` 就拿到了你的 key**。
-   这类洞有个共同点：本地完全看不出来（你本来就知道自己的 key），**上线当天就会被扫到**。
-   规则取「**点开头的都给 404**」，一次把 `.env` / `.gitignore` / `.env.local` 这类全盖住。 */
 var SECRET_FILES = /^\/\./;
+var PUBLIC_EXT = /\.(?:html|css|js|jpg|jpeg|png|webp|svg|ico|woff2)$/i;
+var PRIVATE_FILES = /^\/server\.js$/i;
 
 function serveStatic(req, res) {
-  var urlPath = decodeURIComponent((req.url || '/').split('?')[0]);
+  /* ⚠️ decodeURIComponent 对畸形序列（比如 /%zz）会**抛异常** —— 抛到外层就是整个进程挂掉，
+     等于一条 GET 就能把服务打死。必须就地接住，回 400。 */
+  var urlPath;
+  try { urlPath = decodeURIComponent((req.url || '/').split('?')[0]); }
+  catch (e) { return send(res, 400, 'text/plain; charset=utf-8', 'Bad request'); }
   if (urlPath === '/') urlPath = '/index.html';
 
-  if (PRIVATE.test(urlPath) || PRIVATE_FILES.test(urlPath) || SECRET_FILES.test(urlPath)) {
+  /* 白名单四道闸（说明见上面那块注释）：私有目录 / 点开头 / 例外文件 / 扩展名不在册 */
+  if (PRIVATE.test(urlPath) || SECRET_FILES.test(urlPath) ||
+      PRIVATE_FILES.test(urlPath) || !PUBLIC_EXT.test(urlPath)) {
     return send(res, 404, 'text/plain; charset=utf-8', 'Not found');
   }
 

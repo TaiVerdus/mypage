@@ -8,7 +8,9 @@
 //       的 system 进来，就能把我的模型当免费 ChatGPT 刷
 //    ② 输出长度必须限死 —— 否则有人拿它写长文，烧的是我的额度
 //    ③ 按 IP 限速 —— 否则一个人可以无限刷
-//    这三条只要有一条失效，这个代理就白写了。所以用**假上游**把它们全验一遍
+//    ④ 静态文件走白名单 —— 该公开的类型之外一律 404（2026-09-23 从黑名单改过来：
+//       旧版枚举文件名有洞，新加的 .md 不在名单里就被原样公开）
+//    这几条只要有一条失效，这个代理就白写了。所以用**假上游**把它们全验一遍
 //    （真上游要花钱、还不稳定，不适合放进回归测试）。
 //
 // ⚠️ 另外它还会核对 **server.js 的人设 与 script.js 的 system 是否一致** ——
@@ -153,22 +155,42 @@ function startProxy(port, ratePerMin, extraEnv) {
   ok(hz.keyConfigured === true, 'key 从环境变量读到了');
   ok(hz.model === 'deepseek-flash', '默认模型是 deepseek-flash', '实际 ' + hz.model);
 
-  console.log('\n=== 2. 静态托管：该给的给，不该给的不给 ===');
+  console.log('\n=== 2. 静态托管：白名单制 —— 该给的给，名单外一律不给 ===');
   var r1 = await fetch('http://127.0.0.1:' + PROXY_PORT + '/');
   ok(r1.status === 200 && (r1.headers.get('content-type') || '').indexOf('text/html') === 0,
     'GET / ⇒ 200 text/html');
   var r2 = await fetch('http://127.0.0.1:' + PROXY_PORT + '/script.js');
   ok(r2.status === 200, 'GET /script.js ⇒ 200（页面要用）');
-  // ⚠️ `.env` 必须在清单里：它存着 DEEPSEEK_API_KEY，漏出去等于把 key 公开。
-  //    这类洞本地看不出来（你本来就知道自己的 key），上线当天就会被扫到。
-  for (const p of ['/PROJECT.md', '/server.js', '/tools/test-chat-kb.js', '/data/daily-picks.json',
-                   '/.git/config', '/.env', '/.env.local', '/.gitignore']) {
-    var rr = await fetch('http://127.0.0.1:' + PROXY_PORT + p);
-    ok(rr.status === 404, 'GET ' + p + ' ⇒ 404（源码 / 开发文件 / 机密文件都不暴露）', '实际 ' + rr.status);
+  /* ⚠️ 白名单回归口径：**类型不在册的一切文件**（哪怕仓库里真有）都必须 404。
+     其中 `__probe-new-file.md` 是**现造的** —— 2026-09-23 的洞就是「新加的 .md 被公开」，
+     这条用例把当时的洞原样复现：谁把白名单改回黑名单，这里就会红。
+     `.env` 也必须在清单里：它存着 DEEPSEEK_API_KEY，漏出去等于把 key 公开。 */
+  var probePath = path.join(ROOT, '__probe-new-file.md');
+  var probeMade = false;
+  try { fs.writeFileSync(probePath, '这是不该被公开的临时探针文件'); probeMade = true; } catch (e) {}
+  try {
+    for (const p of ['/PROJECT.md', '/README.md', '/WECLONE.md', '/DEPLOY.md', '/DESIGN-SYSTEM.md',
+                     '/__probe-new-file.md', '/package.json', '/server.js',
+                     '/tools/test-chat-kb.js', '/data/daily-picks.json',
+                     '/.git/config', '/.env', '/.env.local', '/.gitignore']) {
+      var rr = await fetch('http://127.0.0.1:' + PROXY_PORT + p);
+      ok(rr.status === 404, 'GET ' + p + ' ⇒ 404（白名单外的文档 / 源码 / 机密都不暴露）', '实际 ' + rr.status);
+    }
+    // 别误伤：页面真正用得到的类型还得能取到（jpg 从 images/ 里现挑一张，别写死文件名）
+    var probeJpg = (fs.readdirSync(path.join(ROOT, 'images')) || [])
+      .filter(function (f) { return /\.jpg$/i.test(f); })[0];
+    for (const p of ['/style.css', '/favicon.svg'].concat(probeJpg ? ['/images/' + probeJpg] : [])) {
+      var rw = await fetch('http://127.0.0.1:' + PROXY_PORT + p);
+      ok(rw.status === 200, '（别误伤）GET ' + p + ' 仍然是 200', '实际 ' + rw.status);
+    }
+    // 畸形 URL 不能把进程带走：decodeURIComponent 抛异常 = 整个服务挂掉（一条 GET 的 DoS）
+    var bad1 = await fetch('http://127.0.0.1:' + PROXY_PORT + '/%zz');
+    ok(bad1.status >= 400 && bad1.status < 500, '畸形 URL（/%zz）⇒ 4xx，而不是把服务搞挂', '实际 ' + bad1.status);
+    var alive2 = await fetch('http://127.0.0.1:' + PROXY_PORT + '/healthz');
+    ok(alive2.status === 200, '挨了畸形 URL 之后服务还活着');
+  } finally {
+    if (probeMade) { try { fs.unlinkSync(probePath); } catch (e) {} }
   }
-  // 别误伤：正常资源还得能取到
-  var okCss = await fetch('http://127.0.0.1:' + PROXY_PORT + '/style.css');
-  ok(okCss.status === 200, '（别误伤）GET /style.css 仍然是 200', '实际 ' + okCss.status);
 
   console.log('\n=== 3. ★ 人设由服务端注入，客户端的 system 必须被丢掉 ===');
   got.length = 0;
