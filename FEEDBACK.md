@@ -69,7 +69,13 @@ GitHub Pages 只负责把 `index.html / style.css / script.js` 这些静态文�
    反馈这条路不依赖本机代理），点右下角「留个反馈」，**用带唯一标记的内容**提交一次，例如：
    `测试-A7K3 电脑端字有点小`
 7. 回 **Table Editor** 找到那条记录：**字段齐全、时间正确**才算真的成功（这是课件的验收标准）。
-8. 发布到 GitHub Pages（见 `DEPLOY.md` 与课件 Part 4），再用**公开网址**在手机和电脑上各提交一条。
+8. 让机器再替你验一遍（**不用高权限密钥，只用 publishable key**）：
+   ```bash
+   node tools/test-feedback-db.js https://xxxx.supabase.co sb_publishable_xxxxxxxx
+   ```
+   它去数据库那侧问三件事：**① 匿名能插入吗（期待 201）② 匿名能读回吗（期待读到 0 行 —— RLS 真的挡住了）
+   ③ 空内容会被数据库拒绝吗（期待 400 —— 约束真的在管）**。三条都过，才算「权限在数据库层」有证据。
+9. 发布到 GitHub Pages（见 `DEPLOY.md` §8），再用**公开网址**在手机和电脑上各提交一条。
 
 ## 6. 没接上后台时会怎样（演示模式）
 

@@ -57,7 +57,8 @@ MYPAGE-V2.0/
 │   ├── test-chat-memory.js 「记忆（localStorage）」的回归测试（损坏数据 / 隐私 / 存储不可用）
 │   ├── openai-stub.py  本地联调桩：最小 OpenAI 兼容端点（零依赖、含 CORS），验证「换大脑」链路
 │   ├── probe-openai-endpoint.js 探测某个端点页面能不能用（响应形状 / CORS / 耗时）
-│   └── test-chat-proxy.js 「云端代理」的回归测试（锁人设 / 限长 / 限速 + 整条公网链路）
+│   ├── test-chat-proxy.js 「云端代理」的回归测试（锁人设 / 限长 / 限速 + 整条公网链路）
+│   └── test-feedback-db.js V3 反馈后台的**真机验收**：匿名能插入 / 匿名读不到（RLS 生效）/ 空内容被拒
 ├── server.js           线上入口：托管页面 + 代理 /api/chat（零依赖 Node，公网部署用）
 ├── package.json        npm start / npm test（发布沙箱按它识别这是个 Node 项目）
 ├── .env                ⚠️ **机密，不进 git**：DEEPSEEK_API_KEY（怎么建见 DEPLOY.md §2）
@@ -257,7 +258,7 @@ python tools/openai-stub.py
 
 | 分支 | 内容 | 提交数 |
 | --- | --- | --- |
-| `v3` | **当前**版本线：`V3.0`（反馈后台 + 发布），从 `v2` 拉出来的 | 76 |
+| `v3` | **当前**版本线：`V3.0`（反馈后台 + 发布），从 `v2` 拉出来的 | 77 |
 | `v2` | V2 版本线：`V2.0` → `V2.7`（**已冻结**，2026-09-24） | 74 |
 | `main` | V1 版本线：`V1.0` / `V1.1` | 2 |
 
@@ -266,7 +267,7 @@ python tools/openai-stub.py
 哈希全部改变，已经记录在文档里的提交号会集体失效。保持两条独立历史、并在这里说明原因，
 比「看起来整齐」更重要。
 
-页面上写的「共 78 次提交」＝ `v3` 的 76 条 ＋ `main` 的 2 条。
+页面上写的「共 79 次提交」＝ `v3` 的 77 条 ＋ `main` 的 2 条。
 
 ## 设计上几个刻意的决定
 
