@@ -105,11 +105,10 @@ node server.js                # 默认 8080 端口
       `/server.js` 这些挡成 404（有回归测试）
 - [ ] **在手机上开一次**：窄屏布局 + 「不要双击 index.html」那条坑
 - [ ] **`og:image` / `og:url` 换成真实绝对网址**（分享到微信时才有缩略图；现在是 TODO 注释）
-- [ ] **分身的「知道什么」是否已同步**：改了 `data/persona.json` 就跑
-      `python tools/build-persona.py`；`--check` 应为 0 处需要更新
-- [ ] **已知缺口还有 3 句**（「怎么联系他？」「Jarvis + EEG 是什么？」「这个主页是谁做的？」）——
-      现在是老实答「不知道」，要补得给内容（改 `data/persona.json` 的 `about`）；
-      补完把 `tools/test-chat-kb.js` 里的 `KNOWN_GAP` 那几句挪进 `QUICK`
+- [ ] **分身的答案是否与事实档一致**：`python tools/build-persona.py --check` 应为 0 处需要更新
+- [ ] **要不要再补问答**：知识库现有 **12 条**（2026-09-23 用户补了一批：专业 / 课程 / 性格 / 联系 / Jarvis / 主页）。
+      以后想让它多知道什么，改 `data/persona.json` 的 `facts` / `about` 再跑生成器；
+      测试里 `KNOWN_GAP` 那一栏就是「访客会问、它答不上」的标志位
 
 ---
 

@@ -93,16 +93,17 @@ var QUICK = [
   '打鼓和书法哪个更难？',
   '脑机接口能让我用意念打字吗？',
   '他平时怎么放松？',
-  '你有不知道的事吗？'
-];
-
-// ⚠️ 已知缺口（**等用户给内容**）：这几句现在就答不上，是**故意留在这儿的标志位** ——
-//    哪天补了对应条目，把它们挪到 QUICK 里去（否则这一节会红，提醒你改）。
-var KNOWN_GAP = [
+  '你有不知道的事吗？',
+  // 2026-09-23（续七十七）：下面这三句原来是「已知缺口」，用户给了内容 ⇒ 挪上来当正常用例
   '怎么联系他？',
   'Jarvis + EEG 是什么？',
   '这个主页是谁做的？'
 ];
+
+// ⚠️ 已知缺口（**等用户给内容**）：目前是空的 —— 上一批三条（怎么联系 / Jarvis 是什么 / 主页谁做的）
+//    已由用户给了内容、并挪进 QUICK。以后发现「访客会问、但它答不上」的先填在这儿当标志位，
+//    等拿到内容再挪走（测试会红，提醒你别忘了）。
+var KNOWN_GAP = [];
 
 var quickFallback = [];
 QUICK.forEach(function (q) {
@@ -135,7 +136,35 @@ KNOWN_GAP.forEach(function (q) {
   if (matchAnswer(q) !== FALLBACK) fail++;
 });
 
+/* ⚠️ 「能答上」≠「答对了」（2026-09-23 续七十七 补这一节）：
+   知识库是**包含匹配 + 先命中先用**，新加的条目可能被前面某条**抢先命中** ——
+   现象是「点了有回复」，但回复答的是别的事。2026-09-23 就在旧按钮上抓到过 3 例。
+   ⇒ 这几句钉死「必须命中该命中的那条」（答案里必须出现给出的关键词）。 */
+var EXPECT = [
+  ['怎么联系他？', '名片'],
+  ['Jarvis + EEG 是什么？', '科研助理'],
+  ['这个主页是谁做的？', 'DeepSeek'],
+  ['他平时怎么放松？', '听音乐'],
+  ['他在学什么？', '微积分'],
+  ['他性格怎么样？', 'ENFJ'],
+  ['你今年多大？', '大一在读']
+];
+var expectFail = [];
+EXPECT.forEach(function (c) {
+  var a = matchAnswer(c[0]);
+  if (a === FALLBACK || a.indexOf(c[1]) < 0) {
+    expectFail.push(c[0] + '（期待含「' + c[1] + '」，实际：' + a.slice(0, 26) + '…）');
+  }
+});
+console.log('\n「答对而不是只答上」抽查：%d 句', EXPECT.length);
+if (expectFail.length) {
+  expectFail.forEach(function (s) { console.log('  ⚠️ %s', s); });
+  fail += expectFail.length;
+} else {
+  console.log('  ✓ 抽查的每一句都命中了该命中的那条（没有被别的条目抢走）');
+}
+
 console.log('\n知识库 %d 条 / 用例 %d / 失败 %d / 原按钮问句未答上 %d / 已补上的缺口 %d',
-  KNOWLEDGE.length, CASES.length + QUICK.length + KNOWN_GAP.length, fail,
+  KNOWLEDGE.length, CASES.length + QUICK.length + KNOWN_GAP.length + EXPECT.length, fail,
   quickFallback.length, gapAnswered.length);
 process.exit(fail ? 1 : 0);
