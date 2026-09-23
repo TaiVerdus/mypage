@@ -39,6 +39,45 @@ var stubs =
 
 eval(stubs + cfg + '\n' + fns);
 
+/* ---- 流式（SSE）用的假响应（2026-09-23 续七十三）----
+   ⚠️ 第 1 块**故意以半行结尾**（下一块接着写完那行）—— 真上游的 TCP 分片就是这样，
+      不测这条等于没测流式解析；另外还混了**心跳注释行**与**一行坏 JSON**，
+      它们都该被跳过、且**不许打断整条流**。 */
+function sseChunks() {
+  return [
+    'data: {"choices":[{"delta":{"content":"好呀，',
+    '"}}]}\n\n' + ': 心跳注释行，不该被当成内容\n\n' +
+      'data: {"choices":[{"delta":{"content":"我是分身。"}}]}\n\n',
+    'data: {这行是坏的\n\n' +
+      'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n'
+  ];
+}
+// 最后一块带 finish_reason: length ⇒ 页面应据此报「被截断」
+function sseChunksLen() {
+  return [
+    'data: {"choices":[{"delta":{"content":"长话被截"}}]}\n\n',
+    'data: {"choices":[{"delta":{},"finish_reason":"length"}]}\n\ndata: [DONE]\n\n'
+  ];
+}
+function sseResponse(chunks) {
+  var i = 0;
+  return {
+    ok: true,
+    headers: { get: function (k) { return /content-type/i.test(k) ? 'text/event-stream; charset=utf-8' : null; } },
+    body: {
+      getReader: function () {
+        return {
+          read: function () {
+            if (i >= chunks.length) return Promise.resolve({ done: true });
+            return Promise.resolve({ done: false, value: new TextEncoder().encode(chunks[i++]) });
+          }
+        };
+      }
+    },
+    json: function () { return Promise.reject(new Error('要的是流式，不该来读 JSON')); }
+  };
+}
+
 // ---- 假 fetch：按 fetchMode 返回不同结果，并记下最后一次请求 ----
 var fetchMode = 'ok';
 var lastInit = null;
@@ -68,6 +107,15 @@ global.fetch = function (url, init) {
       return Promise.resolve({ ok: false, status: 403, json: function () { return Promise.resolve({}); } });
     }
     return Promise.resolve({ ok: true, json: function () { return Promise.resolve({ choices: [{ message: { content: '来自云端' } }] }); } });
+  }
+  if (fetchMode === 'stream') { return Promise.resolve(sseResponse(sseChunks())); }
+  if (fetchMode === 'streamLen') { return Promise.resolve(sseResponse(sseChunksLen())); }
+  if (fetchMode === 'ignoresStream') {      // 端点不认 stream ⇒ 回整包 JSON（页面按 content-type 分流）
+    return Promise.resolve({
+      ok: true,
+      headers: { get: function () { return 'application/json'; } },
+      json: function () { return Promise.resolve({ choices: [{ message: { content: '整包也能答' } }] }); }
+    });
   }
   return Promise.resolve({
     ok: true,
@@ -338,6 +386,44 @@ function reset() {
 
   fetchMode = 'ok';
   delete global.location;
+
+  console.log('\n=== 12. ★ 流式（2026-09-23 续七十三）===');
+
+  // 12.1 收到 SSE ⇒ onDelta 逐段喂；半行 / 心跳 / 坏行都绕过，最终文本 = 各段拼起来
+  reset();
+  fetchMode = 'stream';
+  var deltas = [], doneInfo = null;
+  var ansS = await askBackend('你是谁', {
+    onDelta: function (piece, soFar) { deltas.push(piece); },
+    onDone: function (info) { doneInfo = info; }
+  });
+  ok(ansS === '好呀，我是分身。', '★ 流式文本正确（半行拼回 / 心跳跳过 / 坏行跳过）', '实际：' + ansS);
+  ok(deltas.join('') === ansS, 'onDelta 的增量拼起来 = 最终文本', JSON.stringify(deltas));
+  ok(deltas.length >= 2, '确实是**逐段**喂进来的（不是一次性）', '段数 ' + deltas.length);
+  ok(lastInit.body.indexOf('"stream":true') >= 0, '★ 要流式时请求体里 stream = true', lastInit.body);
+  ok(doneInfo && doneInfo.truncated === false, 'onDone 报 truncated = false（正常收尾）', JSON.stringify(doneInfo));
+
+  // 12.2 finish_reason = length ⇒ onDone 报「被截断」（页面据此如实提醒访客）
+  reset();
+  fetchMode = 'streamLen';
+  var doneInfo2 = null;
+  var ansS2 = await askBackend('q', { onDone: function (i) { doneInfo2 = i; } });
+  ok(ansS2 === '长话被截', '截断不影响已经收到的字（不吞已显示的内容）', '实际：' + ansS2);
+  ok(doneInfo2 && doneInfo2.truncated === true, '★ onDone 报 truncated = true', JSON.stringify(doneInfo2));
+
+  // 12.3 端点不认 stream（回整包 JSON）⇒ 照样能答（`?chat=` 指向任意端点时容错）
+  reset();
+  fetchMode = 'ignoresStream';
+  var ansS3 = await askBackend('q', { onDelta: function () {} });
+  ok(ansS3 === '整包也能答', '★ 不认 stream 的端点照常工作（按 content-type 分流）', '实际：' + ansS3);
+
+  // 12.4 不传 opts ⇒ 仍然是非流式（老行为逐字不变 —— 上面那些老用例靠的就是这条）
+  reset();
+  fetchMode = 'ok';
+  await askBackend('q');
+  ok(lastInit.body.indexOf('"stream":false') >= 0, '★ 不给 onDelta ⇒ stream = false（与以前一致）', lastInit.body);
+
+  fetchMode = 'ok';
 
   console.log('\n知识库那侧不受影响；用例 %d / 失败 %d', pass + fail, fail);
   process.exit(fail ? 1 : 0);

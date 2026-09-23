@@ -381,13 +381,82 @@ function remember(question, answer) {
   if (chatHistory.length > cap) chatHistory = chatHistory.slice(-cap);
 }
 
-// 落回知识库时补一个小标记：如实说明这句不是微调分身答的，不骗访客。
-function addOfflineNote() {
+// 气泡下面的小字条（复用 `.msg-note` 的样式，**不新增颜色 / 字号**）。
+// ⚠️ 2026-09-23（续七十三）：它原来只服务「离线版回答」一件事，现在「回答被截断」也要用它
+//    ⇒ 抽成一个通用的 addNote()，addOfflineNote() 变成它的薄封装（调用点一个字都不用改）。
+function addNote(text) {
   var el = document.createElement('div');
   el.className = 'msg-note';
-  el.textContent = '离线版回答';
+  el.textContent = text;
   messagesEl.appendChild(el);
   messagesEl.scrollTop = messagesEl.scrollHeight;
+  return el;
+}
+
+// 落回知识库时补一个小标记：如实说明这句不是微调分身答的，不骗访客。
+function addOfflineNote() {
+  return addNote('离线版回答');
+}
+
+/* 读一条**流式**回答（SSE，2026-09-23 续七十三）。返回 `{ text, truncated }`。
+   ⚠️ 为什么要它：非流式时访客盯着「正在输入…」干等 1~3 秒（本机推理模型 5 秒以上）才看到
+      整段话一次性冒出来，体感像卡住。流式让字**边生成边出现** —— 同样的话、同样的钱，
+      感受完全不同（输出 token 数一模一样，只是分批发）。
+   ⚠️ 四条容错（都是真会遇到的）：
+      ① SSE 里混着心跳 / 注释 / 空行 ⇒ **只认 `data:` 行**，其余一律跳过
+      ② 半行 —— chunk 边界会把一行劈成两半 ⇒ 留到下一轮再拼，**绝不半行解析**
+      ③ 坏行（JSON 解析失败）⇒ 跳过这一行，不打断整条流
+      ④ 上游中途断了 ⇒ **已经收到的部分照常返回**（不把访客已经看过的字吞掉） */
+function readAnswerStream(res, onDelta, arm, done) {
+  var out = '';
+  var truncated = false;
+
+  function handleLine(line) {
+    line = String(line).trim();
+    if (line.indexOf('data:') !== 0) return;               // 空行 / 心跳 / 注释都跳过
+    var payload = line.slice(5).trim();
+    if (!payload || payload === '[DONE]') return;
+    var d;
+    try { d = JSON.parse(payload); } catch (e) { return; }  // 坏行跳过，不断流
+    var c = d && d.choices && d.choices[0];
+    if (!c) return;
+    if (c.finish_reason === 'length') truncated = true;    // 撞了输出上限（页面据此如实提醒）
+    var piece = c.delta && c.delta.content ? String(c.delta.content) : '';
+    if (!piece) return;
+    out += piece;
+    if (onDelta) onDelta(piece, out);
+    if (arm) arm();          // 有字在流 ⇒ 把超时往后推（否则长回答会被总计时砍断）
+  }
+
+  function finish() {
+    if (done) done();
+    if (!out.trim()) throw new Error('空回复');
+    return { text: out.trim(), truncated: truncated };
+  }
+
+  var reader = null;
+  try { if (res.body && res.body.getReader) reader = res.body.getReader(); } catch (e) { reader = null; }
+  if (!reader || typeof TextDecoder === 'undefined') {
+    // 拿不到可读流（老环境 / 测试里的假响应）⇒ 退化成「整包读下来再按行解析」，结果一样
+    return res.text().then(function (all) {
+      String(all).split(/\r?\n/).forEach(handleLine);
+      return finish();
+    });
+  }
+
+  var dec = new TextDecoder('utf-8');
+  var buf = '';
+  function pump() {
+    return reader.read().then(function (r) {
+      if (r.done) { if (buf) handleLine(buf); return finish(); }
+      buf += dec.decode(r.value, { stream: true });
+      var lines = buf.split('\n');
+      buf = lines.pop();            // 最后一段可能是半行，留给下一轮
+      lines.forEach(handleLine);
+      return pump();
+    });
+  }
+  return pump();
 }
 
 // 打**一个**后端。成功返回文本；**任何**异常都返回 null（由调用方决定要不要试下一个）。
@@ -397,28 +466,51 @@ function addOfflineNote() {
 //    ③ 服务没起 / 隧道断了 —— 连接直接失败
 //    这三种在这里**表现完全一样**：返回 null。分不出原因是有意的 ——
 //    访客不该看到技术细节，而主人看「离线版回答」出现得频繁就知道要去查。
-function requestOnce(backend, msgs) {
+//
+// ⚠️ 2026-09-23（续七十三）加流式：**传了 `opts.onDelta` 才发 `stream: true`**，
+//    收到 SSE 就边收边喂 `onDelta(增量, 累计)`；`opts.onDone({truncated})` 在成功收尾时
+//    告诉你「这次是不是撞了输出上限」。**不传 opts ⇒ 与以前逐字一致**（非流式、整包 JSON），
+//    这样 `test-chat-backend.js` 里那些老用例和「?chat= 指向的任意端点」都不受影响。
+function requestOnce(backend, msgs, opts) {
+  opts = opts || {};
+  var onDelta = opts.onDelta || null;
   var ctrl = window.AbortController ? new AbortController() : null;
-  var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, CHAT_BACKEND.timeoutMs);
+  var timer = null;
+  // 每次重置超时：流式下它算的是「**多久没动静**」，不是总时长 ——
+  // 否则答到一半（20 秒到点）会被自己掐断，而那时上游明明还在好好说话。
+  function arm() {
+    clearTimeout(timer);
+    timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, CHAT_BACKEND.timeoutMs);
+  }
+  arm();
 
   var init = {
     method: 'POST',
     // 真实服务不校验 key（WeClone 的 api_service、ollama、我们自己的 server.js 都不校验），
     // 但 OpenAI 客户端习惯带一个，填什么都行
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer none' },
-    body: JSON.stringify({ model: backend.model, messages: msgs, stream: false })
+    body: JSON.stringify({ model: backend.model, messages: msgs, stream: !!onDelta })
   };
   if (ctrl) init.signal = ctrl.signal;
 
   return fetch(backend.url, init).then(function (res) {
-    clearTimeout(timer);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    return res.json();
-  }).then(function (data) {
-    var c = data && data.choices && data.choices[0] && data.choices[0].message;
-    var text = c && c.content;
-    if (!text || !String(text).trim()) throw new Error('空回复');
-    return String(text).trim();
+    if (!res.ok) { clearTimeout(timer); throw new Error('HTTP ' + res.status); }
+    var ct = '';
+    try { ct = res.headers && res.headers.get ? String(res.headers.get('content-type') || '') : ''; } catch (e) { ct = ''; }
+    if (ct.indexOf('event-stream') < 0) {
+      // 这个端点不认 `stream`（回了整包 JSON）⇒ 走老路，照样能答
+      return res.json().then(function (data) {
+        clearTimeout(timer);
+        var c = data && data.choices && data.choices[0];
+        var text = c && c.message && c.message.content;
+        if (!text || !String(text).trim()) throw new Error('空回复');
+        return { text: String(text).trim(), truncated: c.finish_reason === 'length' };
+      });
+    }
+    return readAnswerStream(res, onDelta, arm, function () { clearTimeout(timer); });
+  }).then(function (r) {
+    if (opts.onDone) opts.onDone({ truncated: !!r.truncated });
+    return r.text;
   }).catch(function () {
     clearTimeout(timer);
     return null;
@@ -432,7 +524,9 @@ function requestOnce(backend, msgs) {
 //    （`file://` 页面发的 Origin 是 `null`，不在 ollama 的默认白名单里）。
 //    以前"选中一个、失败就落回知识库"的写法，会让**明明可用的云端永远轮不到** ← 这个坑真踩了。
 //    代价是极端情况多等一轮；但本地服务失败通常是**即时**的（403 / 连接拒绝），不会真等满超时。
-function askBackend(question) {
+// ⚠️ `opts`（可选，2026-09-23 续七十三）：`{ onDelta(增量, 累计), onDone({truncated}) }` ——
+//    给了 onDelta 才会走流式；不给就是逐字与以前一致的非流式。
+function askBackend(question, opts) {
   var list = backendCandidates();
   if (!list.length || !window.fetch) return Promise.resolve(null);
 
@@ -442,7 +536,7 @@ function askBackend(question) {
 
   function attempt(i) {
     if (i >= list.length) return Promise.resolve(null);
-    return requestOnce(list[i], msgs).then(function (text) {
+    return requestOnce(list[i], msgs, opts).then(function (text) {
       return text !== null ? text : attempt(i + 1);
     });
   }
@@ -487,6 +581,10 @@ function memoryRead() {
     if (!raw) return null;
     var d = JSON.parse(raw);
     if (!d || d.v !== 1 || !Array.isArray(d.log) || !d.log.length) return null;
+    /* ⚠️ 读回来也裁一遍（2026-09-23 续七十三）：写侧本来就裁（memoryWrite 里 `slice(-MEM_MAX)`），
+       但 localStorage 是**访客按 F12 就能改的**，也可能是更早版本留下的内容 ——
+       读侧不裁，等于这条上限只在「写」的那一半成立。 */
+    if (d.log.length > MEM_MAX) d.log = d.log.slice(-MEM_MAX);
     return d;
   } catch (e) {
     return null;
@@ -563,10 +661,22 @@ function ask(question) {
 
   var typing = addMessage('正在输入…', 'bot typing'); // 3. 打字指示
 
-  function land(answer, fromFallback) {   // 4. 收尾：摘掉打字指示、上屏、按需补标记
-    typing.remove();
-    addMessage(answer, 'bot');
+  /* 4. 收尾：摘掉打字指示、上屏、按需补标记
+     ⚠️ 2026-09-23（续七十三）加流式 ⇒ 多了两个参数：
+        · `note`     —— 额外的小字条（目前只有「被截断」用得上），没有就传 ''
+        · `streamEl` —— 流式时**边收边写**的那个气泡；没有它（非流式 / 直接落回知识库）就新加一条
+        ⚠️ 流式**用同一个气泡收口**（覆盖原子内容），而不是再插一条 ——
+           否则界面上会变成「半句 + 整句」两条，读起来像分身说了两遍。 */
+  function land(answer, fromFallback, note, streamEl) {
+    if (streamEl) {
+      streamEl.textContent = answer;      // 用最终文本收口（尾随空白已在解析层 trim 过）
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    } else {
+      addMessage(answer, 'bot');
+    }
+    if (typing.parentNode) typing.remove();   // 流式时它早被摘掉了，这里只是防重复
     if (fromFallback) addOfflineNote();
+    if (note) addNote(note);
     /* 落盘放在**这里**而不是 remember() 里，因为两件事要分开：
        ① 无论这条是分身答的还是知识库兜底的，访客都看见了 ⇒ 界面恢复时要一样铺回去（chatLog）
        ② 而 chatHistory（要带回模型的那几轮）只由 remember() 记
@@ -583,12 +693,26 @@ function ask(question) {
   }
 
   // 配了后端 ⇒ 先问微调分身；只要它没给出有效回答，就落回知识库并如实标出来
-  askBackend(question).then(function (answer) {
+  // ⚠️ 流式（续七十三）：第一个字到了就把它写进一个**真气泡**、随收随写；
+  //    到收尾时若一个候选都没成 ⇒ 把那半句撤掉（留半截话比没有更糊涂），照老样子落回知识库。
+  var streamEl = null;
+  var truncated = false;
+
+  askBackend(question, {
+    onDelta: function (piece, soFar) {
+      if (!streamEl) { typing.remove(); streamEl = addMessage('', 'bot'); }
+      streamEl.textContent = soFar;
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    },
+    onDone: function (info) { truncated = !!(info && info.truncated); }
+  }).then(function (answer) {
     if (answer) {
       remember(question, answer);
-      land(answer, false);
+      // 撞了输出上限就如实说一句 —— 而不是让访客对着一句没说完的话猜
+      land(answer, false, truncated ? '这条撞到输出上限了、被截断 —— 说句「继续」我就接着讲' : '', streamEl);
     } else {
-      land(matchAnswer(question), true);
+      if (streamEl) { streamEl.remove(); streamEl = null; }
+      land(matchAnswer(question), true, '', null);
     }
   });
 }

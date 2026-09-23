@@ -4,6 +4,8 @@
  *
  *   ① 托管静态页面            GET /  /style.css  /script.js  /images/…
  *   ② 转发聊天请求            POST /api/chat  →  DeepSeek 官方 API
+ *   ③ 流式透传（2026-09-23 加） 页面要流式时（请求里带 `stream: true`）把上游的 SSE
+ *                              **原样转发**，不让它在中转站被攒成一整包
  *
  * ── 为什么要有这一层（而不是让页面直接调 DeepSeek）────────────────────
  *   页面是**纯静态公开**的。任何写进 script.js 的 API key，任何人按 F12
@@ -45,6 +47,7 @@
 var http = require('http');
 var fs = require('fs');
 var path = require('path');
+var Readable = require('stream').Readable;   // 流式透传用（把 fetch 的 web 流接到 node 的响应上）
 
 /* ─────────────────────────────────────────────────────────────────────
    从同目录的 `.env` 读配置（零依赖，十几行）。
@@ -199,6 +202,17 @@ setInterval(function () {
   });
 }, 300000).unref();
 
+/* ── 运行计数（2026-09-23 续七十三）────────────────────────────────────
+   为什么要有它：这一层出问题时，原来只能去翻容器日志里的 console。加一组**进程内**计数，
+   访问 `/healthz` 就能一眼分清是哪种情况 ——
+     · `rateLimited` 涨得快  ⇒ 有人在刷（或被自己反复刷新触发了）
+     · `upstreamErrors` 有值 ⇒ 上游在报错 / 超时（去看日志里的 [chat] 那几行）
+     · `balanceBlocks` 有值  ⇒ 余额护栏在拦（该充值了）
+     · `chat` 与 `streams`   ⇒ 到底有多少人在用、用没用流式
+   ⚠️ 与限速器一样**只在进程内存里**：重启清零、多实例不共享 —— 单实例部署够用；
+      要看历史趋势得接外部监控，那是另一件事。 */
+var stats = { since: Date.now(), chat: 0, streams: 0, rateLimited: 0, upstreamErrors: 0, balanceBlocks: 0 };
+
 /* ── 余额护栏（V2.7 续六十九，用户 2026-09-23 定）──────────────────────
    为什么要有它：页面对公网开放之后，**key 不能设额度上限**（DeepSeek 没有这个能力），
    能兜住的只有两件事 —— 按 IP 限速（上面）与**余额本身**。所以再加一道：
@@ -277,6 +291,7 @@ async function handleChat(req, res) {
   var ip = (req.socket.remoteAddress || '?');
 
   if (rateLimited(ip)) {
+    stats.rateLimited++;
     return fail(res, 429, '问得有点快，歇一分钟再来。');
   }
 
@@ -295,6 +310,7 @@ async function handleChat(req, res) {
         也别为它花钱。 */
   await refreshBalance(false);
   if (balanceBlocked()) {
+    stats.balanceBlocks++;
     return fail(res, 503, '分身暂时下线：账户余额低于 ' + BALANCE_MIN + ' ' + (balance.currency || '') +
       '（页面会自动用本地知识库顶一会儿）');
   }
@@ -315,10 +331,14 @@ async function handleChat(req, res) {
     return fail(res, 400, '最后一条必须是用户的提问');
   }
 
+  /* 客户端要不要流式（页面传了 onDelta 才会带 `stream: true`）。
+     ⚠️ 严格 `=== true`：别的值一律按非流式 —— 免得有人随手传个字符串就改变响应形态。 */
+  var wantStream = payload.stream === true;
+
   var payload = {
     model: MODEL,
     messages: [{ role: 'system', content: PERSONA }].concat(history),
-    stream: false,
+    stream: wantStream,
     max_tokens: MAX_OUT,        // 限长 = 限制有人拿它写长文烧额度
     temperature: 0.8,
     /* ⚠️ **关掉 thinking**（官方文档：默认开启、档位 high）。三条理由都是实测/文档来的：
@@ -336,6 +356,8 @@ async function handleChat(req, res) {
   var ctrl = new AbortController();
   var timer = setTimeout(function () { ctrl.abort(); }, 30000);
 
+  stats.chat++;      // 记账：真正会打到上游（会花钱）的次数
+
   try {
     var r = await fetch(UPSTREAM, {
       method: 'POST',
@@ -343,17 +365,54 @@ async function handleChat(req, res) {
       body: body,
       signal: ctrl.signal
     });
-    var text = await r.text();
-    clearTimeout(timer);
 
     if (!r.ok) {
-      console.error('[chat] 上游 ' + r.status + '：' + text.slice(0, 300));
+      var errText = await r.text();
+      clearTimeout(timer);
+      stats.upstreamErrors++;
+      console.error('[chat] 上游 ' + r.status + '：' + errText.slice(0, 300));
       return fail(res, 502, '上游返回 ' + r.status);
     }
+
+    var upType = '';
+    try { upType = String(r.headers.get('content-type') || ''); } catch (e) { upType = ''; }
+
+    /* 流式：上游回了 SSE 就**原样透传**（不缓冲整包）—— 访客那边的字才是边生成边出现的。
+       两种情况下仍按整包走：
+         ① 客户端没要流式（`wantStream` 假）
+         ② 上游没回 `event-stream` —— 有的兼容端点会忽略 `stream` 参数、回整包 JSON；
+            页面按 content-type 分流，两种都能读，所以这里不需要额外处理。 */
+    if (wantStream && upType.indexOf('event-stream') >= 0) {
+      stats.streams++;
+      res.writeHead(200, {
+        'Content-Type': 'text/event-stream; charset=utf-8',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'X-Accel-Buffering': 'no',      // 别让反向代理把流攒起来再一次性发（那流式就白做了）
+        'Access-Control-Allow-Origin': ALLOW_ORIGIN
+      });
+      var rs = Readable.fromWeb(r.body);
+      rs.on('error', function (e) {
+        stats.upstreamErrors++;
+        console.error('[chat] 流中断：' + (e && e.message));
+        try { res.end(); } catch (e2) { /* 已经断了，收尾失败也无所谓 */ }
+      });
+      /* 访客把页面关了 / 断线 ⇒ 别再往上游要了（那是一条还在计费的连接）。 */
+      res.on('close', function () {
+        clearTimeout(timer);
+        if (!res.writableEnded) { try { ctrl.abort(); } catch (e) {} }
+        try { rs.destroy(); } catch (e) {}
+      });
+      return rs.pipe(res);
+    }
+
+    var text = await r.text();
+    clearTimeout(timer);
     // 上游就是 OpenAI 兼容格式，原样透传（页面只读 choices[0].message.content）
     send(res, 200, 'application/json; charset=utf-8', text);
   } catch (e) {
     clearTimeout(timer);
+    stats.upstreamErrors++;
     console.error('[chat] 转发失败：' + (e && e.message));
     fail(res, 504, '上游超时或不可达');
   }
@@ -376,6 +435,13 @@ var server = http.createServer(function (req, res) {
         min: BALANCE_MIN,
         blocked: balanceBlocked(),
         checkedAt: balance.checkedAt ? new Date(balance.checkedAt).toISOString() : null
+      },
+      /* 运行计数（说明见 stats 那块的注释）：一眼分清「被刷 / 上游错 / 余额拦」 */
+      stats: {
+        uptimeSec: Math.round((Date.now() - stats.since) / 1000),
+        chat: stats.chat, streams: stats.streams,
+        rateLimited: stats.rateLimited, upstreamErrors: stats.upstreamErrors,
+        balanceBlocks: stats.balanceBlocks
       }
     }));
   }
@@ -406,6 +472,7 @@ server.listen(PORT, function () {
   console.log('  限速        : 每 IP 每分钟 ' + RATE_PER_MIN + ' 次');
   console.log('  输出上限    : ' + MAX_OUT + ' tokens');
   console.log('  思考模式    : ' + THINKING + (THINKING === 'enabled' && EFFORT ? '（effort=' + EFFORT + '）' : ''));
+  console.log('  流式        : 支持（页面要 stream 就原样转发上游的 SSE）');
   console.log('  余额护栏    : 低于 ' + BALANCE_MIN + ' 就不接活（查不到不拦）');
   // 启动时先查一次余额（不阻塞、失败也不影响启动）
   refreshBalance(true).then(function (b) {

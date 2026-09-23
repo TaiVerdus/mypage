@@ -115,6 +115,17 @@ ok(capped.log.length === 40, '60 条被截到 40 条（MEM_MAX）', String(cappe
 ok(capped.log[0].text === '第21条', '留的是**最后** 40 条（首条应为第21条）', capped.log[0].text);
 ok(capped.log[39].text === '第60条', '最后一条是最新的那条', capped.log[39].text);
 
+/* ⚠️ 读侧也要裁（2026-09-23 续七十三）：写侧裁过不等于读侧安全 ——
+   localStorage 是**访客按 F12 就能改的**，也可能是更早版本留下的内容。 */
+var rawStore = memoryStore();
+rawStore.setItem(MEM_KEY, JSON.stringify({
+  v: 1, at: Date.now(), log: many.concat(many), ctx: []
+}));
+var readBack = memoryRead();
+ok(readBack.log.length === 40, '★ 手工塞进 120 条（绕过写侧）⇒ 读出来仍被裁到 40 条',
+  String(readBack.log.length));
+ok(readBack.log[39].text === '第60条', '读侧留的也是**最近**的那条', readBack.log[39].text);
+
 console.log('\n=== 5. ★ 上下文只收 user/assistant 的纯文本 ===');
 memoryWrite(
   [{ who: 'user', text: 'x' }],

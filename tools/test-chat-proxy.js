@@ -63,6 +63,22 @@ var up = http.createServer(function (req, res) {
     var parsed = null;
     try { parsed = JSON.parse(raw); } catch (e) {}
     got.push({ url: req.url, auth: req.headers.authorization, body: parsed, raw: raw });
+
+    /* 要流式就回 SSE（真上游就是这形态：一包一包发）。
+       ⚠️ 分两包、中间隔 30ms，且**第 1 包故意停在一行中间** ——
+          这样才验得出代理是「原样透传」而不是「攒成一整包再发」。 */
+    if (parsed && parsed.stream === true) {
+      res.writeHead(200, { 'Content-Type': 'text/event-stream; charset=utf-8' });
+      res.write('data: ' + JSON.stringify({ choices: [{ delta: { role: 'assistant', content: '' } }] }) + '\n\n');
+      res.write('data: ' + JSON.stringify({ choices: [{ delta: { content: '好呀，' } }] }));
+      setTimeout(function () {
+        res.write('\n\ndata: ' + JSON.stringify({ choices: [{ delta: { content: '我是分身。' } }] }) + '\n\n');
+        res.write('data: ' + JSON.stringify({ choices: [{ delta: {}, finish_reason: 'stop' }] }) + '\n\ndata: [DONE]\n\n');
+        res.end();
+      }, 30);
+      return;
+    }
+
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ choices: [{ message: { role: 'assistant', content: '好呀，我是分身。' } }] }));
   });
@@ -154,6 +170,8 @@ function startProxy(port, ratePerMin, extraEnv) {
   ok(hz.ok === true, 'healthz 通');
   ok(hz.keyConfigured === true, 'key 从环境变量读到了');
   ok(hz.model === 'deepseek-flash', '默认模型是 deepseek-flash', '实际 ' + hz.model);
+  ok(hz.stats && typeof hz.stats.chat === 'number', '/healthz 报出运行计数（能一眼分清被刷 / 上游错 / 余额拦）',
+    JSON.stringify(hz.stats));
 
   console.log('\n=== 2. 静态托管：白名单制 —— 该给的给，名单外一律不给 ===');
   var r1 = await fetch('http://127.0.0.1:' + PROXY_PORT + '/');
@@ -244,6 +262,9 @@ function startProxy(port, ratePerMin, extraEnv) {
   ok(codes.slice(0, 3).every(function (c) { return c === 200; }), '前 3 次放行', JSON.stringify(codes));
   ok(blocked >= 2, '超出部分返回 429', JSON.stringify(codes));
   ok(got.length === 3, '被拦下的请求**没有**打到上游（不烧额度）', '上游实际收到 ' + got.length + ' 次');
+  var hzRate = await (await fetch('http://127.0.0.1:' + RATE_PORT + '/healthz')).json();
+  ok(hzRate.stats && hzRate.stats.rateLimited >= 2, '★ /healthz 数得出被限速拦过几次（运维不用翻日志）',
+    JSON.stringify(hzRate.stats));
 
   console.log('\n=== 6. 坏请求不能让服务倒 ===');
   var bad = await fetch('http://127.0.0.1:' + PROXY_PORT + '/api/chat', {
@@ -367,6 +388,36 @@ function startProxy(port, ratePerMin, extraEnv) {
   ok(sentBody && sentBody.body.reasoning_effort === undefined,
     '② 没开 thinking 就不发 reasoning_effort（官方文档：那个参数只在思考模式有意义）',
     sentBody ? String(sentBody.body.reasoning_effort) : '—');
+
+  console.log('\n=== 11. ★ 流式透传（2026-09-23 续七十三）===');
+  // 11.1 直接打代理：响应必须是 event-stream，且 SSE 原样穿过（连 [DONE] 都在）
+  var rawSse = await fetch('http://127.0.0.1:' + PROXY_PORT + '/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages: [{ role: 'user', content: '你是谁？' }], stream: true })
+  });
+  var sseCt = rawSse.headers.get('content-type') || '';
+  ok(sseCt.indexOf('text/event-stream') === 0, '★ 要流式时代理回 text/event-stream', sseCt);
+  var sseText = await rawSse.text();
+  ok(sseText.indexOf('data: [DONE]') >= 0, 'SSE 的 [DONE] 原样透传（没被加工）');
+  ok(sseText.indexOf('我是分身') > 0, '回答内容确实穿过来了', JSON.stringify(sseText).slice(0, 100));
+
+  // 11.2 用页面**真实的** askBackend + onDelta 再走一遍（跨网络包拼接）
+  got.length = 0;
+  var deltas2 = [];
+  var ansSse = await api.askBackend('你是谁？', { onDelta: function (piece) { deltas2.push(piece); } });
+  ok(ansSse === '好呀，我是分身。', '★ 页面代码经代理拿到流式回答（跨包拼回完整文本）', '实际：' + ansSse);
+  ok(deltas2.length >= 2, 'onDelta 被逐段喂到（不是一次性给完）', '段数 ' + deltas2.length);
+  var upS = got.filter(function (g) { return g.url === '/chat/completions'; })[0];
+  ok(!!(upS && upS.body && upS.body.stream === true), '★ 上游收到的 stream = true（页面要流式，代理就透传）',
+    JSON.stringify(upS && upS.body && upS.body.stream));
+  ok(!!(upS && upS.body.messages[0].role === 'system' &&
+    upS.body.messages[0].content.indexOf('数字分身') >= 0),
+    '★ 流式这条路上人设照样由服务端注入（流式没开后门）');
+
+  // 11.3 运行计数：这一节的流式请求也该被数进去
+  var hzS = await (await fetch('http://127.0.0.1:' + PROXY_PORT + '/healthz')).json();
+  ok(hzS.stats && hzS.stats.streams >= 1, '★ /healthz 数得出流式请求数', JSON.stringify(hzS.stats));
 
   console.log('\n用例 %d / 失败 %d', pass + fail, fail);
   proxy.kill();
