@@ -150,6 +150,7 @@ var CHAT_BACKEND = {
         个人信息以「他自己说过」为准，不替他扩写。
      ⚠️ 以后换成 WeClone 微调出来的模型时，**这段必须与微调时的 `default_system` 一致**
         （WeClone 官方明确要求），否则微调出来的语气会被这段前提词盖掉。 */
+  /* persona:begin —— 生成物，别手改（源 data/persona.json，生成器 tools/build-persona.py） */
   system: [
     '你是王释贤的数字分身，在他的个人主页上替他招呼访客。你是 AI，不是他本人——被问到就直说。',
     '称他为「释贤」，自称「我」。语气轻松、简短、口语化，像聊天，别用书面腔，也别用 emoji。',
@@ -166,14 +167,13 @@ var CHAT_BACKEND = {
     '必须遵守：',
     '· **三个人称别搞混**：你是分身（不是他本人）、访客是来看页面的人（也不是他）、',
     '  你和访客口中的「他 / 释贤」才是本人 —— 别把访客当成他，也别说「等你告诉我」这类话',
-    /* V2.7 续六十八：记忆上了之后补这条。⚠️ 必须与 server.js 的 PERSONA **逐行一致**
-       （`tools/test-chat-proxy.js` 第 7 节会比对），改一处就得改两处。 */
     '· 上面可能带你之前和这位访客聊过的几轮（存在他自己的浏览器里）；有就顺着接，没有就当作第一次见面，别假装记得没发生的事',
     '· 不知道就直说不知道，**绝不要编造**关于他的任何事——他没告诉过我的，我不替他说',
     '· 不报私人信息（住址、电话、具体年龄这类）；联系方式让他自己给',
     '· 回答尽量短，两三句就够',
     '· **不要用 markdown**（这个聊天窗不渲染它，星号和井号会原样显示出来）',
   ].join('\n'),
+  /* persona:end */
 
   /* ⚠️ 20000 而不是 8000：deepseek-r1 是推理模型，本身要 2.5~6.2 秒，冷启动还要 9~15 秒。
      8000 会让它偶尔来不及答完就落回知识库 —— 表现成「有时答有时不答」，比慢更糟。
@@ -230,72 +230,69 @@ if (typeof location !== 'undefined' && location.search) {
   }
 }
 
+/* kb:begin —— 生成物，别手改（条目来自 data/persona.json 的 about） */
 var KNOWLEDGE = [
+  /* 他在学什么 */
   {
-    keywords: ['study', 'studying', 'course', 'calculus', 'linear', 'algebra', 'program', 'programming', 'major', 'class', 'classes',
-      // 中文关键词：整站中文化那次漏了这些（关键词不是界面文字，没被扫到），
-      // 导致三个中文快捷按钮一个都匹配不上、全落兜底语 ⇒ 这里补齐
-      '学什么', '在学', '学的', '课程', '专业', '微积分', '线性代数', '编程'],
+    keywords: ['study','studying','course','calculus','linear','algebra','program','programming','major',
+      'class','classes','学什么','在学','学的','课程','专业','微积分','线性代数','编程'],
     answer: '释贤现在重心在三件事上：微积分、线性代数和计算机编程。数学加编程——这是脑机接口方向的基本功。'
   },
+  /* 他的方向 / 为什么选脑机接口 */
   {
-    keywords: ['bci', 'brain', 'major', 'identity', 'focus', 'why', 'direction', 'interface',
-      '脑机接口', '方向', '为什么选', 'bci 是什么'],
+    keywords: ['bci','brain','major','identity','focus','why','direction','interface','脑机接口','方向','为什么选',
+      'bci 是什么'],
     answer: '释贤是脑机接口方向的学生。为什么选这个方向？说实话他没告诉过我细节，所以我不编——你自己问他。'
   },
+  /* 他的爱好 / 平时怎么放松 */
   {
-    keywords: ['interest', 'hobby', 'hobbies', 'drum', 'drums', 'calligraphy', 'basketball', 'fun', 'free time', 'do for fun',
-      '爱好', '兴趣爱好', '玩什么', '平时玩', '喜欢什么', '打鼓', '书法', '篮球',
-      // V2.7 续六十八：快捷按钮「他生气的时候什么样？」换成「他平时怎么放松？」
-      // ⇒ 补这两个词。答的仍是同一条（已有证据的爱好），没有新增任何事实。
-      '放松', '怎么放松'],
+    keywords: ['interest','hobby','hobbies','drum','drums','calligraphy','basketball','fun','free time',
+      'do for fun','爱好','兴趣爱好','玩什么','平时玩','喜欢什么','打鼓','书法','篮球','放松','怎么放松'],
     answer: '他课余挺满的：听音乐、打鼓、练书法、打篮球。安静的吵闹的都有——打鼓和篮球是吵的，书法是静的。'
   },
+  /* 他听什么音乐 */
   {
-    keywords: ['music', 'album', 'albums', 'song', 'songs', 'listen', 'listening', 'artist', 'singer', 'favourite', 'favorite', 'david tao', 'joker xue', 'justin bieber', 'bieber',
-      '音乐', '歌', '专辑', '听什么', '歌手', '陶喆', '薛之谦'],
+    keywords: ['music','album','albums','song','songs','listen','listening','artist','singer','favourite',
+      'favorite','david tao','joker xue','justin bieber','bieber','音乐','歌','专辑','听什么','歌手','陶喆','薛之谦'],
     answer: '他常回去听的三位：陶喆、薛之谦、Justin Bieber。下面那栏「每日推荐」是他每天挑的，有时一两首、有时三首。'
   },
+  /* 他是什么样的人（性格） */
   {
-    keywords: ['enfj', 'personality', 'person', 'what kind', 'mbti',
-      '什么样的人', '性格', '内向', '外向'],
+    keywords: ['enfj','personality','person','what kind','mbti','什么样的人','性格','内向','外向'],
     answer: '释贤是 ENFJ。除了这个标签，我不想替他多说——想真正认识他，直接找他聊。'
   },
+  /* 他跟 AI 前沿 */
   {
-    keywords: ['ai', 'frontier', 'tech', 'technology', 'future', 'follow', 'research',
-      '人工智能', '前沿', '技术', '研究'],
+    keywords: ['ai','frontier','tech','technology','future','follow','research','人工智能','前沿','技术','研究'],
     answer: '释贤一直跟着 AI 的研究走，尤其是它和脑机接口交叉的地方。他自己的看法比我能说的清楚多了——直接问他。'
   },
+  /* 你是谁（自我介绍） */
   {
-    keywords: ['who are you', 'name', 'intro', 'wang shixian', 'shixian', 'hello', 'hi', 'hey',
-      '你是谁', '你叫什么', '叫什么', '名字', '自我介绍', '你好', '嗨'],
+    keywords: ['who are you','name','intro','wang shixian','shixian','hello','hi','hey','你是谁','你叫什么','叫什么',
+      '名字','自我介绍','你好','嗨'],
     answer: '嗨！我是王释贤的数字分身，他不在的时候替他招呼一下访客。基本情况：ENFJ、脑机接口方向。随便问。'
   },
-
+  /* 他多大（⚠️ 答案刻意不写具体年龄：那只有本人能确认，没说他就不编） */
   {
-    // 新增（V2.7 续四十三）：用户要求在快捷问题上加「你今年多大？」
-    // ⚠️ 答案**不写具体年龄** —— 年龄是「只有本人能确认」的事实，没问到他之前不编。
-    //    写成「大一在读」（页面上已有的公开事实）+ 直说不知道具体岁数，符合分身
-    //    「只说告诉过我的事，不编」的口径（那句兜底语就是这么写的）。
-    keywords: ['多大', '年龄', '几岁', '多少岁', 'how old', 'age'],
+    keywords: ['多大','年龄','几岁','多少岁','how old','age'],
     answer: '他大一在读。具体多大他没告诉过我——我不替他编，你想知道直接问他。'
   },
-
+  /* 你有不知道的事吗（它的边界） */
   {
-    // 新增（V2.7 续六十八，用户 2026-09-23 定）：快捷按钮「你有不知道的事吗？」原来落兜底语。
-    // ⚠️ 这条答的是**它自己的边界**，不是关于释贤的事实 —— 用户原话是「照实说」。
-    // ⚠️ 关键词都带「不」字，避免把普通的提问（如「他住哪」）吸过来。
-    keywords: ['不知道的事', '不知道的', '你不知道', '有没有不知道', '什么不知道', '不知道什么', '不懂的'],
+    keywords: ['不知道的事','不知道的','你不知道','有没有不知道','什么不知道','不知道什么','不懂的'],
     answer: '有，而且挺多。他没告诉过我的，我就直说不知道——这是我的规矩，不是偷懒。'
-  }
+  },
 ];
+/* kb:end */
 
 var FALLBACK = '这个我不知道——去问本人吧。我只说告诉过我的事，不编。'
 
 var messagesEl = document.getElementById('chatMessages');
 var inputEl = document.getElementById('chatInput');
 var sendBtn = document.getElementById('chatSend');
-var quickEl = document.getElementById('chatQuick');
+/* ⚠️ 原来这里还有 `quickEl`（预设问题按钮容器）—— 2026-09-23（续七十六）用户要求
+   「页面不放置任何按钮，只保留一个对话框」⇒ 那 5 个预设问题按钮连同它的样式与点击绑定一起删了。
+   引导改由下面那句开场白承担。**别再顺手加回来。** */
 
 // 生成一条消息气泡；who 为 'bot' 或 'user'
 function addMessage(text, who) {
@@ -728,12 +725,10 @@ inputEl.addEventListener('keydown', function (e) {
   }
 });
 
-// 快捷问题：点击即发送
-quickEl.querySelectorAll('.quick-btn').forEach(function (btn) {
-  btn.addEventListener('click', function () {
-    ask(btn.textContent);
-  });
-});
+// ⚠️ 这里原来是「快捷问题：点击即发送」的绑定块（`quickEl.querySelectorAll('.quick-btn')`）。
+// 2026-09-23（续七十六）随预设问题按钮一起删掉了 —— **它必须和 `var quickEl` 的声明同生共死**：
+// 只删声明会留下这行 `quickEl.query…`，页面一加载就抛 ReferenceError，后面所有交互都初始化不了。
+// （⚠️ 本轮就是这么漏过一次：`node --check` 只查语法，查不出「引用了已删的变量」。）
 
 // 开场白：分身先打招呼
 addMessage('嗨，我是释贤的数字分身！你可以问他正在学什么、是个什么样的人，或者他有什么爱好——不知道的事我会直说。', 'bot');

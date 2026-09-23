@@ -192,11 +192,11 @@
               <p>纯静态 · 无框架 · 自己的一套设计系统</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 65 条 + main 分支 2 条（V1.0 / V1.1）
+                   N = 整个 MYPAGE 仓库的全部提交 = v2 分支 66 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
               <!-- ⚠️ 这一行带提交数，由 tools/sync-version.py 自动写 ——
                    别手改数字，改完在提交前跑一次那个脚本。 -->
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 截至 2026-09-23 共 67 次提交</p>
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 · 截至 2026-09-23 共 68 次提交</p>
               <a class="item-link" href="ai-log.html">这个页面是怎么做出来的 →</a>
             </div>
             <!-- ⚠️ 这里原来是 CarbonBrain（写着「课程 / 比赛项目 · 已有可演示版本」）——
@@ -466,13 +466,10 @@
           <button class="chat-clear" id="chatClear" type="button" hidden>清空记忆</button>
         </div>
         <div class="chat-messages" id="chatMessages"></div>
-        <div class="chat-quick" id="chatQuick">
-          <button class="quick-btn">陶喆、薛之谦、Bieber他最爱谁？</button>
-          <button class="quick-btn">打鼓和书法哪个更难？</button>
-          <button class="quick-btn">脑机接口能让我用意念打字吗？</button>
-          <button class="quick-btn">他平时怎么放松？</button>
-          <button class="quick-btn">你有不知道的事吗？</button>
-        </div>
+        <!-- 预设问题按钮已全部移除（V2.7 续七十六，用户 2026-09-23 定）：
+             对话区只留「消息 + 输入框」，访客自己提问。
+             ⚠️ 别再顺手加回来 —— 用户原话是「页面不放置任何按钮，只保留一个对话框」。
+             引导改由开场白那句话承担（见 script.js 末尾）；样式与绑定也一起删了，要恢复看 git 历史。 -->
         <div class="chat-input-row">
           <input type="text" id="chatInput" placeholder="问我点什么…" maxlength="100">
           <button id="chatSend" class="btn btn--primary">发送</button>

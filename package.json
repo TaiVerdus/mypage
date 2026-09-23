@@ -6,7 +6,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node tools/test-chat-backend.js && node tools/test-chat-proxy.js && node tools/test-chat-kb.js"
+    "test": "node tools/test-chat-backend.js && node tools/test-chat-proxy.js && node tools/test-chat-kb.js && node tools/test-chat-memory.js"
   },
   "engines": {
     "node": ">=18"

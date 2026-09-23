@@ -105,7 +105,11 @@ node server.js                # 默认 8080 端口
       `/server.js` 这些挡成 404（有回归测试）
 - [ ] **在手机上开一次**：窄屏布局 + 「不要双击 index.html」那条坑
 - [ ] **`og:image` / `og:url` 换成真实绝对网址**（分享到微信时才有缩略图；现在是 TODO 注释）
-- [ ] **知识库里还有 3 个快捷按钮点了只说「我不知道」** —— 上线前最好补掉（内容要你自己给）
+- [ ] **分身的「知道什么」是否已同步**：改了 `data/persona.json` 就跑
+      `python tools/build-persona.py`；`--check` 应为 0 处需要更新
+- [ ] **已知缺口还有 3 句**（「怎么联系他？」「Jarvis + EEG 是什么？」「这个主页是谁做的？」）——
+      现在是老实答「不知道」，要补得给内容（改 `data/persona.json` 的 `about`）；
+      补完把 `tools/test-chat-kb.js` 里的 `KNOWN_GAP` 那几句挪进 `QUICK`
 
 ---
 

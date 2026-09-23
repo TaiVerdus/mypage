@@ -1009,29 +1009,10 @@ section {
   to { opacity: 1; transform: translateY(0); }
 }
 
-.chat-quick {
-  display: flex;
-  flex-wrap: wrap;
-  gap: calc(8px * var(--scale));
-  padding: calc(12px * var(--scale)) calc(18px * var(--scale)) 0;
-}
-
-.quick-btn {
-  font-size: var(--fs-xs);
-  color: var(--color-brand);
-  background: var(--color-bg);
-  border: 1px solid var(--color-line);
-  border-radius: var(--r-pill);
-  padding: 6px 14px;
-  cursor: pointer;
-  transition: background var(--dur-base) var(--ease-out), transform var(--dur-fast) var(--ease-out);
-}
-
-.quick-btn:hover {
-  background: var(--color-mint);
-  transform: translateY(-1px);
-}
-
+/* ⚠️ 这里原来有 `.chat-quick`（容器）与 `.quick-btn` / `.quick-btn:hover` 三条规则 ——
+   随「快捷问题按钮」一起删掉了（V2.7 续七十六，用户 2026-09-23 定：对话区不放预设问题）。
+   要恢复旧样式：`git show fda9628:style.css`（那是删之前的最后一个版本）。
+   三条都是**独立规则**（不在任何分组选择器里）⇒ 删干净不影响别的元素。 */
 .chat-input-row {
   display: flex;
   gap: calc(10px * var(--scale));
