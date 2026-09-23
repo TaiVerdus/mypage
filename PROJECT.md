@@ -157,7 +157,8 @@
 | 66 | `455869c` | 09-23 | V2.7 续七十六: 对话区去掉预设问题按钮（只留一个对话框）+ 分身事实档 `data/persona.json` 与生成器 `build-persona.py`（两处人设 + 离线知识库同源生成）+ kb 测试改固定问句口径 |
 | 67 | `9ea7587` | 09-23 | V2.7 续七十七: 按用户口述填事实档（facts 9 条 / about 12 条：补专业、课程、性格、联系、Jarvis、主页来源）+ 消一个关键词冲突 + kb 测试新增「答对」抽查 |
 | 68 | `480c850` | 09-23 | V2.7 续七十八: 「中央空调」那条去掉 AI 加的解释（只留用户原话；页面不同步新事实） |
-| 69 | — | 09-23 | V2.7 续八十: 「双击打开只有离线回答」排障（根因：8080 没服务在跑）+ 补 PNA 预检（Chrome 私有网络访问）+ 一键启动器 `start-twin-server.cmd` + proxy 测试 66→69（本次提交，哈希见 `git log`） |
+| 69 | `36f7507` | 09-23 | V2.7 续八十: 「双击打开只有离线回答」排障（根因：8080 没服务在跑）+ 补 PNA 预检（Chrome 私有网络访问）+ 一键启动器 `start-twin-server.cmd` + proxy 测试 66→69 |
+| 70 | — | 09-24 | V2.7 续八十一: 启动器改成「自己找 node」（这台机器没有系统级 Node，只有 WorkBuddy 自带那份）+ README 说明（本次提交，哈希见 `git log`） |
 
 ### 仓库分布与分支（2026-09-17 整理）
 
@@ -167,7 +168,7 @@
 | 仓库 | 分支 | 内容 | 提交数 |
 | --- | --- | --- | --- |
 | `github.com/TaiVerdus/mypage` | `main` | V1 版本线（V1.0 → V1.1，2026-09-06） | 2 |
-| `github.com/TaiVerdus/mypage` | **`v2`**（设为默认分支） | V2 版本线（V2.0 → V2.7） | 69 |
+| `github.com/TaiVerdus/mypage` | **`v2`**（设为默认分支） | V2 版本线（V2.0 → V2.7） | 70 |
 
 - **两条分支没有共同祖先**：V2.0 是 2026-09-16 在新文件夹里重新 `git init` 的，不是从 V1.1 拉出来的分支。
   唯一完全相同的文件是 `PROJECT.md`（两边 blob 哈希一致 `9cf01743…`），说明当时是把 V1.1 的文件拷过来再改
@@ -232,6 +233,28 @@ python tools/sync-version.py --check   # 提交后核对：按 git 真实条数�
 `--check` 则按 git 现在的真实条数比对，是**提交之后**用的。
 
 ## 迭代日志
+
+### 2026-09-24 · V2.7 续八十一（启动器改「自己找 node」—— 这台机器没有系统级 Node）
+
+**用户贴的截图**：双击 `start-twin-server.cmd` 后黑窗口里报
+`'node' 不是内部或外部命令，也不是可运行的程序或批处理文件。`
+
+**查证**：这台机器**没有装系统级 Node**（`C:\Program Files\nodejs`、`%LOCALAPPDATA%\Programs\nodejs`、
+scoop、nvm 全都没有）；此前我一路用的 `C:\Users\wshix\.workbuddy\binaries\node\versions\22.22.2-3\node.exe`
+是 **WorkBuddy 自带**的那份 —— 我自己的命令行里有它（所以从没报错），但**双击出来的 cmd 里没有**。
+⇒ 这是「在我这儿能跑」和「在他那儿能跑」的差别，**必须按双击的环境验**。
+
+**改动**：启动器先 `where node`（给以后装了 Node 的情形），找不到就依次试
+`%USERPROFILE%\.workbuddy\binaries\node\versions\22.22.2-3\node.exe`、
+再扫 `…\node\versions\*` 目录；都找不到就打印两行可操作的办法（装 Node LTS / 手改 NODE_EXE 一行）并暂停。
+README 补一句说明（这台机器没系统 Node）。
+
+**验证（关键：用「干净 PATH」模拟双击，不能用我自己的环境）**：
+`env -i PATH="/c/Windows/System32:/c/Windows" … cmd //c start-twin-server.cmd`
+⇒ 输出 `node.exe: C:\Users\wshix\.workbuddy\binaries\node\versions\22.22.2-3\node.exe`
+⇒ 服务正常起来、`/healthz` 正常、`http://127.0.0.1:8080/` 200 ✓
+（在此之前先用我的环境跑过一次，`where node` 假成功、看着像「修好了」—— **假通过**。）
+验完把自己起的进程关掉，把 8080 留给用户双击。
 
 ### 2026-09-23 · V2.7 续八十（「双击打开却只有离线回答」排障 + 补 PNA 预检 + 启动器）
 
