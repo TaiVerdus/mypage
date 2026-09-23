@@ -1,0 +1,15 @@
+{
+  "name": "mypage",
+  "version": "2.7.0",
+  "private": true,
+  "description": "王释贤的个人主页：纯静态页面 + 数字分身的云端代理（server.js）",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node tools/test-chat-backend.js && node tools/test-chat-proxy.js && node tools/test-chat-kb.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED"
+}

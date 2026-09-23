@@ -2,6 +2,16 @@
 # 注意：ai-log.html 与 audio/ambient-loop.wav 虽然是生成物，但**要提交**——
 # 站点是纯静态、要能直接打开，不能要求访客先跑脚本。所以它们不在这里忽略。
 
+# ⚠️⚠️ 机密：DeepSeek API key 等配置。
+# 为什么它必须存在、又必须被忽略：
+#   · 线上发布沙箱**没有配置环境变量的入口**，key 只能随项目一起上传 ⇒ 文件得留在目录里
+#   · 而这个仓库是**公开**的 ⇒ 一旦提交，key 就等于公开，别人能拿它烧你的额度
+# ⇒ 所以：文件留着、git 忽略它。server.js 启动时会读它（见那边的 loadDotEnv）。
+# ⚠️ 如果你 fork 或搬运这个项目：先确认 .env 没在版本控制里（`git check-ignore .env` 应有输出）。
+.env
+.env.*
+!.env.example
+
 # Python 运行缓存（tools/ 下有脚本，跑一次就会冒出来）
 __pycache__/
 *.pyc
@@ -10,3 +20,6 @@ __pycache__/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# WorkBuddy 的工作目录（自动化执行记录之类，不是项目产物）
+.workbuddy/

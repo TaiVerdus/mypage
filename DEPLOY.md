@@ -47,37 +47,53 @@
 
 ---
 
-## 2. 本机先验一遍
+## 2. 把 key 放进 `.env`（唯一必配的东西）
+
+项目根目录建一个 `.env`：
+
+```
+DEEPSEEK_API_KEY=sk-你的一串
+```
+
+⚠️ **为什么是文件、不是环境变量**：线上发布沙箱**没有配置环境变量的入口**，
+key 只能随项目一起上传 ⇒ `server.js` 启动时读这个文件（见那边的 `loadDotEnv`）。
+
+⚠️ **本机的环境变量依然优先**（`DEEPSEEK_API_KEY=xx node server.js` 不会被文件盖掉）。
+
+⚠️ 建完**先确认它没进 git**：
 
 ```bash
-cd "D:\Project-Based_CST_AI_Foundations\Vibe Coding\MYPAGE-V2.0"
-DEEPSEEK_API_KEY=sk-你的一串 node server.js      # 默认 8080 端口
-# 打开 http://localhost:8080/  问一句
+git check-ignore .env      # 要有输出（说明被忽略）。没有输出就先别往下做
 ```
 
-⚠️ **本机打开时页面会优先用本机 ollama**（如果它在跑）。想强制走云端代理：
+## 3. 本机先验一遍，然后发布
 
-```
-http://localhost:8080/?chat=/api/chat
-```
-
-想不在真 key 上花钱先验链路，可以指到一个假端点（`tools/openai-stub.py`）：
+**先在本机跑通**（不花部署的时间）：
 
 ```bash
-DEEPSEEK_BASE=http://127.0.0.1:8005 DEEPSEEK_API_KEY=test node server.js
+node server.js                # 默认 8080 端口
+# 打开 http://localhost:8080/ 问一句
 ```
 
----
+- 本机打开时页面**默认优先用本机 ollama**；想强制走云端：`http://localhost:8080/?chat=/api/chat`
+- 想**不花真钱**先验链路：`DEEPSEEK_BASE=http://127.0.0.1:8005 node server.js`
+  （配 `tools/openai-stub.py` 那个假端点）
 
-## 3. 部署
+**发布**用内置的「发布为应用」能力（我可以直接做，你说一声就行）。它会：
+**上传源码 → 在沙箱里装依赖 → 起服务 → 返回一个分享链接**。
 
-`server.js` 是**零依赖的 Node 服务**（只用 Node 内置模块），任何能跑 Node 的地方都能跑。
-**唯一必配的环境变量是 `DEEPSEEK_API_KEY`**，其余都有合理默认。
+项目已经满足它对项目的要求：服务监听 `PORT` 环境变量、绑 `0.0.0.0`、零依赖、
+`package.json` 里有 `start` 脚本。
 
-> ⏳ **托管选哪家还没定**（这决定链接长什么样、以及国内访客的可达性）。
-> 候选见 `PROJECT.md` 的「未结项」。定下来后这一节补上具体命令。
+### ⚠️ 发布前必查（这两条漏一条就会出事）
 
----
+| 检查 | 为什么 |
+| --- | --- |
+| `git check-ignore .env` **有输出** | 仓库是公开的。key 一旦被提交就等于公开，别人能拿它烧你的额度 |
+| 线上 `/.env` 必须返回 **404** | 静态托管默认把目录里的文件**原样发出去**。不挡的话，**任何人访问一次就拿到 key** —— 这个洞本地完全看不见（你本来就知道自己的 key），**上线当天就会被扫到** |
+
+`server.js` 已经把**所有「点开头」的路径**都挡成 404（`.env` / `.env.local` / `.gitignore` /
+`.git/config` …），并且有回归测试盯着（`tools/test-chat-proxy.js` 第 2 节）。
 
 ## 4. 上线前的检查清单
 

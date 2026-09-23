@@ -42,6 +42,30 @@ var http = require('http');
 var fs = require('fs');
 var path = require('path');
 
+/* ─────────────────────────────────────────────────────────────────────
+   从同目录的 `.env` 读配置（零依赖，十几行）。
+
+   ⚠️ **为什么需要它**：线上发布沙箱**没有配置环境变量的入口**，key 只能随项目一起上传，
+      所以线上就直接读这个文件。
+   ⚠️ **而 `.env` 绝不能进 git** —— 这个仓库是公开的，提交等于把 key 公开。
+      `.gitignore` 里已经忽略它；搬运这个项目时先 `git check-ignore .env` 确认一下。
+   ⚠️ **已有的环境变量优先**，所以本机 `DEEPSEEK_API_KEY=xx node server.js` 不会被文件盖掉。
+   写法故意很土：只认 `KEY=值` 一行一条，不做引号与转义（够用，也不容易出错）。
+   ───────────────────────────────────────────────────────────────────── */
+(function loadDotEnv() {
+  var txt;
+  try { txt = fs.readFileSync(path.join(__dirname, '.env'), 'utf8'); } catch (e) { return; }
+  txt.split(/\r?\n/).forEach(function (line) {
+    line = line.trim();
+    if (!line || line.charAt(0) === '#') return;
+    var i = line.indexOf('=');
+    if (i < 1) return;
+    var k = line.slice(0, i).trim();
+    var v = line.slice(i + 1).trim();
+    if (process.env[k] === undefined) process.env[k] = v;
+  });
+})();
+
 var PORT = Number(process.env.PORT || 8080);
 var API_KEY = process.env.DEEPSEEK_API_KEY || '';
 var BASE = (process.env.DEEPSEEK_BASE || 'https://api.deepseek.com').replace(/\/+$/, '');
@@ -98,15 +122,22 @@ var MIME = {
   '.md': 'text/plain; charset=utf-8'
 };
 
-// ⚠️ 这些文件**不给公网访客看**（源码/开发文档/工具都在仓库里，没必要暴露）
+// ⚠️ 这些路径**不给公网访客看**（源码 / 开发文档 / 工具 / 机密文件）
 var PRIVATE = /^\/(?:\.git|tools|data|backups)\//i;
-var PRIVATE_FILES = /^\/(?:PROJECT|README|WECLONE|DESIGN-SYSTEM|server|package(-\w+)?)\.(md|js|json)$/i;
+var PRIVATE_FILES = /^\/(?:PROJECT|README|WECLONE|DEPLOY|DESIGN-SYSTEM|server|package(-\w+)?)\.(md|js|json)$/i;
+
+/* ⚠️⚠️ 机密文件必须单独挡死。
+   `.env` 里存着 DEEPSEEK_API_KEY，而静态托管默认是把目录里的文件**原样发出去**的 ——
+   不挡的话，**任何人访问 `/.env` 就拿到了你的 key**。
+   这类洞有个共同点：本地完全看不出来（你本来就知道自己的 key），**上线当天就会被扫到**。
+   规则取「**点开头的都给 404**」，一次把 `.env` / `.gitignore` / `.env.local` 这类全盖住。 */
+var SECRET_FILES = /^\/\./;
 
 function serveStatic(req, res) {
   var urlPath = decodeURIComponent((req.url || '/').split('?')[0]);
   if (urlPath === '/') urlPath = '/index.html';
 
-  if (PRIVATE.test(urlPath) || PRIVATE_FILES.test(urlPath)) {
+  if (PRIVATE.test(urlPath) || PRIVATE_FILES.test(urlPath) || SECRET_FILES.test(urlPath)) {
     return send(res, 404, 'text/plain; charset=utf-8', 'Not found');
   }
 

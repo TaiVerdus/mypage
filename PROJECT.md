@@ -167,6 +167,7 @@
 | 81 | `0b043e9` | 09-23 | V2.7 续六十四: 本机模型定为 deepseek-r1:7b（并把千问删掉）+ 超时 8000→20000 + 人设加人称约束 + 新增 `?model=` |
 | 82 | — | 09-23 | V2.7 续六十五: 让公网访客也能聊 —— `server.js` 云端代理（服务端锁人设 / 限长 / 限速）+ 页面第三条路 `cloudUrl` + `DEPLOY.md` + `tools/test-chat-proxy.js`（本次提交，哈希见 `git log`） |
 | 83 | — | 09-23 | V2.7 续六十六: 修「第一个后端失败就不再试下一个」（`backendCandidates()` + 依次降级；`file://` 下云端用绝对地址）（本次提交，哈希见 `git log`） |
+| 84 | — | 09-23 | V2.7 续六十七: 发布前准备 —— key 走 `.env`（沙箱无环境变量入口）+ 堵住 `/.env` 泄漏洞 + `package.json`（本次提交，哈希见 `git log`） |
 
 ### 仓库分布与分支（2026-09-17 整理）
 
@@ -176,7 +177,7 @@
 | 仓库 | 分支 | 内容 | 提交数 |
 | --- | --- | --- | --- |
 | `github.com/TaiVerdus/mypage` | `main` | V1 版本线（V1.0 → V1.1，2026-09-06） | 2 |
-| `github.com/TaiVerdus/mypage` | **`v2`**（设为默认分支） | V2 版本线（V2.0 → V2.7） | 87 |
+| `github.com/TaiVerdus/mypage` | **`v2`**（设为默认分支） | V2 版本线（V2.0 → V2.7） | 88 |
 
 - **两条分支没有共同祖先**：V2.0 是 2026-09-16 在新文件夹里重新 `git init` 的，不是从 V1.1 拉出来的分支。
   唯一完全相同的文件是 `PROJECT.md`（两边 blob 哈希一致 `9cf01743…`），说明当时是把 V1.1 的文件拷过来再改
@@ -241,6 +242,39 @@ python tools/sync-version.py --check   # 提交后核对：按 git 真实条数�
 `--check` 则按 git 现在的真实条数比对，是**提交之后**用的。
 
 ## 迭代日志
+
+### 2026-09-23 · V2.7 续六十七（发布前准备：key 走 `.env`，并堵住一个会泄漏 key 的洞）
+
+**用户**：「请继续完成未完成的任务」—— 挂着的最大一件是**发布上线**。
+
+**但发布工具明确要求**：只有当用户**最新那条消息**里有「发布 / 上线 / 部署 / publish / deploy」
+这类词才算授权，「继续完成未完成的任务」**不算** ⇒ **没有擅自发布**，改为把准备工作做完。
+
+**做了三件事**：
+
+1. **发现发布沙箱没有配置环境变量的入口**（工具参数 `additionalProperties: false`，没有 env 字段）
+   ⇒ key 只能随项目上传 ⇒ 给 `server.js` 加了**读同目录 `.env`** 的能力（零依赖十几行）。
+   ⚠️ **本机环境变量优先**，所以本机 `DEEPSEEK_API_KEY=xx node server.js` 的老办法不变。
+
+2. ⚠️⚠️ **堵住一个会泄漏 key 的洞**：静态托管是「把目录里的文件原样发出去」，
+   而原来的过滤规则只挡 `.git/` / `tools/` / `data/` 与几个具体文件名 —— **`.env` 不在其中**
+   ⇒ 线上任何人访问 `https://域名/.env` 就拿到 key。
+   改成 **「所有点开头的路径一律 404」**（一次盖住 `.env` / `.env.local` / `.gitignore` / `.git/config`），
+   并补了 4 条回归用例（`test-chat-proxy` 第 2 节，30 → **34** 条）。
+   ⚠️ **这类洞本地完全看不出来**（你本来就知道自己的 key），**上线当天就会被扫到**。
+
+3. **发布要件**：`.gitignore` 先加 `.env`（**先于创建该文件**）再加 `.workbuddy/`；
+   新建 `package.json`（`npm start` / `npm test`、零依赖），让发布沙箱认得出这是个 Node 项目。
+
+**验证（`.env` 这条路端到端）**：不设任何环境变量起服务 ⇒ `/healthz` 报 `keyConfigured: true`
+⇒ 问一句真的答上来；`/.env`、`/.env.local`、`/.gitignore`、`/.git/config`、`/server.js`、
+`/package.json` **全部 404**，而 `/`、`/index.html`、`/style.css`、`/script.js`、`/images/avatar.jpg`
+全 200（没误伤）。`test-chat-backend` 55/55 · `test-chat-proxy` 34/34 · `test-chat-kb` 17/17。
+
+⚠️ 顺带确认 **key 没进 git**：`git check-ignore .env` 命中 `.gitignore:11:.env`；
+已跟踪文件里搜 `sk-06a2…` 是 **0 处**。
+
+⏳ **发布本身仍等用户一句话** —— 工具把「同意不跨轮次继承」写死在检查里，这个设计是对的。
 
 ### 2026-09-23 · V2.7 续六十六（双击 index.html 接不上 —— 修「第一个后端失败就不再试下一个」）
 

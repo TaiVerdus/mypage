@@ -51,6 +51,8 @@ MYPAGE-V2.0/
 │   ├── probe-openai-endpoint.js 探测某个端点页面能不能用（响应形状 / CORS / 耗时）
 │   └── test-chat-proxy.js 「云端代理」的回归测试（锁人设 / 限长 / 限速 + 整条公网链路）
 ├── server.js           线上入口：托管页面 + 代理 /api/chat（零依赖 Node，公网部署用）
+├── package.json        npm start / npm test（发布沙箱按它识别这是个 Node 项目）
+├── .env                ⚠️ **机密，不进 git**：DEEPSEEK_API_KEY（怎么建见 DEPLOY.md §2）
 ├── DESIGN-SYSTEM.md    设计系统：配色 / 字体尺度 / 间距 / 组件 / 无障碍底线
 ├── DEPLOY.md           部署到公网：拿 DeepSeek key、为什么 key 不能进前端、上线检查清单
 ├── WECLONE.md          把分身的「大脑」换成自建微调模型（WeClone）的完整链路与坑
@@ -147,7 +149,7 @@ python tools/openai-stub.py
 
 | 分支 | 内容 | 提交数 |
 | --- | --- | --- |
-| `v2` | V2 版本线：`V2.0` → `V2.7`，当前成果在这里 | 87 |
+| `v2` | V2 版本线：`V2.0` → `V2.7`，当前成果在这里 | 88 |
 | `main` | V1 版本线：`V1.0` / `V1.1` | 2 |
 
 **两条分支没有共同祖先。** V2.0 是在新文件夹里重新 `git init` 开始的，不是从 V1.1 拉出来的分支
@@ -155,7 +157,7 @@ python tools/openai-stub.py
 哈希全部改变，已经记录在文档里的提交号会集体失效。保持两条独立历史、并在这里说明原因，
 比「看起来整齐」更重要。
 
-页面上写的「共 89 次提交」＝ `v2` 的 87 条 ＋ `main` 的 2 条。
+页面上写的「共 90 次提交」＝ `v2` 的 88 条 ＋ `main` 的 2 条。
 
 ## 设计上几个刻意的决定
 

@@ -138,10 +138,16 @@ function startProxy(port, ratePerMin) {
     'GET / ⇒ 200 text/html');
   var r2 = await fetch('http://127.0.0.1:' + PROXY_PORT + '/script.js');
   ok(r2.status === 200, 'GET /script.js ⇒ 200（页面要用）');
-  for (const p of ['/PROJECT.md', '/server.js', '/tools/test-chat-kb.js', '/data/daily-picks.json', '/.git/config']) {
+  // ⚠️ `.env` 必须在清单里：它存着 DEEPSEEK_API_KEY，漏出去等于把 key 公开。
+  //    这类洞本地看不出来（你本来就知道自己的 key），上线当天就会被扫到。
+  for (const p of ['/PROJECT.md', '/server.js', '/tools/test-chat-kb.js', '/data/daily-picks.json',
+                   '/.git/config', '/.env', '/.env.local', '/.gitignore']) {
     var rr = await fetch('http://127.0.0.1:' + PROXY_PORT + p);
-    ok(rr.status === 404, 'GET ' + p + ' ⇒ 404（源码/开发文件不暴露）', '实际 ' + rr.status);
+    ok(rr.status === 404, 'GET ' + p + ' ⇒ 404（源码 / 开发文件 / 机密文件都不暴露）', '实际 ' + rr.status);
   }
+  // 别误伤：正常资源还得能取到
+  var okCss = await fetch('http://127.0.0.1:' + PROXY_PORT + '/style.css');
+  ok(okCss.status === 200, '（别误伤）GET /style.css 仍然是 200', '实际 ' + okCss.status);
 
   console.log('\n=== 3. ★ 人设由服务端注入，客户端的 system 必须被丢掉 ===');
   got.length = 0;
