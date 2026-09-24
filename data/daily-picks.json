@@ -1,18 +1,19 @@
 {
   "_说明": "「每日推荐」的唯一数据源。页面里那一段由 tools/build-daily.py 生成，别手改生成物。",
   "_怎么加歌": "pool 就是**总歌单**（用户 2026-09-24 更新，共 276 首）。自动化每天 09:00 用 random.sample 从 pool 里**随机抽 3 首**写进 history 顶上（同一批里不重样），**pool 本身不消耗** —— 所以「每天随机三首」能一直成立。",
-  "_字段": "title 歌名 / artist 歌手 / album 专辑 / year 年份（数字）/ note 可选的一句推荐理由（用户自己的话，没有就留空串）",
+  "_字段": "title 歌名 / artist 歌手 / no 在总歌单里的编号 / duration 时长（可选）/ album / year / note",
   "_缺失字段怎么办": "album / year 没有就留空 —— 生成器会跳过空的那几项，绝不编造年份。",
   "_版权口径": "只存「事实」——歌名、歌手、专辑、年份。不存音频、不存歌词、不存封面。",
   "_池子空了": "history 会一直留着最后一条，页面不会变空；自动化会跳过并不报错。",
   "pool": [
     {
       "title": "爱不来 (feat. Miss Ko葛仲珊)",
-      "artist": "",
+      "artist": "方大同 / 葛仲珊",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 1
     },
     {
       "title": "味道",
@@ -20,7 +21,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 2
     },
     {
       "title": "瘦子 (Skinny Love)",
@@ -28,7 +30,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 3
     },
     {
       "title": "潮流季",
@@ -36,7 +39,8 @@
       "duration": "3:59",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 4
     },
     {
       "title": "媚人",
@@ -44,7 +48,8 @@
       "duration": "3:46",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 5
     },
     {
       "title": "爱情宣判",
@@ -52,7 +57,8 @@
       "duration": "4:34",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 6
     },
     {
       "title": "我的雅典娜",
@@ -60,7 +66,8 @@
       "duration": "3:42",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 7
     },
     {
       "title": "念",
@@ -68,7 +75,8 @@
       "duration": "5:08",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 8
     },
     {
       "title": "彩券",
@@ -76,7 +84,8 @@
       "duration": "4:35",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 9
     },
     {
       "title": "Come Together (Live)",
@@ -84,7 +93,8 @@
       "duration": "4:59",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 10
     },
     {
       "title": "宫保鸡丁",
@@ -92,7 +102,8 @@
       "duration": "3:54",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 11
     },
     {
       "title": "讨厌",
@@ -100,7 +111,8 @@
       "duration": "4:17",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 12
     },
     {
       "title": "违背的青春",
@@ -108,7 +120,8 @@
       "duration": "5:36",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 13
     },
     {
       "title": "深深爱过你 (前世)",
@@ -116,7 +129,8 @@
       "duration": "4:38",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 14
     },
     {
       "title": "唉!",
@@ -124,7 +138,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 15
     },
     {
       "title": "公园",
@@ -132,7 +147,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 16
     },
     {
       "title": "我在意的",
@@ -140,7 +156,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 17
     },
     {
       "title": "好想谈恋爱 (Live)",
@@ -148,23 +165,26 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 18
     },
     {
       "title": "Sober (Explicit)",
-      "artist": "G-Eazy",
+      "artist": "G-Eazy / Charlie Puth",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 19
     },
     {
       "title": "Electrical (Explicit)",
-      "artist": "",
+      "artist": "Tai Verdes",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 20
     },
     {
       "title": "菊",
@@ -172,7 +192,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 21
     },
     {
       "title": "爱琴海",
@@ -180,7 +201,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 22
     },
     {
       "title": "淘金小镇",
@@ -188,7 +210,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 23
     },
     {
       "title": "那天下雨了",
@@ -196,7 +219,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 24
     },
     {
       "title": "Stay Home",
@@ -204,23 +228,26 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 25
     },
     {
       "title": "一半一半",
-      "artist": "Top Barry",
+      "artist": "Top Barry / INDEcompany",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 26
     },
     {
-      "title": "一直很安静",
-      "artist": "",
+      "title": "一直很安静（2024中国网络视听年度盛典现场）",
+      "artist": "单依纯",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 27
     },
     {
       "title": "给我一首歌的时间",
@@ -228,7 +255,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 28
     },
     {
       "title": "玻璃",
@@ -236,7 +264,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 29
     },
     {
       "title": "15 MINUTES",
@@ -244,7 +273,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 30
     },
     {
       "title": "世界正中",
@@ -252,31 +282,35 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 31
     },
     {
       "title": "That Should Be Me",
-      "artist": "",
+      "artist": "Justin Bieber",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 32
     },
     {
       "title": "Beauty And A Beat",
-      "artist": "",
+      "artist": "Justin Bieber / Nicki Minaj",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 33
     },
     {
       "title": "I’m the One",
-      "artist": "DJ Khaled",
+      "artist": "DJ Khaled / Justin Bieber / Quavo / Chance the Rapper / Lil Wayne",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 34
     },
     {
       "title": "BUTTERFLIES",
@@ -284,15 +318,17 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 35
     },
     {
       "title": "DEVOTION",
-      "artist": "Justin Bieber",
+      "artist": "Justin Bieber / Dijon",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 36
     },
     {
       "title": "Long D",
@@ -300,15 +336,17 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 37
     },
     {
       "title": "Sunrise (Live)",
-      "artist": "单依纯",
+      "artist": "单依纯 / Lambert",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 38
     },
     {
       "title": "船长",
@@ -316,7 +354,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 39
     },
     {
       "title": "TENDER (Live)",
@@ -324,7 +363,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 40
     },
     {
       "title": "Porto girl",
@@ -332,7 +372,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 41
     },
     {
       "title": "失真",
@@ -340,7 +381,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 42
     },
     {
       "title": "读心术",
@@ -348,7 +390,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 43
     },
     {
       "title": "想你的夜",
@@ -356,7 +399,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 44
     },
     {
       "title": "DISEASE",
@@ -364,7 +408,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 45
     },
     {
       "title": "不在乎",
@@ -372,7 +417,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 46
     },
     {
       "title": "公园前",
@@ -380,7 +426,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 47
     },
     {
       "title": "不如见一面",
@@ -388,7 +435,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 48
     },
     {
       "title": "for him.",
@@ -396,7 +444,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 49
     },
     {
       "title": "行走的鱼 (Live)",
@@ -404,7 +453,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 50
     },
     {
       "title": "月光",
@@ -412,7 +462,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 51
     },
     {
       "title": "半秒如果",
@@ -420,7 +471,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 52
     },
     {
       "title": "女儿心如水",
@@ -428,7 +480,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 53
     },
     {
       "title": "一程山路",
@@ -436,7 +489,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 54
     },
     {
       "title": "The Cure",
@@ -444,7 +498,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 55
     },
     {
       "title": "同个世界 (Explicit)",
@@ -452,7 +507,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 56
     },
     {
       "title": "小小虫",
@@ -460,15 +516,17 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 57
     },
     {
       "title": "飞到月球 (SUNKIS x LH)",
-      "artist": "",
+      "artist": "sunkis 宋秉勤 / 鹿晗",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 58
     },
     {
       "title": "爱里",
@@ -476,7 +534,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 59
     },
     {
       "title": "爱的回归线 (Live)",
@@ -484,7 +543,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 60
     },
     {
       "title": "多少的光阴",
@@ -492,7 +552,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 61
     },
     {
       "title": "十七岁",
@@ -500,7 +561,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 62
     },
     {
       "title": "Snooze (Explicit)",
@@ -508,15 +570,17 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 63
     },
     {
       "title": "Peaches (Explicit)",
-      "artist": "",
+      "artist": "Justin Bieber / Daniel Caesar / GIVĒON",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 64
     },
     {
       "title": "果实",
@@ -524,7 +588,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 65
     },
     {
       "title": "世界中心",
@@ -532,15 +597,17 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 66
     },
     {
       "title": "一口 (The Day You Left Me)",
-      "artist": "",
+      "artist": "丁世光",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 67
     },
     {
       "title": "神探",
@@ -548,7 +615,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 68
     },
     {
       "title": "没关系",
@@ -556,7 +624,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 69
     },
     {
       "title": "像晴天像雨天 (Live)",
@@ -564,7 +633,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 70
     },
     {
       "title": "遇到",
@@ -572,7 +642,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 71
     },
     {
       "title": "大山",
@@ -580,7 +651,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 72
     },
     {
       "title": "Paper hearts (Live)",
@@ -588,7 +660,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 73
     },
     {
       "title": "思念是一种病 (Live)",
@@ -596,7 +669,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 74
     },
     {
       "title": "一个人跳舞 (Live)",
@@ -604,15 +678,17 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 75
     },
     {
       "title": "Stand By Me (Live)",
-      "artist": "戴佩妮",
+      "artist": "戴佩妮 / 周笔畅 / 单依纯",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 76
     },
     {
       "title": "纯寐寐",
@@ -620,7 +696,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 77
     },
     {
       "title": "卸妆",
@@ -628,7 +705,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 78
     },
     {
       "title": "瘦身男女",
@@ -636,7 +714,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 79
     },
     {
       "title": "平庸 (Live)",
@@ -644,7 +723,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 80
     },
     {
       "title": "别叫我达芬奇",
@@ -652,7 +732,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 81
     },
     {
       "title": "爱转动",
@@ -660,7 +741,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 82
     },
     {
       "title": "VLOG",
@@ -668,7 +750,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 83
     },
     {
       "title": "公转自转",
@@ -676,7 +759,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 84
     },
     {
       "title": "不枉 (Live)",
@@ -684,7 +768,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 85
     },
     {
       "title": "DAISIES",
@@ -692,7 +777,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 86
     },
     {
       "title": "SPEED DEMON",
@@ -700,7 +786,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 87
     },
     {
       "title": "给电影人的情书",
@@ -708,7 +795,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 88
     },
     {
       "title": "心中的日月",
@@ -716,7 +804,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 89
     },
     {
       "title": "还你茉莉",
@@ -724,7 +813,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 90
     },
     {
       "title": "我表示理解",
@@ -732,7 +822,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 91
     },
     {
       "title": "我管不住我自己",
@@ -740,7 +831,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 92
     },
     {
       "title": "向日葵朝着夜",
@@ -748,7 +840,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 93
     },
     {
       "title": "忍住 (动感版)",
@@ -756,7 +849,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 94
     },
     {
       "title": "CD盒 (Live)",
@@ -764,7 +858,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 95
     },
     {
       "title": "蔓珠莎华 (Live)",
@@ -772,7 +867,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 96
     },
     {
       "title": "迟迟",
@@ -780,7 +876,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 97
     },
     {
       "title": "trust me",
@@ -788,15 +885,17 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 98
     },
     {
-      "title": "左转灯 (1000 Times +1)",
-      "artist": "",
+      "title": "左转灯 (1000 Times +1) (Live)",
+      "artist": "汪苏泷 / Eric周兴哲",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 99
     },
     {
       "title": "朵",
@@ -804,7 +903,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 100
     },
     {
       "title": "芳草地",
@@ -812,7 +912,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 101
     },
     {
       "title": "讽刺的情书",
@@ -820,7 +921,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 102
     },
     {
       "title": "Sheesh!",
@@ -828,7 +930,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 103
     },
     {
       "title": "有趣 (Live)",
@@ -836,7 +939,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 104
     },
     {
       "title": "风衣",
@@ -844,7 +948,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 105
     },
     {
       "title": "爱我的时候",
@@ -852,7 +957,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 106
     },
     {
       "title": "浪漫手机",
@@ -860,7 +966,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 107
     },
     {
       "title": "紧急联络人",
@@ -868,15 +975,17 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 108
     },
     {
       "title": "South of the Border",
-      "artist": "",
+      "artist": "Ed Sheeran / Camila Cabello / Cardi B",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 109
     },
     {
       "title": "悬日",
@@ -884,7 +993,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 110
     },
     {
       "title": "断了的弦",
@@ -892,7 +1002,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 111
     },
     {
       "title": "曾经是情侣 (Live)",
@@ -900,7 +1011,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 112
     },
     {
       "title": "忘记",
@@ -908,7 +1020,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 113
     },
     {
       "title": "最好的我",
@@ -916,7 +1029,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 114
     },
     {
       "title": "美人鱼",
@@ -924,15 +1038,17 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 115
     },
     {
       "title": "到时说爱我",
-      "artist": "茜拉",
+      "artist": "茜拉 (Shila Amzah)",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 116
     },
     {
       "title": "其实",
@@ -940,7 +1056,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 117
     },
     {
       "title": "歌谣",
@@ -948,7 +1065,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 118
     },
     {
       "title": "大人梦",
@@ -956,7 +1074,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 119
     },
     {
       "title": "对的人",
@@ -964,7 +1083,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 120
     },
     {
       "title": "给自己的情书 (Live)",
@@ -972,7 +1092,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 121
     },
     {
       "title": "Gray Turns To May",
@@ -980,7 +1101,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 122
     },
     {
       "title": "妈妈说",
@@ -988,7 +1110,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 123
     },
     {
       "title": "Oh lala",
@@ -996,7 +1119,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 124
     },
     {
       "title": "还有什么更好的",
@@ -1004,7 +1128,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 125
     },
     {
       "title": "喂",
@@ -1012,23 +1137,26 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 126
     },
     {
       "title": "爱错 (feat. 单依纯) (Live)",
-      "artist": "",
+      "artist": "王力宏 / 单依纯",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 127
     },
     {
       "title": "Done for Me (feat. Kehlani)",
-      "artist": "",
+      "artist": "Charlie Puth / Kehlani",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 128
     },
     {
       "title": "爱丫爱丫 (Live)",
@@ -1036,7 +1164,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 129
     },
     {
       "title": "我落泪情绪零碎",
@@ -1044,7 +1173,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 130
     },
     {
       "title": "像晴天像雨天",
@@ -1052,7 +1182,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 131
     },
     {
       "title": "不舍",
@@ -1060,7 +1191,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 132
     },
     {
       "title": "Stuck with U",
@@ -1068,7 +1200,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 133
     },
     {
       "title": "矛盾",
@@ -1076,7 +1209,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 134
     },
     {
       "title": "无人知晓",
@@ -1084,7 +1218,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 135
     },
     {
       "title": "爱情证书",
@@ -1092,7 +1227,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 136
     },
     {
       "title": "今天只做一件事",
@@ -1100,7 +1236,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 137
     },
     {
       "title": "谁来剪月光",
@@ -1108,23 +1245,26 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 138
     },
     {
       "title": "可一可再",
-      "artist": "陈奕迅",
+      "artist": "陈奕迅 / eason and the duo band",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 139
     },
     {
       "title": "I Don’t Care",
-      "artist": "Ed Sheeran",
+      "artist": "Ed Sheeran / Justin Bieber",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 140
     },
     {
       "title": "娘子",
@@ -1132,15 +1272,17 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 141
     },
     {
       "title": "Bang Bang",
-      "artist": "Jessie J",
+      "artist": "Jessie J / Ariana Grande / Nicki Minaj",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 142
     },
     {
       "title": "无赖",
@@ -1148,7 +1290,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 143
     },
     {
       "title": "夏天的风",
@@ -1156,7 +1299,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 144
     },
     {
       "title": "III",
@@ -1164,7 +1308,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 145
     },
     {
       "title": "我爱你中国 (Live)",
@@ -1172,7 +1317,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 146
     },
     {
       "title": "意外",
@@ -1180,7 +1326,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 147
     },
     {
       "title": "出现又离开 (Live)",
@@ -1188,7 +1335,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 148
     },
     {
       "title": "Jasmine",
@@ -1196,7 +1344,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 149
     },
     {
       "title": "怎么了",
@@ -1204,7 +1353,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 150
     },
     {
       "title": "想你时风起",
@@ -1212,7 +1362,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 151
     },
     {
       "title": "去北极忘记你",
@@ -1220,7 +1371,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 152
     },
     {
       "title": "阳光下的星星",
@@ -1228,7 +1380,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 153
     },
     {
       "title": "一半",
@@ -1236,7 +1389,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 154
     },
     {
       "title": "心中的日月",
@@ -1244,7 +1398,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 155
     },
     {
       "title": "别怕变老",
@@ -1252,7 +1407,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 156
     },
     {
       "title": "给我你的爱",
@@ -1260,15 +1416,17 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 157
     },
     {
       "title": "神爱世人 (合唱版)",
-      "artist": "邓小巧",
+      "artist": "邓小巧 / 张敬轩",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 158
     },
     {
       "title": "赛勒斯的爱",
@@ -1276,7 +1434,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 159
     },
     {
       "title": "断点",
@@ -1284,7 +1443,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 160
     },
     {
       "title": "吻得太逼真",
@@ -1292,7 +1452,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 161
     },
     {
       "title": "必杀技",
@@ -1300,7 +1461,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 162
     },
     {
       "title": "葡萄成熟时",
@@ -1308,7 +1470,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 163
     },
     {
       "title": "大哥",
@@ -1316,7 +1479,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 164
     },
     {
       "title": "单车",
@@ -1324,7 +1488,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 165
     },
     {
       "title": "千万次想象",
@@ -1332,7 +1497,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 166
     },
     {
       "title": "暗号",
@@ -1340,7 +1506,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 167
     },
     {
       "title": "星晴",
@@ -1348,7 +1515,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 168
     },
     {
       "title": "Susan说",
@@ -1356,7 +1524,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 169
     },
     {
       "title": "手写的从前",
@@ -1364,7 +1533,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 170
     },
     {
       "title": "普通女孩",
@@ -1372,7 +1542,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 171
     },
     {
       "title": "舍得",
@@ -1380,7 +1551,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 172
     },
     {
       "title": "明天过后",
@@ -1388,7 +1560,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 173
     },
     {
       "title": "他不懂",
@@ -1396,7 +1569,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 174
     },
     {
       "title": "爱我还是他",
@@ -1404,15 +1578,17 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 175
     },
     {
       "title": "LOVE. (Explicit)",
-      "artist": "",
+      "artist": "Kendrick Lamar / Zacari",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 176
     },
     {
       "title": "爱错",
@@ -1420,7 +1596,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 177
     },
     {
       "title": "小镇姑娘 (Live)",
@@ -1428,7 +1605,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 178
     },
     {
       "title": "爱你没差",
@@ -1436,7 +1614,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 179
     },
     {
       "title": "恋人",
@@ -1444,7 +1623,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 180
     },
     {
       "title": "雨时多云偶阵晴",
@@ -1452,7 +1632,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 181
     },
     {
       "title": "樱花树下",
@@ -1460,7 +1641,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 182
     },
     {
       "title": "恶作剧",
@@ -1468,7 +1650,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 183
     },
     {
       "title": "零距离的思念",
@@ -1476,15 +1659,17 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 184
     },
     {
       "title": "Duvet",
-      "artist": "Various Artists",
+      "artist": "bôa",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 185
     },
     {
       "title": "一夜情",
@@ -1492,7 +1677,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 186
     },
     {
       "title": "爱的飞行日记",
@@ -1500,7 +1686,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 187
     },
     {
       "title": "可不可以",
@@ -1508,7 +1695,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 188
     },
     {
       "title": "180度",
@@ -1516,15 +1704,17 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 189
     },
     {
       "title": "一般的一天 (Live)",
-      "artist": "",
+      "artist": "Wiz_H张子豪",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 190
     },
     {
       "title": "skeletons (Explicit)",
@@ -1532,7 +1722,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 191
     },
     {
       "title": "普通朋友",
@@ -1540,7 +1731,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 192
     },
     {
       "title": "Bleeding Love",
@@ -1548,7 +1740,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 193
     },
     {
       "title": "爱情废柴",
@@ -1556,7 +1749,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 194
     },
     {
       "title": "我想念",
@@ -1564,7 +1758,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 195
     },
     {
       "title": "无心快意",
@@ -1572,7 +1767,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 196
     },
     {
       "title": "剪爱",
@@ -1580,23 +1776,26 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 197
     },
     {
       "title": "Falling Asleep At The Wheel",
-      "artist": "",
+      "artist": "Holly Humberstone",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 198
     },
     {
       "title": "我们万岁",
-      "artist": "陈奕迅",
+      "artist": "陈奕迅 / eason and the duo band",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 199
     },
     {
       "title": "Lay It Down",
@@ -1604,15 +1803,17 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 200
     },
     {
       "title": "Deep Green (Explicit)",
-      "artist": "",
+      "artist": "Christian Kuria",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 201
     },
     {
       "title": "于心有愧",
@@ -1620,7 +1821,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 202
     },
     {
       "title": "会呼吸的痛",
@@ -1628,7 +1830,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 203
     },
     {
       "title": "不分手的恋爱",
@@ -1636,7 +1839,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 204
     },
     {
       "title": "几分之几",
@@ -1644,7 +1848,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 205
     },
     {
       "title": "名字",
@@ -1652,7 +1857,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 206
     },
     {
       "title": "沙龙",
@@ -1660,7 +1866,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 207
     },
     {
       "title": "送你一朵小红花",
@@ -1668,7 +1875,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 208
     },
     {
       "title": "天外来物",
@@ -1676,7 +1884,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 209
     },
     {
       "title": "千言万语",
@@ -1684,15 +1893,17 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 210
     },
     {
       "title": "In The Shadow Of The Sun",
-      "artist": "",
+      "artist": "Professor Green",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 211
     },
     {
       "title": "珠玉",
@@ -1700,7 +1911,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 212
     },
     {
       "title": "Attention",
@@ -1708,7 +1920,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 213
     },
     {
       "title": "Deadman",
@@ -1716,7 +1929,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 214
     },
     {
       "title": "不爱",
@@ -1724,7 +1938,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 215
     },
     {
       "title": "上爱唱的歌",
@@ -1732,15 +1947,17 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 216
     },
     {
       "title": "What Do You Mean?",
-      "artist": "",
+      "artist": "Justin Bieber",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 217
     },
     {
       "title": "Believer",
@@ -1748,7 +1965,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 218
     },
     {
       "title": "你把我灌醉",
@@ -1756,15 +1974,17 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 219
     },
     {
       "title": "STAY (Explicit)",
-      "artist": "",
+      "artist": "The Kid LAROI / Justin Bieber",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 220
     },
     {
       "title": "情胜策略",
@@ -1772,7 +1992,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 221
     },
     {
       "title": "我不难过",
@@ -1780,7 +2001,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 222
     },
     {
       "title": "普通朋友 (Live)",
@@ -1788,7 +2010,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 223
     },
     {
       "title": "鱼仔",
@@ -1796,7 +2019,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 224
     },
     {
       "title": "爱在",
@@ -1804,7 +2028,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 225
     },
     {
       "title": "才二十三",
@@ -1812,7 +2037,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 226
     },
     {
       "title": "回到过去",
@@ -1820,7 +2046,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 227
     },
     {
       "title": "不值得",
@@ -1828,7 +2055,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 228
     },
     {
       "title": "藏星",
@@ -1836,7 +2064,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 229
     },
     {
       "title": "走走",
@@ -1844,15 +2073,17 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 230
     },
     {
       "title": "Home To Mama",
-      "artist": "",
+      "artist": "Justin Bieber / Cody Simpson",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 231
     },
     {
       "title": "sheluvme",
@@ -1860,7 +2091,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 232
     },
     {
       "title": "二十二 (Live)",
@@ -1868,7 +2100,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 233
     },
     {
       "title": "素颜",
@@ -1876,7 +2109,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 234
     },
     {
       "title": "Six Degrees",
@@ -1884,7 +2118,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 235
     },
     {
       "title": "倒数",
@@ -1892,7 +2127,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 236
     },
     {
       "title": "关于爱的定义",
@@ -1900,7 +2136,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 237
     },
     {
       "title": "改变自己",
@@ -1908,7 +2145,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 238
     },
     {
       "title": "Letting Go",
@@ -1916,7 +2154,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 239
     },
     {
       "title": "Love Song (Live)",
@@ -1924,7 +2163,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 240
     },
     {
       "title": "小镇姑娘",
@@ -1932,7 +2172,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 241
     },
     {
       "title": "九月底",
@@ -1940,7 +2181,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 242
     },
     {
       "title": "如果当时",
@@ -1948,7 +2190,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 243
     },
     {
       "title": "思念病",
@@ -1956,7 +2199,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 244
     },
     {
       "title": "飞机场的10:30 (Live)",
@@ -1964,7 +2208,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 245
     },
     {
       "title": "裹着心的光",
@@ -1972,7 +2217,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 246
     },
     {
       "title": "暗号 (Live)",
@@ -1980,7 +2226,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 247
     },
     {
       "title": "有何不可",
@@ -1988,7 +2235,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 248
     },
     {
       "title": "我们俩",
@@ -1996,7 +2244,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 249
     },
     {
       "title": "颂海",
@@ -2004,7 +2253,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 250
     },
     {
       "title": "再见",
@@ -2012,7 +2262,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 251
     },
     {
       "title": "认真的雪",
@@ -2020,7 +2271,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 252
     },
     {
       "title": "Holy",
@@ -2028,7 +2280,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 253
     },
     {
       "title": "爱爱爱",
@@ -2036,7 +2289,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 254
     },
     {
       "title": "无名的人",
@@ -2044,7 +2298,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 255
     },
     {
       "title": "明明就",
@@ -2052,7 +2307,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 256
     },
     {
       "title": "花田错",
@@ -2060,7 +2316,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 257
     },
     {
       "title": "我们的歌",
@@ -2068,7 +2325,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 258
     },
     {
       "title": "就是爱你",
@@ -2076,7 +2334,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 259
     },
     {
       "title": "爱，很简单",
@@ -2084,7 +2343,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 260
     },
     {
       "title": "Melody",
@@ -2092,7 +2352,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 261
     },
     {
       "title": "流沙",
@@ -2100,7 +2361,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 262
     },
     {
       "title": "二十二",
@@ -2108,7 +2370,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 263
     },
     {
       "title": "那个女孩",
@@ -2116,7 +2379,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 264
     },
     {
       "title": "迷宫 (Live)",
@@ -2124,7 +2388,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 265
     },
     {
       "title": "心乱飞",
@@ -2132,7 +2397,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 266
     },
     {
       "title": "别问很可怕",
@@ -2140,7 +2406,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 267
     },
     {
       "title": "麦恩莉",
@@ -2148,15 +2415,17 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 268
     },
     {
       "title": "如果爱忘了 (Live)",
-      "artist": "汪苏泷",
+      "artist": "汪苏泷 / 单依纯",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 269
     },
     {
       "title": "疲惫的爱",
@@ -2164,7 +2433,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 270
     },
     {
       "title": "Love Song",
@@ -2172,7 +2442,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 271
     },
     {
       "title": "Love Yourself",
@@ -2180,7 +2451,8 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 272
     },
     {
       "title": "how deep?",
@@ -2188,15 +2460,17 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 273
     },
     {
       "title": "MILLION DOLLAR BABY",
-      "artist": "",
+      "artist": "Tommy Richman",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 274
     },
     {
       "title": "After The Storm",
@@ -2204,15 +2478,17 @@
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 275
     },
     {
       "title": "BIRDS OF A FEATHER",
-      "artist": "",
+      "artist": "Billie Eilish",
       "duration": "",
       "album": "",
       "year": "",
-      "note": ""
+      "note": "",
+      "no": 276
     }
   ],
   "history": [
@@ -2307,6 +2583,6 @@
   "classics": [],
   "classics_updated": "2026-09-22",
   "_classics 已废弃": "「常听的」那张独立小票按用户要求撤掉了（V2.7 续四十五）——他要的是「每日推荐那一栏按小票风格」。原 15 首已搬进 pool。",
-  "_duration": "pool 里每条的 duration（'m:ss'）用于小票的 AMT 列与 TOTAL；总时长由 tools/build-daily.py 现算，绝不抄外部数字。缺 duration 的条目会被标成 --:--，且此时不输出 TOTAL 行。",
+  "_duration": "有 duration（m:ss）就显示时长并算 TOTAL；没有就显示**歌单编号 no**（用户 2026-09-24 定）。两者都没有才写 --，此时不输出 TOTAL 行。总时长由 build-daily.py 现算，绝不抄外部数字。",
   "_每天几首": "默认一天**随机**抽 3 首（build-daily.py --advance 的 --count 默认值）。自动化每天 09:00 跑一次。"
 }

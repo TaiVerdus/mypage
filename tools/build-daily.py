@@ -55,14 +55,19 @@ def item_html(it, idx):
 
     ⚠️ 这一版按用户 2026-09-22 的要求改成小票风格（V2.7 续四十五）：
        他要的是「**每日推荐那一栏**按小票风格来」，不是另做一张「常听的」。
-       ⚠️ 时长缺失时写 `--:--`，不猜（此时整张票也不输出 TOTAL 行，见 build()）。"""
+       ⚠️ 时长缺失怎么办（用户 2026-09-24 定）：**显示这条歌在总歌单里的编号（no）** ——
+       歌单扩容到 276 首后多数条目没有时长，与其满屏 `--:--`，不如用真实存在的编号顶上；
+       连编号都没有才写 `--`（此时整张票也不输出 TOTAL 行，见 build()）。"""
     secs = secs_of(it.get("duration"))
     artist = ('<span class="r-artist"> — %s</span>' % esc(it.get("artist", ""))) if it.get("artist") else ""
+    if secs is not None:
+        amt = esc(it.get("duration", ""))
+    else:
+        amt = str(it.get("no")) if it.get("no") else "--"
     return ('            <li><span class="r-no">%02d</span>'
             '<span class="r-name">%s%s</span>'
             '<span class="r-amt">%s</span></li>'
-            % (idx, esc(it.get("title", "")), artist,
-               esc(it.get("duration", "")) if secs is not None else "--:--"))
+            % (idx, esc(it.get("title", "")), artist, esc(amt)))
 
 
 
@@ -81,6 +86,9 @@ def build(data):
         secs = [secs_of(it.get("duration")) for it in items]
         total_ok = all(s is not None for s in secs) and items
         total = sum(s for s in secs if s is not None)
+        # ⚠️ 用户 2026-09-24 定：只要有一条没有时长，这一栏就整体走「**歌单编号**」显示
+        #    （不能一半时长一半编号，那列会看不懂）⇒ 表头也跟着从 AMT 改成 NO.
+        use_no = not total_ok
         parts.append('        <article class="receipt">')
         parts.append('          <p class="receipt-kicker">DAILY PICKS</p>')
         parts.append('          <h3 class="receipt-title">今日推荐</h3>')
@@ -96,7 +104,8 @@ def build(data):
         parts.append('          </div>')
         parts.append('          <p class="receipt-store">00 WANG SHIXIAN · MYPAGE</p>')
         parts.append('          <div class="receipt-head" aria-hidden="true">')
-        parts.append('            <span>QTY</span><span>ITEM</span><span>AMT</span>')
+        parts.append('            <span>QTY</span><span>ITEM</span><span>%s</span>'
+                     % ('NO.' if use_no else 'AMT'))
         parts.append('          </div>')
         parts.append('          <ol class="receipt-list" role="list">')
         for i, it in enumerate(items, 1):
