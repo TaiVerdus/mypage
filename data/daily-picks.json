@@ -1,11 +1,35 @@
 {
   "_说明": "「每日推荐」的唯一数据源。页面里那一段由 tools/build-daily.py 生成，别手改生成物。",
-  "_怎么加歌": "把歌加进 pool（备选池）。每天由自动化取池子里的第一条，挪进 history 顶上（带当天日期），再重跑生成脚本。",
+  "_怎么加歌": "pool 就是**总歌单**（用户 2026-09-24 更新，共 276 首）。自动化每天 09:00 用 random.sample 从 pool 里**随机抽 3 首**写进 history 顶上（同一批里不重样），**pool 本身不消耗** —— 所以「每天随机三首」能一直成立。",
   "_字段": "title 歌名 / artist 歌手 / album 专辑 / year 年份（数字）/ note 可选的一句推荐理由（用户自己的话，没有就留空串）",
   "_缺失字段怎么办": "album / year 没有就留空 —— 生成器会跳过空的那几项，绝不编造年份。",
   "_版权口径": "只存「事实」——歌名、歌手、专辑、年份。不存音频、不存歌词、不存封面。",
   "_池子空了": "history 会一直留着最后一条，页面不会变空；自动化会跳过并不报错。",
   "pool": [
+    {
+      "title": "爱不来 (feat. Miss Ko葛仲珊)",
+      "artist": "",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "味道",
+      "artist": "方大同/Zion.T",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "瘦子 (Skinny Love)",
+      "artist": "丁世光",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
     {
       "title": "潮流季",
       "artist": "薛之谦",
@@ -95,9 +119,2097 @@
       "note": ""
     },
     {
-      "title": "唉！",
+      "title": "唉!",
       "artist": "方大同",
-      "duration": "3:40",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "公园",
+      "artist": "方大同",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "我在意的",
+      "artist": "单依纯",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "好想谈恋爱 (Live)",
+      "artist": "单依纯",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Sober (Explicit)",
+      "artist": "G-Eazy",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Electrical (Explicit)",
+      "artist": "",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "菊",
+      "artist": "关喆",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "爱琴海",
+      "artist": "周杰伦",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "淘金小镇",
+      "artist": "周杰伦",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "那天下雨了",
+      "artist": "周杰伦",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Stay Home",
+      "artist": "Elijah Woods",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "一半一半",
+      "artist": "Top Barry",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "一直很安静",
+      "artist": "",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "给我一首歌的时间",
+      "artist": "周杰伦",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "玻璃",
+      "artist": "Gareth.T",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "15 MINUTES",
+      "artist": "Jake Miller",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "世界正中",
+      "artist": "陈粒",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "That Should Be Me",
+      "artist": "",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Beauty And A Beat",
+      "artist": "",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "I’m the One",
+      "artist": "DJ Khaled",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "BUTTERFLIES",
+      "artist": "Justin Bieber",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "DEVOTION",
+      "artist": "Justin Bieber",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Long D",
+      "artist": "JACE 陈凯咏",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Sunrise (Live)",
+      "artist": "单依纯",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "船长",
+      "artist": "赵雷",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "TENDER (Live)",
+      "artist": "单依纯",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Porto girl",
+      "artist": "그래쓰 (GRASS)",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "失真",
+      "artist": "G.E.M.邓紫棋",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "读心术",
+      "artist": "卓文萱",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "想你的夜",
+      "artist": "关喆",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "DISEASE",
+      "artist": "鹤The Crane",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "不在乎",
+      "artist": "icyball 冰球乐团",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "公园前",
+      "artist": "张敬轩",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "不如见一面",
+      "artist": "海来阿木/单依纯",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "for him.",
+      "artist": "Troye Sivan/Allday",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "行走的鱼 (Live)",
+      "artist": "汪苏泷",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "月光",
+      "artist": "胡彦斌",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "半秒如果",
+      "artist": "王安宇",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "女儿心如水",
+      "artist": "邓福如 AFÜ",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "一程山路",
+      "artist": "毛不易",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "The Cure",
+      "artist": "Lady Gaga",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "同个世界 (Explicit)",
+      "artist": "J.Sheon",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "小小虫",
+      "artist": "方大同",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "飞到月球 (SUNKIS x LH)",
+      "artist": "",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "爱里",
+      "artist": "单依纯",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "爱的回归线 (Live)",
+      "artist": "单依纯",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "多少的光阴",
+      "artist": "单依纯",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "十七岁",
+      "artist": "陶喆",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Snooze (Explicit)",
+      "artist": "SZA",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Peaches (Explicit)",
+      "artist": "",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "果实",
+      "artist": "陈粒",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "世界中心",
+      "artist": "胡彦斌",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "一口 (The Day You Left Me)",
+      "artist": "",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "神探",
+      "artist": "丁世光",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "没关系",
+      "artist": "容祖儿",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "像晴天像雨天 (Live)",
+      "artist": "汪苏泷",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "遇到",
+      "artist": "方雅贤",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "大山",
+      "artist": "王睿卓",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Paper hearts (Live)",
+      "artist": "单依纯",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "思念是一种病 (Live)",
+      "artist": "单依纯",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "一个人跳舞 (Live)",
+      "artist": "单依纯",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Stand By Me (Live)",
+      "artist": "戴佩妮",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "纯寐寐",
+      "artist": "单依纯",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "卸妆",
+      "artist": "余佳运",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "瘦身男女",
+      "artist": "余佳运",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "平庸 (Live)",
+      "artist": "薛之谦",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "别叫我达芬奇",
+      "artist": "Ghost（王琳凯）",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "爱转动",
+      "artist": "曹格",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "VLOG",
+      "artist": "沙一汀EL",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "公转自转",
+      "artist": "王力宏",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "不枉 (Live)",
+      "artist": "宋亚轩",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "DAISIES",
+      "artist": "Justin Bieber",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "SPEED DEMON",
+      "artist": "Justin Bieber",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "给电影人的情书",
+      "artist": "单依纯",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "心中的日月",
+      "artist": "王睿卓",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "还你茉莉",
+      "artist": "单依纯",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "我表示理解",
+      "artist": "单依纯",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "我管不住我自己",
+      "artist": "单依纯",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "向日葵朝着夜",
+      "artist": "单依纯",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "忍住 (动感版)",
+      "artist": "司马缸砸光",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "CD盒 (Live)",
+      "artist": "step.jad依加",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "蔓珠莎华 (Live)",
+      "artist": "伍珂玥",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "迟迟",
+      "artist": "薛之谦",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "trust me",
+      "artist": "sunkis 宋秉勤",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "左转灯 (1000 Times +1)",
+      "artist": "",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "朵",
+      "artist": "赵雷",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "芳草地",
+      "artist": "陈粒",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "讽刺的情书",
+      "artist": "田馥甄",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Sheesh!",
+      "artist": "Surfaces/Tai Verdes",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "有趣 (Live)",
+      "artist": "单依纯",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "风衣",
+      "artist": "孙燕姿",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "爱我的时候",
+      "artist": "单依纯/Eric周兴哲",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "浪漫手机",
+      "artist": "周杰伦",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "紧急联络人",
+      "artist": "Gareth.T",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "South of the Border",
+      "artist": "",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "悬日",
+      "artist": "田馥甄",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "断了的弦",
+      "artist": "周杰伦",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "曾经是情侣 (Live)",
+      "artist": "梁博",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "忘记",
+      "artist": "郑润泽",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "最好的我",
+      "artist": "房祖名/龚芝怡",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "美人鱼",
+      "artist": "周杰伦",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "到时说爱我",
+      "artist": "茜拉",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "其实",
+      "artist": "薛之谦",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "歌谣",
+      "artist": "李荣浩",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "大人梦",
+      "artist": "黄旭/余佳运",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "对的人",
+      "artist": "余佳运",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "给自己的情书 (Live)",
+      "artist": "古巨基",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Gray Turns To May",
+      "artist": "单依纯",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "妈妈说",
+      "artist": "余佳运",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Oh lala",
+      "artist": "D.N.A/单依纯",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "还有什么更好的",
+      "artist": "单依纯",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "喂",
+      "artist": "单依纯",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "爱错 (feat. 单依纯) (Live)",
+      "artist": "",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Done for Me (feat. Kehlani)",
+      "artist": "",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "爱丫爱丫 (Live)",
+      "artist": "汪苏泷",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "我落泪情绪零碎",
+      "artist": "周杰伦",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "像晴天像雨天",
+      "artist": "汪苏泷",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "不舍",
+      "artist": "徐佳莹",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Stuck with U",
+      "artist": "Ariana Grande",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "矛盾",
+      "artist": "田馥甄",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "无人知晓",
+      "artist": "田馥甄",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "爱情证书",
+      "artist": "孙燕姿",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "今天只做一件事",
+      "artist": "陈奕迅",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "谁来剪月光",
+      "artist": "陈奕迅",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "可一可再",
+      "artist": "陈奕迅",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "I Don’t Care",
+      "artist": "Ed Sheeran",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "娘子",
+      "artist": "周杰伦",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Bang Bang",
+      "artist": "Jessie J",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "无赖",
+      "artist": "郑中基",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "夏天的风",
+      "artist": "温岚",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "III",
+      "artist": "Athletics",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "我爱你中国 (Live)",
+      "artist": "孙楠/韩红",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "意外",
+      "artist": "薛之谦",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "出现又离开 (Live)",
+      "artist": "梁博",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Jasmine",
+      "artist": "蔡徐坤",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "怎么了",
+      "artist": "Eric周兴哲",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "想你时风起",
+      "artist": "单依纯",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "去北极忘记你",
+      "artist": "Gareth.T",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "阳光下的星星",
+      "artist": "金海心",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "一半",
+      "artist": "薛之谦",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "心中的日月",
+      "artist": "王力宏",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "别怕变老",
+      "artist": "王以太/艾热AIR",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "给我你的爱",
+      "artist": "Tank",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "神爱世人 (合唱版)",
+      "artist": "邓小巧",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "赛勒斯的爱",
+      "artist": "张敬轩",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "断点",
+      "artist": "张敬轩",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "吻得太逼真",
+      "artist": "张敬轩",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "必杀技",
+      "artist": "古巨基",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "葡萄成熟时",
+      "artist": "陈奕迅",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "大哥",
+      "artist": "卫兰",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "单车",
+      "artist": "陈奕迅",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "千万次想象",
+      "artist": "张杰",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "暗号",
+      "artist": "周杰伦",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "星晴",
+      "artist": "周杰伦",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Susan说",
+      "artist": "陶喆",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "手写的从前",
+      "artist": "周杰伦",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "普通女孩",
+      "artist": "沙一汀EL",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "舍得",
+      "artist": "王唯旖",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "明天过后",
+      "artist": "张杰",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "他不懂",
+      "artist": "张杰",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "爱我还是他",
+      "artist": "陶喆",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "LOVE. (Explicit)",
+      "artist": "",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "爱错",
+      "artist": "王力宏",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "小镇姑娘 (Live)",
+      "artist": "陶喆",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "爱你没差",
+      "artist": "周杰伦",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "恋人",
+      "artist": "李荣浩",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "雨时多云偶阵晴",
+      "artist": "卢广仲",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "樱花树下",
+      "artist": "张敬轩",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "恶作剧",
+      "artist": "林依晨",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "零距离的思念",
+      "artist": "TINY7",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Duvet",
+      "artist": "Various Artists",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "一夜情",
+      "artist": "张惠妹",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "爱的飞行日记",
+      "artist": "周杰伦/杨瑞代",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "可不可以",
+      "artist": "张紫豪",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "180度",
+      "artist": "孙燕姿",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "一般的一天 (Live)",
+      "artist": "",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "skeletons (Explicit)",
+      "artist": "keshi",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "普通朋友",
+      "artist": "陶喆",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Bleeding Love",
+      "artist": "Ni/Co",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "爱情废柴",
+      "artist": "周杰伦",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "我想念",
+      "artist": "汪苏泷",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "无心快意",
+      "artist": "刘德华",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "剪爱",
+      "artist": "关喆",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Falling Asleep At The Wheel",
+      "artist": "",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "我们万岁",
+      "artist": "陈奕迅",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Lay It Down",
+      "artist": "steelix",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Deep Green (Explicit)",
+      "artist": "",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "于心有愧",
+      "artist": "陈奕迅",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "会呼吸的痛",
+      "artist": "梁静茹",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "不分手的恋爱",
+      "artist": "汪苏泷",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "几分之几",
+      "artist": "卢广仲",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "名字",
+      "artist": "李荣浩",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "沙龙",
+      "artist": "陈奕迅",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "送你一朵小红花",
+      "artist": "赵英俊",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "天外来物",
+      "artist": "薛之谦",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "千言万语",
+      "artist": "陶喆",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "In The Shadow Of The Sun",
+      "artist": "",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "珠玉",
+      "artist": "单依纯",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Attention",
+      "artist": "Charlie Puth",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Deadman",
+      "artist": "蔡徐坤",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "不爱",
+      "artist": "陶喆",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "上爱唱的歌",
+      "artist": "陶喆",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "What Do You Mean?",
+      "artist": "",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Believer",
+      "artist": "Imagine Dragons",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "你把我灌醉",
+      "artist": "G.E.M.邓紫棋",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "STAY (Explicit)",
+      "artist": "",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "情胜策略",
+      "artist": "方大同",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "我不难过",
+      "artist": "孙燕姿",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "普通朋友 (Live)",
+      "artist": "陶喆",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "鱼仔",
+      "artist": "卢广仲",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "爱在",
+      "artist": "方大同",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "才二十三",
+      "artist": "方大同",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "回到过去",
+      "artist": "周杰伦",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "不值得",
+      "artist": "梦飞船",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "藏星",
+      "artist": "汪苏泷",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "走走",
+      "artist": "李荣浩",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Home To Mama",
+      "artist": "",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "sheluvme",
+      "artist": "Tai Verdes",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "二十二 (Live)",
+      "artist": "陶喆",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "素颜",
+      "artist": "许嵩/何曼婷",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Six Degrees",
+      "artist": "派伟俊/周杰伦",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "倒数",
+      "artist": "G.E.M.邓紫棋",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "关于爱的定义",
+      "artist": "方大同",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "改变自己",
+      "artist": "王力宏",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Letting Go",
+      "artist": "蔡健雅",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Love Song (Live)",
+      "artist": "方大同",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "小镇姑娘",
+      "artist": "陶喆",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "九月底",
+      "artist": "余佳运",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "如果当时",
+      "artist": "许嵩",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "思念病",
+      "artist": "step.jad依加",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "飞机场的10:30 (Live)",
+      "artist": "陶喆",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "裹着心的光",
+      "artist": "林俊杰",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "暗号 (Live)",
+      "artist": "周杰伦",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "有何不可",
+      "artist": "许嵩",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "我们俩",
+      "artist": "郭顶",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "颂海",
+      "artist": "方大同/王诗安",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "再见",
+      "artist": "G.E.M.邓紫棋",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "认真的雪",
+      "artist": "薛之谦",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Holy",
+      "artist": "Justin Bieber/Chance",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "爱爱爱",
+      "artist": "方大同",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "无名的人",
+      "artist": "毛不易",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "明明就",
+      "artist": "周杰伦",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "花田错",
+      "artist": "王力宏",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "我们的歌",
+      "artist": "王力宏",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "就是爱你",
+      "artist": "陶喆",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "爱，很简单",
+      "artist": "陶喆",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Melody",
+      "artist": "陶喆",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "流沙",
+      "artist": "陶喆",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "二十二",
+      "artist": "陶喆",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "那个女孩",
+      "artist": "陶喆/卢广仲",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "迷宫 (Live)",
+      "artist": "陶喆/单依纯",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "心乱飞",
+      "artist": "陶喆",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "别问很可怕",
+      "artist": "J.Sheon",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "麦恩莉",
+      "artist": "方大同",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "如果爱忘了 (Live)",
+      "artist": "汪苏泷",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "疲惫的爱",
+      "artist": "step.jad依加",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Love Song",
+      "artist": "方大同",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "Love Yourself",
+      "artist": "Justin Bieber",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "how deep?",
+      "artist": "Tai Verdes",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "MILLION DOLLAR BABY",
+      "artist": "",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "After The Storm",
+      "artist": "Kali Uchis",
+      "duration": "",
+      "album": "",
+      "year": "",
+      "note": ""
+    },
+    {
+      "title": "BIRDS OF A FEATHER",
+      "artist": "",
+      "duration": "",
       "album": "",
       "year": "",
       "note": ""
