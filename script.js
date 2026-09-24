@@ -1675,6 +1675,22 @@ document.documentElement.classList.add('js-ready');
       && !!CLOUD_CONFIG.publishableKey;
   }
 
+  // ---------- 镜像站判断（2026-09-24 实测平台策略后加的） ----------
+  // 云服务后台的跨域预检只放行三种来源（逐个用 OPTIONS 探过的实测结果）：
+  //   ✅ 应用自己的域名、✅ 本机（localhost / 127.0.0.1，任意端口）、✅ file://（Origin: null）
+  //   ❌ 其它公开网站（GitHub Pages 镜像、example.com 一律 403）
+  // 本地开发与双击打开全都不受影响；但页面若被挂到别的域名下（比如 GitHub Pages 镜像），
+  // 表单是发不出去的 —— 与其让访客撞上一个莫名其妙的「网络连不上」，不如如实告诉他去正式地址。
+  function isMirrorSite() {
+    if (typeof location === 'undefined' || location.protocol === 'file:') return false;
+    try {
+      if (location.origin === new URL(CLOUD_CONFIG.endpoint).origin) return false;
+    } catch (e) { /* endpoint 异常就按镜像处理，宁可多提示 */ }
+    var h = location.hostname;
+    if (h === 'localhost' || h === '127.0.0.1' || h === '[::1]') return false;
+    return true;
+  }
+
   // ---------- 开合 ----------
   function open() {
     if (isOpen) return;
@@ -1883,6 +1899,10 @@ document.documentElement.classList.add('js-ready');
   }
 
   function sendToBackend(data, cb) {
+    if (isMirrorSite()) {
+      cb('这个镜像站收不了反馈——请到正式地址提交');
+      return;
+    }
     if (!backendReady()) {
       cb('客户端库没加载出来');
       return;
@@ -1964,6 +1984,19 @@ document.documentElement.classList.add('js-ready');
   });
 
   // ---------- 初始化 ----------
-  if (noticeEl) noticeEl.hidden = backendReady();   // 后端没就绪时才提示
+  if (noticeEl) noticeEl.hidden = backendReady() && !isMirrorSite();
+  if (noticeEl && isMirrorSite()) {
+    // 镜像站：如实说清「这里收不了」，并给出正式地址（DOM 方式拼，不拼 HTML 字符串）
+    noticeEl.textContent = '这是镜像站，收不了反馈（后台只接受正式地址与本机预览）。请到 ';
+    var home = document.createElement('a');
+    home.href = CLOUD_CONFIG.endpoint;
+    home.target = '_blank';
+    home.rel = 'noopener';
+    home.className = 'fb-notice-link';
+    home.textContent = '正式地址';
+    noticeEl.appendChild(home);
+    noticeEl.appendChild(document.createTextNode(' 提交，谢谢。'));
+    if (submitBtn) submitBtn.setAttribute('aria-disabled', 'true');   // 边界用 aria-disabled，不用 disabled
+  }
   updateCount();
 })();

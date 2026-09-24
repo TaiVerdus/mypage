@@ -3077,6 +3077,13 @@ html.js-ready .fb-trigger {
   border-radius: var(--r-sm);
 }
 
+/* 镜像站提示里的「正式地址」链接：跟正文同色但带下划线，看得出来能点 */
+.fb-notice a {
+  color: var(--color-brand);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .fb-field {
   display: flex;
   flex-direction: column;
