@@ -1,36 +1,50 @@
 #!/usr/bin/env node
 /**
- * 反馈后台的「真机验收」（V3 · 2026-09-24）
+ * 反馈后台的「真机验收」（V3 · 2026-09-24 改走 WorkBuddy 云服务）
  *
- * 为什么要有它：课件第 28 页说得很清楚 —— **不能只看网页提示「提交成功」**，
- * 而且「页面隐藏不等于安全」：权限必须由数据库层真的拒绝才算数。
- * 这个脚本就是去数据库那一侧问三件事，全部用**公开的 publishable key**（不需要任何高权限密钥）：
+ * 为什么要有它：课件第 28 页说得很清楚 —— **不能只看网页提示「提交成功」**；
+ * 第 18 页又说「页面隐藏不等于安全」，权限必须由**数据库层真的拒绝**才算数。
+ * 这个脚本就用**公开配置**（endpoint + publishableKey，都从 script.js 里现读）去问三件事：
  *
- *   ① 匿名访客能插入一条反馈吗？              → 期待 201
- *   ② 匿名访客能读回反馈吗？                  → 期待「读到 0 行」（RLS 挡住了）
- *   ③ 空内容 / 超长内容会被数据库拒绝吗？      → 期待 400（建表时的 check 约束在干活）
+ *   ① 匿名访客能插入一条反馈吗？          → 期待成功
+ *   ② 匿名访客能读回反馈吗？              → 期待被拒（GRANT 只给了 INSERT + RLS 没有读策略）
+ *   ③ 空内容会被数据库拒绝吗？            → 期待失败（建表时的 CHECK 约束在干活）
  *
- * 用法（两种都行）：
- *   node tools/test-feedback-db.js https://xxxx.supabase.co sb_publishable_xxxx
- *   SUPABASE_URL=... SUPABASE_KEY=... node tools/test-feedback-db.js
+ * 用法（先装官方 SDK，再跑）：
+ *   npm install --prefix <隔离的 node 工作区> @tencent-ai/workbuddy-cloud-sdk@dev
+ *   NODE_PATH=<隔离的 node 工作区>/node_modules node tools/test-feedback-db.js
  *
- * ⚠️ 只需要 publishable key。**不要**把 secret key / service_role / 数据库密码给它 ——
- *    真机上那三样永远不进前端，也不该交给任何脚本或 AI。
- * ⚠️ 它会往表里留一条测试记录（内容带唯一标记），跑完你可以去 Table Editor 里删掉，
- *    也可以留着 —— 它正好是「能查到」这条验收的证据。
+ * ⚠️ 用的是浏览器同款 SDK（不是手写 fetch）—— 手写 /.cloud/** 请求是错的。
+ * ⚠️ 只需要公开配置；高权限凭据（数据库密码 / 平台密钥）不进这个脚本、也不进任何前端文件。
+ * ⚠️ 它会真往表里写一条测试记录（带唯一标记），可在数据库管理界面删掉，也可以留着当证据。
  */
 
-var URL_ = process.argv[2] || process.env.SUPABASE_URL || '';
-var KEY = process.argv[3] || process.env.SUPABASE_KEY || '';
+var fs = require('fs');
+var path = require('path');
 
-if (!/^https?:\/\//.test(URL_ ) || !KEY) {
-  console.log('用法：node tools/test-feedback-db.js <SUPABASE_URL> <PUBLISHABLE_KEY>');
-  console.log('（或设环境变量 SUPABASE_URL / SUPABASE_KEY）');
+// ---- 配置从 script.js 现读，保证「验的就是线上用的那份」----
+var scriptPath = path.join(__dirname, '..', 'script.js');
+var src = fs.readFileSync(scriptPath, 'utf8');
+var mEndpoint = src.match(/endpoint:\s*'([^']+)'/);
+var mKey = src.match(/publishableKey:\s*'([^']+)'/);
+if (!mEndpoint || !mKey) {
+  console.log('✗ 没能从 script.js 里读到 CLOUD_CONFIG（改了写法？）');
+  process.exit(2);
+}
+var ENDPOINT = mEndpoint[1];
+var KEY = mKey[1];
+
+var sdk;
+try {
+  sdk = require('@tencent-ai/workbuddy-cloud-sdk');
+} catch (e) {
+  console.log('✗ 没找到官方 SDK。先装再跑：');
+  console.log('   npm install --prefix <隔离的 node 工作区> @tencent-ai/workbuddy-cloud-sdk@dev');
+  console.log('   NODE_PATH=<隔离的 node 工作区>/node_modules node tools/test-feedback-db.js');
   process.exit(2);
 }
 
-var ENDPOINT = URL_.replace(/\/+$/, '') + '/rest/v1/feedback';
-var HEADERS = { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' };
+var cloud = sdk.createWorkBuddyCloud({ endpoint: ENDPOINT, publishableKey: KEY });
 var MARK = '自查-' + Math.random().toString(36).slice(2, 6).toUpperCase();
 var pass = 0, fail = 0;
 
@@ -39,63 +53,48 @@ function ok(cond, label, detail) {
   else { fail++; console.log('  FAIL ' + label + (detail ? '  → ' + detail : '')); }
 }
 
-async function main() {
+(async function () {
   console.log('后台：' + ENDPOINT);
-  console.log('标记：' + MARK + '（这串字用来在 Table Editor 里认出这一条）');
+  console.log('标记：' + MARK + '（用它在数据库里认出这条测试记录）');
   console.log('');
 
-  // ① 匿名插入
   console.log('=== ① 匿名访客能不能插入一条反馈 ===');
-  var ins = await fetch(ENDPOINT, {
-    method: 'POST',
-    headers: Object.assign({ Prefer: 'return=minimal' }, HEADERS),
-    body: JSON.stringify({
-      name: '自查脚本',
-      relation: '其他',
-      device: '电脑',
-      message: MARK + ' 这条是验收脚本自动写的，用来确认「能收到、能存下」。',
-      version: 'V3.0'
-    })
+  var ins = await cloud.database.from('feedback').insert({
+    name: '自查脚本',
+    relation: '其他',
+    device: '电脑',
+    message: MARK + ' 这条是验收脚本自动写的，用来确认「能收到、能存下」。',
+    version: 'V3.0'
   });
-  var insText = await ins.text();
-  ok(ins.status === 201, '插入返回 201（能收到、能存下）', '实际 ' + ins.status + ' ' + insText.slice(0, 120));
+  ok(!ins.error, '插入成功（能收到、能存下）',
+    ins.error ? (ins.error.code + ' ' + ins.error.message) : '');
 
-  // ② 匿名读取 —— RLS 的核心证据
-  console.log('\n=== ② 匿名访客能不能读回反馈（RLS 是否真的挡住） ===');
-  var sel = await fetch(ENDPOINT + '?select=id,message&limit=5', { headers: HEADERS });
-  var selBody = '';
-  try { selBody = await sel.text(); } catch (e) { selBody = ''; }
-  var rows = null;
-  try { rows = JSON.parse(selBody); } catch (e) { rows = null; }
-  if (sel.status === 200 && Array.isArray(rows) && rows.length === 0) {
-    ok(true, '读回来是**空数组**（策略没给 anon select ⇒ 看不到任何人的反馈）');
-  } else if (sel.status === 401 || sel.status === 403) {
-    ok(true, '直接 401/403 被拒（同样算挡住了）', '实际 ' + sel.status);
+  console.log('\n=== ② 匿名访客能不能读回反馈（权限是否真的挡住） ===');
+  var sel = await cloud.database.from('feedback').select('id, message').limit(5);
+  var rows = sel.data;
+  if (sel.error) {
+    ok(true, '读取被拒（' + (sel.error.code || '') + ' ' + (sel.error.message || '').slice(0, 60) + '）');
   } else {
-    ok(false, '匿名竟然读到了数据 —— RLS 没生效，去检查 supabase/feedback.sql 有没有跑全',
-      '状态 ' + sel.status + ' / 返回 ' + selBody.slice(0, 160));
+    ok(Array.isArray(rows) && rows.length === 0,
+      '读回来是空数组（没有读策略 ⇒ 看不到任何人的反馈）',
+      JSON.stringify(rows).slice(0, 120));
   }
 
-  // ③ 数据库层的长度约束
   console.log('\n=== ③ 数据库层约束（空内容应当被拒） ===');
-  var bad = await fetch(ENDPOINT, {
-    method: 'POST',
-    headers: Object.assign({ Prefer: 'return=minimal' }, HEADERS),
-    body: JSON.stringify({ message: '', relation: '其他', device: '电脑', version: 'V3.0' })
+  var bad = await cloud.database.from('feedback').insert({
+    message: '', relation: '其他', device: '电脑', version: 'V3.0'
   });
-  var badText = await bad.text();
-  ok(bad.status >= 400, '空 message 被数据库拒绝（不只是靠前端拦）', '实际 ' + bad.status + ' ' + badText.slice(0, 120));
+  ok(!!bad.error, '空 message 被数据库拒绝（不只是靠前端拦）',
+    bad.error ? (bad.error.code + ' ' + bad.error.message) : '竟然成功了');
 
   console.log('\n通过 ' + pass + ' / 失败 ' + fail);
   if (!fail) {
     console.log('\n⇒ 三条都过：后台真的在收、权限真的在挡、约束真的在管。');
-    console.log('  去 Supabase 的 Table Editor 搜「' + MARK + '」，应该正好能看到那一条。');
+    console.log('  去云服务的数据管理界面搜「' + MARK + '」，应该正好能看到那一条。');
   }
   process.exit(fail ? 1 : 0);
-}
-
-main().catch(function (e) {
+})().catch(function (e) {
   console.log('跑挂了：' + (e && e.message ? e.message : e));
-  console.log('先确认：项目地址对不对、publishable key 有没有抄全、网络能不能到 Supabase。');
+  console.log('先确认：endpoint / publishableKey 对不对、网络能不能到后台。');
   process.exit(1);
 });

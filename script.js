@@ -1624,15 +1624,17 @@ document.documentElement.classList.add('js-ready');
 
 (function () {
   /* ============================================================
-     后端配置
+     后端配置（WorkBuddy 云服务 · 2026-09-24 激活）
      ------------------------------------------------------------
-     publishable key 是「设计上就可以公开」的密钥，放在前端是正常的。
-     ⚠️ secret key / service_role / 数据库密码 —— 永远不要写在这里，
-     也不要提交进 git。前端代码是全网可见的。
+     这两个值是「设计上就可以公开」的公开配置（客户端初始化用），放在前端是正常的。
+     ⚠️ 真正的高权限凭据（service_role / 数据库密码 / 平台密钥）只在平台那一侧，
+     永远不进前端、不进 git、也不交给 AI。
+     ⚠️ endpoint 必须用这里写死的这个（平台按 Origin + 应用绑定校验）；
+     别改成 location.origin，也别在别处再初始化一个客户端。
      ============================================================ */
-  var SUPABASE_CONFIG = {
-    url: '',              // 形如 https://abcdefghijklmn.supabase.co
-    publishableKey: ''    // 形如 sb_publishable_xxxxxxxxxxxx
+  var CLOUD_CONFIG = {
+    endpoint: 'https://mypage-38202.app.workbuddy.host',   // 来自激活时的 publicConfig.endpoint
+    publishableKey: 'wbpk_aEH7ucbFjEJiB6me355TAg_x2LJk4zHHaBkp9wK8WdEIXhPbjsZusAn'
   };
 
   var PAGE_VERSION = 'V3.0';
@@ -1667,7 +1669,10 @@ document.documentElement.classList.add('js-ready');
   // 没配好就老实说「还没接上」，绝不假装成功——
   // 假成功比报错更糟：用户以为反馈送到了，你这边一条都收不到
   function backendReady() {
-    return /^https?:\/\//.test(SUPABASE_CONFIG.url) && !!SUPABASE_CONFIG.publishableKey;
+    return typeof window.WorkBuddyCloud !== 'undefined'
+      && typeof window.WorkBuddyCloud.createWorkBuddyCloud === 'function'
+      && /^https?:\/\//.test(CLOUD_CONFIG.endpoint)
+      && !!CLOUD_CONFIG.publishableKey;
   }
 
   // ---------- 开合 ----------
@@ -1846,29 +1851,57 @@ document.documentElement.classList.add('js-ready');
     });
   }
 
-  // ---------- 发往 Supabase ----------
+  // ---------- 发往云端后台（WorkBuddy 云服务） ----------
   // 单独拎一层：库没加载、网络断了、表不存在、权限被拒……
   // 全部在这里收口成「成功 / 失败 + 人话原因」，上层不用关心细节
+  //
+  // ⚠️ 客户端只初始化一次（懒加载缓存），四个模块共用同一个实例 —— 别在别处再建一个
+  var cloudClient = null;
+  function getCloud() {
+    if (!cloudClient) {
+      cloudClient = window.WorkBuddyCloud.createWorkBuddyCloud({
+        endpoint: CLOUD_CONFIG.endpoint,          // ⚠️ 必须来自配置，不要用 location.origin
+        publishableKey: CLOUD_CONFIG.publishableKey
+      });
+    }
+    return cloudClient;
+  }
+
+  // 把后端的报错翻成中文人话。数据库错误码是「好事」：说明请求真的到了数据库那一层，
+  // 剩下的问题都在表 / 权限里。平台层的 401（凭据没带上）不是这里能修的，照实说。
+  function humanizeError(err) {
+    var code = err && err.code;
+    if (code === '42P01') return '数据库里还没有这张表（建表脚本没跑？）';
+    if (code === '42501') return '数据库权限拒绝了这条记录（RLS 或授权没配好）';
+    if (code === '23505') return '这条好像已经提交过了';
+    if (code === '23514') return '内容不合法：反馈正文要 1~1000 字';
+    var msg = (err && err.message) ? String(err.message) : '';
+    if (/MISSING_CREDENTIALS|ACCESS_TOKEN_KID_INVALID/.test(msg) || /401/.test(String(code || ''))) {
+      return '后端的凭据没通过（这是平台侧的问题，不是我这边能改的）';
+    }
+    return msg || '数据库拒绝了这条记录';
+  }
+
   function sendToBackend(data, cb) {
-    if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
+    if (!backendReady()) {
       cb('客户端库没加载出来');
       return;
     }
 
     var client;
     try {
-      client = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.publishableKey);
+      client = getCloud();
     } catch (err) {
-      cb('客户端初始化失败，检查一下项目地址和密钥');
+      cb('客户端初始化失败，稍后再试一次');
       return;
     }
 
-    // 用 Promise.resolve 包一层：supabase 返回的是 thenable，
+    // 用 Promise.resolve 包一层：SDK 返回的是 thenable，
     // 这样能保证 then / catch 两套接口都在
-    Promise.resolve(client.from('feedback').insert(data))
+    Promise.resolve(client.database.from('feedback').insert(data))
       .then(function (res) {
         if (res && res.error) {
-          cb(res.error.message || '数据库拒绝了这条记录');
+          cb(humanizeError(res.error));
         } else {
           cb(null);
         }

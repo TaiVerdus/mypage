@@ -160,7 +160,8 @@
 | 69 | `36f7507` | 09-23 | V2.7 续八十: 「双击打开只有离线回答」排障（根因：8080 没服务在跑）+ 补 PNA 预检（Chrome 私有网络访问）+ 一键启动器 `start-twin-server.cmd` + proxy 测试 66→69 |
 | 70 | `a84f269` | 09-24 | V2.7 续八十一: 启动器改成「自己找 node」（这台机器没有系统级 Node，只有 WorkBuddy 自带那份）+ README 说明 |
 | 71 | `bcb0d3f` + `def621b` | 09-24 | V2.7 续八十二: 自启动机制 —— `start-server.cmd`（找 node / 防重复 / 崩了自重启，进 git）+ 仓库外双击入口改薄包装 + 开机自启（Startup）+ README 说明；**同轮补**：`.cmd` 行尾统一 CRLF + `.gitattributes` 钉住 + 重启循环改用 ping 等待（文档同步折进本行） |
-| 72 | — | 09-24 | **V3.0 起步**: 从搁置版移植反馈抽屉（HTML 140 / CSS 538 / JS 316 行，补 3 个 token + supabase-js + 页脚与版本号改造）+ `supabase/feedback.sql` + `FEEDBACK.md` + `DEPLOY.md` §8 GitHub Pages 发布 + V2.0 快照 zip（本次提交，哈希见 `git log`） |
+| 72 | `46623ff` / `928ccc5` / `deacfd7` | 09-24 | **V3.0 起步**: 从搁置版移植反馈抽屉（HTML 140 / CSS 538 / JS 316 行，补 3 个 token + 客户端库 + 页脚与版本号改造）+ `FEEDBACK.md` + `DEPLOY.md` §8 GitHub Pages 发布 + V2.0 快照 zip；同轮：`sync-version` 改「跟当前分支走」+ 验收脚本 `test-feedback-db.js` |
+| 73 | — | 09-24 | **V3.0 后端落地**: 后端改用 **WorkBuddy 云服务**（激活应用 + 建 `feedback` 表 + RLS/GRANT + RLS 策略）+ 前端换官方 SDK + 真机验收三条全过并从库侧读回 `id=1` + `FEEDBACK.md` 按真实后端重写 + `DEPLOY.md` §8.6（本次提交，哈希见 `git log`） |
 
 ### 仓库分布与分支（2026-09-17 整理）
 
@@ -236,6 +237,37 @@ python tools/sync-version.py --check   # 提交后核对：按 git 真实条数�
 `--check` 则按 git 现在的真实条数比对，是**提交之后**用的。
 
 ## 迭代日志
+
+### 2026-09-24 · V3.0 后端落地（改用 WorkBuddy 云服务，用户拍板）
+
+**用户**先问「必须要弄 Supabase 吗 / 怎么做最效率」→ 我给的判断：不是必须，但换服务要付**讲解成本**
+（课件 Part 2/3 整套是按 Supabase 讲的）；最效率的不是选型而是**分工**（他 4 步账号操作，其余我做）。
+→ **他拍板：「直接用 workbuddy 的吧」**。于是改走 WorkBuddy 云服务。
+
+**做了什么**：
+- **激活云服务**（确认弹框由用户点）：应用 `个人主页`（`wbapp_aEH7ucbFjEJiB6me355TAg`，
+  域名前缀 `mypage`）；拿到 `publicConfig`（`endpoint` = `https://mypage-38202.app.workbuddy.host` + `publishableKey`）
+- **建表 + 权限**（走数据库管理通道，**一句一次**）：
+  `feedback`（`message` 带 `CHECK (char_length(message) BETWEEN 1 AND 1000)`、`created_at DEFAULT now()`）
+  + 索引 + 表注释 + `ENABLE ROW LEVEL SECURITY` + `GRANT INSERT ON feedback TO authenticated, anon`
+  + 策略 `feedback_insert_anyone`（INSERT / `WITH CHECK (true)`；`pg_policies` 实测角色 = `{anon,authenticated}`）
+  ⇒ **只给 INSERT、且没有 SELECT 策略**：访客读不到、改不了、删不了
+  ⚠️ 本表**没有 `owner_id`**：访客是匿名的，不存在「属于谁」的问题
+- **前端换接线**：CDN 从 supabase-js 换成官方 `@tencent-ai/workbuddy-cloud-sdk@dev`（全局 `WorkBuddyCloud`）；
+  `SUPABASE_CONFIG` → `CLOUD_CONFIG`；提交层改成 `client.database.from('feedback').insert(...)`；
+  错误码翻人话（`42P01` 没表 / `42501` 权限 / `23514` 约束 / `401` 平台凭据）
+- **验收脚本重写**：`tools/test-feedback-db.js` 改为**从 `script.js` 现读配置**（避免两份配置漂移）、
+  走**浏览器同款 SDK** 问三件事 ⇒ **三条全过**（匿名能插入 / 匿名读回空数组 / 空内容被拒）；
+  并从数据库侧读回那条记录：`id=1`、字段齐全、`created_at = 2026-09-24T09:39:04+08:00`、`version = V3.0`
+  ⇒ 课件那条验收标准（带唯一标记提交 → 回后台核对）**已达成**
+- **文档**：`FEEDBACK.md` 按真实后端重写（数据流 / 表结构 / 逐句 SQL / **两道门** / 两种凭据 /
+  他要做的 4 步 / 排查表）；`DEPLOY.md` 新增 §8.6；`supabase/feedback.sql` 标注「未采用、备查」
+
+**顺带确认的一条硬事实**（讲解时用得上）：WorkBuddy 云服务底层就是**托管 PostgreSQL + PostgREST**，
+角色同样是 `anon` / `authenticated`，权限同样是 **GRANT + RLS 两道门** ⇒
+**课件里的表 / SQL / 权限 / 公开密钥概念一条都没少**，只是不用自己开控制台。
+⚠️ 另一条**实测**结论：数据库写入**不挑页面来源**（我从 node 不带 Origin 也写成功了）
+⇒ 页面挂 GitHub Pages 照样能提交反馈；但**登录类功能**挑精确 Origin（本项目无登录，不受限）。
 
 ### 2026-09-24 · V3.0 起步（反馈后台 + 发布准备）
 
@@ -2658,7 +2690,7 @@ key 会被抄走烧额度；而且 **CORS 挡不住**（它只是浏览器的规
 | V2.5 | 新增 CarbonBrain 项目条目 | ✅ 已完成（06298ea） |
 | V2.6 | 页面数据校正 + 建立 AI 使用日志 + 摄影集署名纠正 + 仓库整合 | ✅ 已完成（tag `v2.6`；曾标记为「V2 封版」，**同日晚些时候由用户撤销**） |
 | V2.7 | 撤销封版 + 新增 AI 使用日志子页 `ai-log.html` + 首页两个入口 | ✅ 已完成 |
-| V3 | 反馈表单 + 数据库 + 部署上线 + 收集 3 人反馈 | 🔄 **进行中（09-24 起步）**：反馈抽屉已从搁置版移植进主线（入口/表单/三态/Supabase 接入）；`supabase/feedback.sql` 与 `FEEDBACK.md` 就绪 ⇒ 接着等他建 Supabase 项目 + 填 publishable key + 开 GitHub Pages |
+| V3 | 反馈表单 + 数据库 + 部署上线 + 收集 3 人反馈 | 🔄 **进行中**：反馈抽屉已移植进主线；**后端改用 WorkBuddy 云服务**（09-24 激活应用 `个人主页`，表 `feedback` + RLS 权限已建，真机验收三条全过、数据库侧读回 `id=1`）⇒ 剩下：开 GitHub Pages 发布 + 收 3 人反馈 |
 | V4 | 基于反馈迭代 | 🔲 待做 |
 
 ## Git 操作备忘

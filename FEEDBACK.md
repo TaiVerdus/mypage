@@ -1,99 +1,124 @@
-# 反馈后台（V3）：它怎么工作、你要做哪几步
+# 反馈后台（V3）：它怎么工作、你在哪看数据
 
 > 面向两件事：**课程验收**（能解释清楚表 / SQL / 权限 / 密钥）和**以后自己回看**。
+> 后端 = **WorkBuddy 云服务**（托管 PostgreSQL + PostgREST 接口 + 行级安全 RLS），
+> 应用 `个人主页`（`wbapp_aEH7ucbFjEJiB6me355TAg`）。
 > 代码在 `index.html`（抽屉表单）、`style.css`（`.fb-*` 那一段）、`script.js`（末尾「交互十：反馈抽屉」）。
-> 建表脚本在 `supabase/feedback.sql`。
 
 ## 1. 一次反馈的数据流
 
 ```
 访客打开主页 → 点右下角「留个反馈」→ 填表（不跳页）
-    → 浏览器把数据发给 Supabase（带项目地址 + publishable key）
-        → Supabase 按 RLS 规则判断：这条允许插入吗？ → 写进 feedback 表
+    → 浏览器用官方 SDK（@tencent-ai/workbuddy-cloud-sdk）把数据发给云服务
+        → 云服务按 RLS + 授权判断：这条允许插入吗？ → 写进 feedback 表
     → 前端收到成功/失败 → 显示「收到了，谢谢」或人话错误 + 保留已填内容
-你：登录 Supabase 控制台 → Table Editor 看记录
+你：打开云服务面板 → 数据管理 → feedback 表看记录
 ```
 
-⚠️ 关键：是**浏览器**直接向 Supabase 提交，不是 GitHub Pages 替你写数据库。
-GitHub Pages 只负责把 `index.html / style.css / script.js` 这些静态文件发给访客。
+⚠️ 关键：**是「浏览器」向后台提交数据**，不是托管页面的服务替访客写数据库。
+静态托管只负责把 `index.html / style.css / script.js` 发给访客。
 
-## 2. 表结构：一条反馈 = 一行
+## 2. 表结构：一条反馈 = 一行（这就是数据库概念的样子）
 
 | 列（字段） | 类型 | 含义 | 谁填 |
 | --- | --- | --- | --- |
-| `id` | bigint，主键 | 每条记录的唯一编号 | 数据库自动 |
-| `name` | text | 昵称（可选，允许匿名） | 访客 |
+| `id` | bigint，**主键** | 每条记录的唯一编号（自增） | 数据库自动 |
+| `name` | text | 昵称（可空，允许匿名） | 访客（选填） |
 | `relation` | text | 与主页主人的关系（同学/老师/家人/朋友/同事/其他/不便透露） | 访客选 |
 | `device` | text | 这条反馈针对的设备（电脑/手机/平板/其他） | 访客选 |
-| `message` | text，必填 | 反馈正文（1~1000 字） | 访客 |
-| `version` | text | 网站版本（前端提交时自动带上 `V3.0`） | 前端自动 |
+| `message` | text，必填 | 反馈正文（1~1000 字，超了数据库会拒） | 访客 |
+| `version` | text | 网站版本，提交时前端自动带上 `V3.0` | 前端自动 |
 | `created_at` | timestamptz | 提交时间 | **数据库** `now()` |
 
-对照概念：**表**（table）= feedback；**行**（记录）= 一条反馈；**列** = 上表的一行；
-**主键** = `id`，每条记录的唯一编号。
+**表（table）** = `feedback`；**行** = 一条反馈；**列** = 上表的一行；**主键** = `id`。
+⚠️ 注意**没有** `owner_id`：本表的访客是匿名的，不存在「这条属于谁」的问题 —— 权限靠下面的策略管。
 
-## 3. 建表脚本在做什么（`supabase/feedback.sql`）
+## 3. 实际跑过的 SQL（逐句什么意思）
 
-1. `create table` —— 建表；`message` 上挂了 `check`，**空的和超 1000 字的在数据库层就挡掉**（不只靠前端）。
-2. `created_at default now()` —— 时间由数据库记，**不信客户端**（访客改不了自己的提交时间）。
-3. `enable row level security` —— 开 RLS ⇒ **默认拒绝一切**，必须显式写策略放行。
-4. `create policy ... for insert to anon` —— 只放行一件事：**匿名访客插入新反馈**。
-5. `grant insert on ... to anon` —— 表级权限上再确认一次「只能插入」。
+```sql
+-- 建表：一条反馈一行。message 上的 CHECK 让「空的 / 超 1000 字」在数据库层就被挡掉
+CREATE TABLE feedback (
+  id         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  name       TEXT,
+  relation   TEXT,
+  device     TEXT,
+  message    TEXT NOT NULL CHECK (char_length(message) BETWEEN 1 AND 1000),
+  version    TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()      -- 时间由**数据库**记，不信客户端
+)
+```
+```sql
+CREATE INDEX feedback_created_at_idx ON feedback (created_at DESC)  -- 按时间倒序看反馈更快
+COMMENT ON TABLE feedback IS '访客反馈：一条反馈=一行（V3，2026-09-24）'
+```
+```sql
+ALTER TABLE feedback ENABLE ROW LEVEL SECURITY                 -- 开 RLS ⇒ 默认拒绝一切，必须显式放行
+GRANT INSERT ON TABLE public.feedback TO authenticated, anon   -- 第一道门：表级授权，只给「插入」
+DROP POLICY IF EXISTS feedback_insert_anyone ON feedback       -- PG 没有 CREATE POLICY IF NOT EXISTS
+CREATE POLICY feedback_insert_anyone ON feedback               -- 第二道门：行级策略
+  FOR INSERT TO authenticated, anon WITH CHECK (true)
+```
 
-**为什么没有读策略**：访客读不到别人的反馈、也改不了删不了 —— 这不是靠页面上藏按钮，
-而是数据库层根本不允许。你自己能看到，是因为控制台用的是高权限（service_role，绕过 RLS）。
+**两道门都要过**（这正是课件第 18~20 页讲的那件事）：
+1. **表级授权**：只 `GRANT INSERT` ⇒ 谁都没有 `SELECT / UPDATE / DELETE` 的权力；
+2. **行级策略**：只建了一条 INSERT 策略，**没有** SELECT 策略 ⇒ 读了也是空。
 
-## 4. 两种密钥，别搞混
+⇒ 结果：**访客只能提交新反馈，读不到别人的、改不了、删不了**。这不是靠页面上藏按钮，
+是数据库层根本不允许 —— 第 6 节脚本的 ② 号检查就是去证明这一点。
 
-| | 能不能放前端 | 在本项目的用途 |
+## 4. 两种凭据，别搞混
+
+| | 能不能放前端 | 本项目里在哪 |
 | --- | --- | --- |
-| **publishable key**（旧称 anon key） | ✅ 可以 —— 它设计上就是给浏览器用的，权限由 RLS 兜着 | 填在 `script.js` 的 `SUPABASE_CONFIG` |
-| **secret key**（旧称 service_role）/ 数据库密码 | ❌ **永远不进前端、不进 git、不给 AI** | 你只在控制台里用，本项目任何文件都不需要它 |
+| **公开配置**：`endpoint` + `publishableKey` | ✅ 可以 —— 设计上就是给浏览器用的，权限由 RLS 兜着 | `script.js` 顶部的 `CLOUD_CONFIG` |
+| **平台侧高权限凭据**（数据库密码 / 平台密钥 / service_role 之类） | ❌ **永不进前端、不进 git、不给 AI** | 只在平台那一侧 |
 
-⚠️ 本项目对 AI 的实际做法：**只把 publishable key 和项目地址给它**，secret 从不提供（课件第 21 / 30 页的红线）。
+⚠️ 本项目对 AI 的实际做法：**只把公开配置交给 AI**，高权限凭据自始至终没提供过（课件第 21 / 30 页的红线）。
 
-## 5. 你要做的步骤
+## 5. 你要做的（已经很短了）
 
-1. 注册 / 登录 Supabase，新建一个项目（记下数据库密码，别丢、也别给任何人）。
-2. 进 **SQL Editor** → 把 `supabase/feedback.sql` 整段粘进去 → Run。
-3. 进 **Table Editor**，应该能看到空的 `feedback` 表（字段与第 2 节一致）。
-4. 进 **Project Settings → API**，复制 **Project URL** 和 **publishable key**（**不是** secret）。
-5. 把这两项填进 `script.js` 的：
-   ```js
-   var SUPABASE_CONFIG = {
-     url: 'https://xxxx.supabase.co',
-     publishableKey: 'sb_publishable_xxxxxxxx'
-   };
-   ```
-6. 本地打开页面（`node server.js` 后访问 `http://127.0.0.1:8080/`，或直接双击 `index.html` 也行 ——
-   反馈这条路不依赖本机代理），点右下角「留个反馈」，**用带唯一标记的内容**提交一次，例如：
-   `测试-A7K3 电脑端字有点小`
-7. 回 **Table Editor** 找到那条记录：**字段齐全、时间正确**才算真的成功（这是课件的验收标准）。
-8. 让机器再替你验一遍（**不用高权限密钥，只用 publishable key**）：
-   ```bash
-   node tools/test-feedback-db.js https://xxxx.supabase.co sb_publishable_xxxxxxxx
-   ```
-   它去数据库那侧问三件事：**① 匿名能插入吗（期待 201）② 匿名能读回吗（期待读到 0 行 —— RLS 真的挡住了）
-   ③ 空内容会被数据库拒绝吗（期待 400 —— 约束真的在管）**。三条都过，才算「权限在数据库层」有证据。
-9. 发布到 GitHub Pages（见 `DEPLOY.md` §8），再用**公开网址**在手机和电脑上各提交一条。
+后端我已经建好并验过（表 / 权限 / 写入 / 拒绝读，见第 6 节），你只需要：
 
-## 6. 没接上后台时会怎样（演示模式）
+1. **看数据**：打开 **云服务面板 → 数据管理**，找到 `feedback` 表 —— 现在里面有一条
+   `自查-XYGJ` 的测试记录（验收脚本写的，认完可以删）。
+2. **自己真提交一条**：本地打开页面（双击 `index.html`，或访问 `http://127.0.0.1:8080/`），
+   点右下角「留个反馈」，写一条**带唯一标记**的（如 `本地-A7K3 手机上字有点小`），提交后回面板核对。
+3. **发布**（见 `DEPLOY.md` §8）：GitHub 开 Pages 后，用**公开网址**在电脑和手机上各提交一条
+   —— 课件的验收标准是「本地成功 ≠ 线上成功」，这两条线上测试不能省。
+4. **收集 3 人反馈**（下一步就是拿这些反馈做 V4）。
 
-`SUPABASE_CONFIG` 还是空的时候，表单**可以照常填**，但提交后显示的是**演示模式**文案：
-这条没真的发出去。这是故意的 —— 界面能先给人看，但绝不假装「已经收到了」。
+## 6. 怎么自己验后台（不用高权限凭据）
+
+```bash
+NODE_PATH=<隔离的 node 工作区>/node_modules node tools/test-feedback-db.js
+```
+
+它用**和浏览器同款的官方 SDK**、以及从 `script.js` 现读的公开配置，问数据库三件事：
+
+| 检查 | 期待 | 为什么这条重要 |
+| --- | --- | --- |
+| ① 匿名插入一条 | 成功 | 「能收到、能存下」 |
+| ② 匿名读回 | **空数组 / 被拒** | 「权限在数据库层」——页面藏起来不算数 |
+| ③ 提交空内容 | 失败 | 约束在数据库层，不只靠前端拦 |
+
+**2026-09-24 实测：三条全过**；并从数据库侧读回了那条记录
+（`id=1`、字段齐全、`created_at = 2026-09-24T09:39:04+08:00`、`version = V3.0`）。
 
 ## 7. 出问题先看这几条
 
 | 现象 | 大概率原因 |
 | --- | --- |
-| 提示「数据库拒绝了这条记录」 | RLS 策略没建 / 跑脚本时漏了 `create policy` |
-| 提示「表不存在」之类 | SQL 没跑成功（回 SQL Editor 看有没有红字） |
-| 提示「客户端初始化失败」 | `url` / `publishableKey` 填错或还空着 |
-| 提示「客户端库没加载出来」 | 页面上那个 Supabase CDN 脚本没加载成功（网络/被拦） |
-| 提交成功但 Table Editor 找不到 | 表建在别的 schema，或看错项目 |
+| 「数据库里还没有这张表」 | 表没建（错误码 `42P01`） |
+| 「数据库权限拒绝了这条记录」 | 授权或 RLS 策略没配好（`42501`，两道门都要查） |
+| 「内容不合法：反馈正文要 1~1000 字」 | 正文空或超长（`23514`，CHECK 在拦） |
+| 「客户端库没加载出来」 | 那个 SDK 的 CDN `<script>` 没加载成功（网络 / 被拦） |
+| 「后端的凭据没通过」 | 平台侧凭据问题（HTTP 401）——不是页面能修的，照实报给平台 |
 
 ## 8. 已知限制（V3 范围之内，不当 bug 修）
 
 - **公开网站上数字分身会落回本地知识库**：它的在线大脑是本机的 `server.js` 代理（保管 DeepSeek key），
-  而 GitHub Pages 只能托管静态文件、跑不了 Node。想让它也上线，得把代理搬到别处（Supabase Edge Function 之类）—— 那是下一步的事。
-- **没有防刷**：这里只防「误点重复提交」（提交中禁用按钮）。长期公开挨刷的话要额外加限流 / 验证码（课件第 29 页也这么提醒）。
+  静态托管跑不了 Node。想让它也上线，得把代理搬到云服务 / Edge Function 之类的地方 —— 下一步的事。
+- **没有防刷**：只防「误点重复提交」（提交中禁用按钮）。长期公开挨刷要另加限流 / 验证码
+  （课件第 29 页也这么提醒）。
+- **课件原路径备查**：`supabase/feedback.sql` 是「用 Supabase 做同一件事」的脚本，**本项目没有采用**
+  （用户选择直接用 WorkBuddy 云服务）。留着是为了讲解时能对照两种后台，或以后想切回去。

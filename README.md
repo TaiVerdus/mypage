@@ -43,7 +43,7 @@ MYPAGE-V2.0/
 │   ├── daily-picks.json 「每日推荐」的歌单与历史（小票的数据源）
 │   └── persona.json     ⭐ 数字分身的**事实档**：它能说什么、离线怎么答，只有这一份源
 ├── supabase/
-│   └── feedback.sql     V3 的**建表 + RLS 策略**脚本（在 Supabase SQL Editor 里跑；不含任何密钥）
+│   └── feedback.sql     ⚠️ **本项目未采用**（改用 WorkBuddy 云服务了）：用 Supabase 做同一件事的脚本，备查
 ├── tools/
 │   ├── build-ai-log.py 把 AI 使用日志的 Markdown 源生成 ai-log.html（只用标准库）
 │   ├── sync-version.py 把「共 N 次提交」这类易过时的数字从 git 读出来写回文档
@@ -58,7 +58,7 @@ MYPAGE-V2.0/
 │   ├── openai-stub.py  本地联调桩：最小 OpenAI 兼容端点（零依赖、含 CORS），验证「换大脑」链路
 │   ├── probe-openai-endpoint.js 探测某个端点页面能不能用（响应形状 / CORS / 耗时）
 │   ├── test-chat-proxy.js 「云端代理」的回归测试（锁人设 / 限长 / 限速 + 整条公网链路）
-│   └── test-feedback-db.js V3 反馈后台的**真机验收**：匿名能插入 / 匿名读不到（RLS 生效）/ 空内容被拒
+│   └── test-feedback-db.js V3 反馈后台的**真机验收**：匿名能插入 / 匿名读不到（权限生效）/ 空内容被拒
 ├── server.js           线上入口：托管页面 + 代理 /api/chat（零依赖 Node，公网部署用）
 ├── package.json        npm start / npm test（发布沙箱按它识别这是个 Node 项目）
 ├── .env                ⚠️ **机密，不进 git**：DEEPSEEK_API_KEY（怎么建见 DEPLOY.md §2）
@@ -258,7 +258,7 @@ python tools/openai-stub.py
 
 | 分支 | 内容 | 提交数 |
 | --- | --- | --- |
-| `v3` | **当前**版本线：`V3.0`（反馈后台 + 发布），从 `v2` 拉出来的 | 78 |
+| `v3` | **当前**版本线：`V3.0`（反馈后台 + 发布），从 `v2` 拉出来的 | 79 |
 | `v2` | V2 版本线：`V2.0` → `V2.7`（**已冻结**，2026-09-24） | 74 |
 | `main` | V1 版本线：`V1.0` / `V1.1` | 2 |
 
@@ -267,7 +267,7 @@ python tools/openai-stub.py
 哈希全部改变，已经记录在文档里的提交号会集体失效。保持两条独立历史、并在这里说明原因，
 比「看起来整齐」更重要。
 
-页面上写的「共 80 次提交」＝ `v3` 的 78 条 ＋ `main` 的 2 条。
+页面上写的「共 81 次提交」＝ `v3` 的 79 条 ＋ `main` 的 2 条。
 
 ## 设计上几个刻意的决定
 
