@@ -1795,7 +1795,7 @@ document.documentElement.classList.add('js-ready');
       relation:     picked('relation'),
       device:       picked('device'),
       message:      msgEl ? msgEl.value.trim() : '',
-      page_version: PAGE_VERSION
+      version:      PAGE_VERSION   // ⚠️ 必须与 feedback 表的列名一致（表里叫 version，不是 page_version）
     };
   }
 

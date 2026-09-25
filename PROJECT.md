@@ -243,6 +243,21 @@ python tools/sync-version.py --check   # 提交后核对：按 git 真实条数�
 
 ## 迭代日志
 
+### 2026-09-26 · 🔧 线上首单报错修复（page_version → version）
+
+**他在正式地址按步骤 1 提交，报错**：`Could not find the 'page_version' column of 'feedback' in the schema cache`。
+
+**根因**：反馈模块是 9-17 旧草稿移植的，它的 `collect()` 发送的字段叫 **`page_version`**（草稿自己的表设计）；
+我 09-24 建表时按课件写的是 **`version`**。两处一直没对上 ——
+**为什么没测出来**：我的「真机验收」用的是**自己拼的请求**（字段名恰好对），测的是数据库不是页面的载荷 ⇒
+E2E 测试必须用**页面自己的载荷构造**，这条教训已记。新增 `tools/verify-collect-payload.js`（从 script.js 现读配置、
+按 collect() 修复后的原样字段插入）作为回归工具。
+
+**修复**：`collect()` 的 `page_version` → `version`（一行）；用修复后的原样字段实测插入 **OK** ✅。
+错误提示链路表现符合设计（人话错误 + 内容保留 + 可重试）——失败路径这次也算被真实演练了。
+
+**⏳ 待办**：沙箱里跑的还是旧代码 ⇒ **需要重新发布**才能在线上生效（等他说「更新线上」）。
+
 ### 2026-09-24 · 🚀 正式发布上线（用户说「发布」→ WorkBuddy 应用发布）
 
 **正式地址：`https://mypage-38202.app.workbuddy.host/`**（复用已绑定云服务的应用 ⇒ 域名与 Origin 天然一致）
