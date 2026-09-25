@@ -1244,6 +1244,29 @@ if (fxCanvas && (fxCanHover || fxTouchMode) && !fxReduced && fxCanvas.getContext
   fxStart();
   // 开场先来一圈波 —— 一眼看出这东西是活的
   fxWaves.push({ x: fxW / 2, y: fxH * 0.42, t: 0 });
+
+  // ---- 调试开关（?fx=1）：把形状场的状态贴在屏幕角上，手机排查专用 ----
+  // 正式页面没有任何入口指向它；每 1.8s 自动放一圈波 —— 不摸屏幕也能看出画布是不是活的
+  if (location.search.indexOf('fx=1') !== -1) {
+    var fxBadge = document.createElement('div');
+    fxBadge.style.cssText = 'position:fixed;top:6px;right:6px;z-index:9999;' +
+      'font:11px/1.6 monospace;color:#0f0;background:rgba(0,0,0,.65);' +
+      'padding:4px 7px;border-radius:4px;pointer-events:none;';
+    document.body.appendChild(fxBadge);
+    function fxBadgeTick() {
+      fxBadge.textContent = 'fx touch=' + (fxTouchMode ? 1 : 0) +
+        ' hover=' + (fxCanHover ? 1 : 0) +
+        ' reduced=' + (fxReduced ? 1 : 0) +
+        ' cells=' + fxCells.length +
+        ' waves=' + fxWaves.length +
+        ' ' + fxW + 'x' + fxH;
+    }
+    fxBadgeTick();
+    setInterval(fxBadgeTick, 1000);
+    setInterval(function () {
+      fxWaves.push({ x: fxW / 2, y: fxH / 2, t: fxClock });
+    }, 1800);
+  }
 }
 
 // ---------- 交互六：卡片鼠标光斑 ----------

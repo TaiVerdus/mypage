@@ -1781,11 +1781,9 @@ section {
   pointer-events: none;
 }
 
-@media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
-  .fx-field {
-    display: none;
-  }
-}
+/* ⚠️ 2026-09-26 删掉了「(hover: none)/(pointer: coarse) 时 display:none」的旧双保险：
+   触屏模式上线后画布**必须在触屏上可见**（JS 那边已按模式分别处理；
+   reduced-motion 下 JS 不启动、画布本来就是空的，无需再藏）。 */
 
 /* ---------- 16. 尊重系统的「减少动效」设置 ---------- */
 /* 用 0.01ms 而不是 none：动画会瞬间跳到终态，
