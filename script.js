@@ -792,20 +792,29 @@ if (restoreMemory()) syncClearBtn();
 //      所以色板整体换到站点那 6 色之间的派生，见下面 FX_COLORS。
 //   ③ **它逐帧 arc、逐帧画星**，没有 DPR 上限、切后台不停、也不理「减少动效」。
 //      这里沿用本站的工程口径：离屏精灵 + drawImage、DPR 封顶 2、格数压到 ~1000、
-//      切后台停、触屏与「减少动效」直接不启动。
+//      切后台停、系统「减少动效」不启动。
 //   另外它靠 `[data-shape-mask]` 在内容处「挖洞」。本站的画布本来就压在内容之下
 //   （z-index: -1），不需要挖洞，这套 mask 机制整个略去。
 //
 // 四条工程约束：
 // ① 不挡东西：画布 z-index:-1（写在样式里）+ pointer-events:none
 // ② 不拖慢页面：精灵预渲染 + drawImage、DPR 封顶 2、格数 ~1000 以内、切后台就停
-// ③ 不该动的人不动：触屏 / 系统「减少动效」→ 不启动
+// ③ 不该动的人不动：系统「减少动效」→ 不启动
 // ④ 颜色不新增：色板全部落在站点那 6 色内
+// ⚠️ 触屏（2026-09-26 起）：原来「触屏直接不启动」，现在改为 **触屏模式** 也启动 ——
+//    输入换成 touch（点按=波 / 滑动=扫亮 / 长按=持续涟漪），渲染管线复用，30fps 封顶省电
+//    （见 fxTouchMode 与触屏监听段；桌面行为一字不变）。
 var fxCanvas = document.getElementById('fxField');
 var fxReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 var fxCanHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+// 触屏模式（2026-09-26，用户拍板）：手机/平板上也能玩同一片形状场。
+// 输入源从鼠标换成触摸：点按=波 / 滑动=扫亮扫过换形 / 长按≥350ms=持续涟漪（松手即停）；
+// 渲染管线、色板、正文避让**全部复用**，只多一条 30fps 上限（省电）。
+// 桌面（有悬停精确指针）行为一字不变；系统「减少动效」下两种模式都不启动。
+var fxTouchMode = !fxCanHover && !fxReduced &&
+  (window.matchMedia('(hover: none) and (pointer: coarse)').matches || 'ontouchstart' in window);
 
-if (fxCanvas && fxCanHover && !fxReduced && fxCanvas.getContext) {
+if (fxCanvas && (fxCanHover || fxTouchMode) && !fxReduced && fxCanvas.getContext) {
   var fxCtx = fxCanvas.getContext('2d');
 
   // ---- 校音旋钮（尺寸口径整体照 pen：静止是一颗小点，扫过时鼓起来） ----
@@ -993,7 +1002,15 @@ if (fxCanvas && fxCanHover && !fxReduced && fxCanvas.getContext) {
     }
   }
 
+  var fxLastPaint = 0;
   function fxFrame(now) {
+    // 触屏模式 30fps 上限：全屏 canvas 在手机上逐帧跑太费电，
+    // 形状场本来就是「慢节奏呼吸」型特效，30fps 观感无损（桌面模式不封顶，行为不变）
+    if (fxTouchMode && now - fxLastPaint < 32) {
+      fxRaf = requestAnimationFrame(fxFrame);
+      return;
+    }
+    fxLastPaint = now;
     // 用累加而不是绝对时间：切后台再回来，波纹不会「瞬移」
     if (!fxLast) fxLast = now;
     var dt = Math.min((now - fxLast) / 1000, 0.05);
@@ -1117,24 +1134,84 @@ if (fxCanvas && fxCanHover && !fxReduced && fxCanvas.getContext) {
     }
   }
 
-  window.addEventListener('mousemove', function (e) {
-    fxPointer.x = e.clientX;
-    fxPointer.y = e.clientY;
-    fxPointer.on = true;
-    fxActivity = 1;                    // 手一动就重新点亮动量（照 pen 的 onMove）
-  }, { passive: true });
+  if (fxTouchMode) {
+    // ---- 触屏输入（触屏模式专属，2026-09-26）----
+    // 三条铁律：
+    //   ① 全部 passive、绝不 preventDefault —— 滚动/点按页面照常，特效只是「顺便」亮起来
+    //   ② 只跟第一根手指（多指不放大效果，保持简单）
+    //   ③ tap=波 / 滑动=扫亮扫过换形 / 长按≥350ms=持续涟漪（松手即停，不留残留状态）
+    var fxTouchId = null, fxTouchStart = null, fxLongHold = false, fxLongTimer = null;
 
-  // 点击 → 从落点发出一圈扩散的波（照 pen 的 triggerWave）。
-  // **passive + 不拦截**：页面上其他点击（导航、按钮、链接、聊天的输入框）一律照常，
-  // 这条监听只负责「顺便放一圈波」。
-  window.addEventListener('click', function (e) {
-    fxWaves.push({ x: e.clientX, y: e.clientY, t: fxClock });
-  }, { passive: true });
+    function fxWaveAt(x, y) { fxWaves.push({ x: x, y: y, t: fxClock }); }
 
-  // 鼠标离开窗口：涟漪收回，只留环境波
-  document.addEventListener('mouseleave', function () {
-    fxPointer.on = false;
-  });
+    document.addEventListener('touchstart', function (e) {
+      if (fxTouchId !== null) return;                  // 已在跟一根手指：忽略后续按下
+      var t0 = e.changedTouches[0];
+      fxTouchId = t0.identifier;
+      fxPointer.x = t0.clientX; fxPointer.y = t0.clientY; fxPointer.on = true;
+      fxActivity = 1;
+      fxTouchStart = { x: t0.clientX, y: t0.clientY, moved: false };
+      clearTimeout(fxLongTimer);
+      fxLongTimer = setTimeout(function () {           // 长按 ≥350ms：按住泉眼，一圈圈荡开
+        if (fxTouchId === null || !fxTouchStart || fxTouchStart.moved) return;
+        fxLongHold = true;
+        fxWaveAt(fxPointer.x, fxPointer.y);
+        fxLongTimer = setInterval(function () {
+          if (fxTouchId !== null) fxWaveAt(fxPointer.x, fxPointer.y);
+        }, 480);
+      }, 350);
+    }, { passive: true });
+
+    document.addEventListener('touchmove', function (e) {
+      for (var i = 0; i < e.changedTouches.length; i++) {
+        var tm = e.changedTouches[i];
+        if (tm.identifier !== fxTouchId) continue;
+        fxPointer.x = tm.clientX; fxPointer.y = tm.clientY; fxPointer.on = true;
+        fxActivity = 1;                                // 手指在动 = 动量拉满
+        if (fxTouchStart) {
+          var dx = tm.clientX - fxTouchStart.x, dy = tm.clientY - fxTouchStart.y;
+          if (dx * dx + dy * dy > 576) {               // 移动超过 24px：算拖动，取消长按
+            fxTouchStart.moved = true;
+            clearTimeout(fxLongTimer);
+          }
+        }
+      }
+    }, { passive: true });
+
+    function fxEndTouch(e) {
+      for (var i = 0; i < e.changedTouches.length; i++) {
+        var te = e.changedTouches[i];
+        if (te.identifier !== fxTouchId) continue;
+        clearTimeout(fxLongTimer); clearInterval(fxLongTimer);
+        if (fxTouchStart && !fxTouchStart.moved && !fxLongHold) {
+          fxWaveAt(fxTouchStart.x, fxTouchStart.y);    // 没怎么动的短按 = 一次点按波
+        }
+        fxTouchId = null; fxTouchStart = null; fxLongHold = false;
+      }
+    }
+    document.addEventListener('touchend', fxEndTouch, { passive: true });
+    document.addEventListener('touchcancel', fxEndTouch, { passive: true });
+  } else {
+    window.addEventListener('mousemove', function (e) {
+      fxPointer.x = e.clientX;
+      fxPointer.y = e.clientY;
+      fxPointer.on = true;
+      fxActivity = 1;                    // 手一动就重新点亮动量（照 pen 的 onMove）
+    }, { passive: true });
+
+    // 点击 → 从落点发出一圈扩散的波（照 pen 的 triggerWave）。
+    // **passive + 不拦截**：页面上其他点击（导航、按钮、链接、聊天的输入框）一律照常，
+    // 这条监听只负责「顺便放一圈波」。
+    // ⚠️ 触屏模式不挂它：手机浏览器在 tap 后会合成一次 click，再听就会一波变两波。
+    window.addEventListener('click', function (e) {
+      fxWaves.push({ x: e.clientX, y: e.clientY, t: fxClock });
+    }, { passive: true });
+
+    // 鼠标离开窗口：涟漪收回，只留环境波
+    document.addEventListener('mouseleave', function () {
+      fxPointer.on = false;
+    });
+  }
 
   // 切到后台就停 —— 没人看的时候不该烧 CPU
   document.addEventListener('visibilitychange', function () {
