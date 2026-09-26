@@ -58,13 +58,15 @@ MYPAGE-V2.0/
 │   ├── openai-stub.py  本地联调桩：最小 OpenAI 兼容端点（零依赖、含 CORS），验证「换大脑」链路
 │   ├── probe-openai-endpoint.js 探测某个端点页面能不能用（响应形状 / CORS / 耗时）
 │   ├── test-chat-proxy.js 「云端代理」的回归测试（锁人设 / 限长 / 限速 + 整条公网链路）
-│   └── test-feedback-db.js V3 反馈后台的**真机验收**：匿名能插入 / 匿名读不到（权限生效）/ 空内容被拒
+│   ├── test-feedback-db.js V3 反馈后台的**真机验收**：匿名能插入 / 匿名读不到（权限生效）/ 空内容被拒
+│   └── test-question-log.js 提问记录的回归：抽 script.js 里那段**真身代码**在 node 里跑，验请求形状
 ├── server.js           线上入口：托管页面 + 代理 /api/chat（零依赖 Node，公网部署用）
 ├── package.json        npm start / npm test（发布沙箱按它识别这是个 Node 项目）
 ├── .env                ⚠️ **机密，不进 git**：DEEPSEEK_API_KEY（怎么建见 DEPLOY.md §2）
 ├── DESIGN-SYSTEM.md    设计系统：配色 / 字体尺度 / 间距 / 组件 / 无障碍底线
 ├── DEPLOY.md           部署到公网：拿 DeepSeek key、为什么 key 不能进前端、上线检查清单、**GitHub Pages 发布（§8）**
 ├── FEEDBACK.md         **V3 反馈后台**：数据流、表结构、建表脚本逐句、RLS 与两种密钥、你的操作步骤与排查
+├── QUESTIONS.md        **提问记录**：记什么/不记什么、为什么挂在前端、怎么读、FAQ 回流到人设的流程
 ├── WECLONE.md          把分身的「大脑」换成自建微调模型（WeClone）的完整链路与坑
 └── PROJECT.md          项目进度大脑：进度记录、迭代日志、版本说明、提交历史
 ```
@@ -258,7 +260,7 @@ python tools/openai-stub.py
 
 | 分支 | 内容 | 提交数 |
 | --- | --- | --- |
-| `v3` | **当前**版本线：`V3.0`（反馈后台 + 发布），从 `v2` 拉出来的 | 99 |
+| `v3` | **当前**版本线：`V3.0`（反馈后台 + 发布），从 `v2` 拉出来的 | 100 |
 | `v2` | V2 版本线：`V2.0` → `V2.7`（**已冻结**，2026-09-24） | 74 |
 | `main` | V1 版本线：`V1.0` / `V1.1` | 2 |
 
@@ -267,7 +269,7 @@ python tools/openai-stub.py
 哈希全部改变，已经记录在文档里的提交号会集体失效。保持两条独立历史、并在这里说明原因，
 比「看起来整齐」更重要。
 
-页面上写的「共 101 次提交」＝ `v3` 的 99 条 ＋ `main` 的 2 条。
+页面上写的「共 102 次提交」＝ `v3` 的 100 条 ＋ `main` 的 2 条。
 
 ## 设计上几个刻意的决定
 

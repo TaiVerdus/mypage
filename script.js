@@ -671,6 +671,11 @@ function restoreMemory() {
 function ask(question) {
   if (!question.trim()) return;
 
+  // 匿名记一条（统计「大家最常问什么」）。⚠️ 放在这里而不是后端：
+  // 后端只看得见「走云端」的那些提问，余额护栏/断网时落回知识库的提问它根本收不到，
+  // 而那些恰恰也是真实提问。失败绝不影响聊天 ⇒ 这里不做任何错误处理。
+  if (window.__mypageLogQuestion) { try { window.__mypageLogQuestion(question); } catch (e) {} }
+
   addMessage(question, 'user');          // 1. 先显示用户的问题
   chatLog.push({ who: 'user', text: question });   // 记账：记忆要恢复的是「访客看见了什么」
   inputEl.value = '';                     // 2. 清空输入框
@@ -750,7 +755,8 @@ inputEl.addEventListener('keydown', function (e) {
 // （⚠️ 本轮就是这么漏过一次：`node --check` 只查语法，查不出「引用了已删的变量」。）
 
 // 开场白：分身先打招呼
-addMessage('嗨，我是释贤的数字分身！你可以问他正在学什么、是个什么样的人，或者他有什么爱好——不知道的事我会直说。', 'bot');
+// 2026-09-26：用户指定改成这句（「世贤（不爱品如）」是他自己的梗；页面其他地方一律用本名「释贤」）。
+addMessage('Hi，我是世贤（不爱品如）~', 'bot');
 
 /* ---------- 记忆的上屏部分（V2.7 续六十八）----------
    ⚠️ 这段**必须放在文件末尾**，不能放进 <function isLocalPage … function ask(> 那个区间：
@@ -1741,6 +1747,10 @@ document.documentElement.classList.add('js-ready');
     publishableKey: 'wbpk_aEH7ucbFjEJiB6me355TAg_x2LJk4zHHaBkp9wK8WdEIXhPbjsZusAn'
   };
 
+  /* 提问记录（2026-09-26）要用同一份云配置 —— 在这里交出一个页面级引用，
+     ⚠️ **配置只此一份**：别处不要再写第二份 endpoint / key（改这里就等于改了全部）。 */
+  window.MYPAGE_CLOUD_CONFIG = CLOUD_CONFIG;
+
   var PAGE_VERSION = 'V3.0';
   var MAX_LEN = 1000;
 
@@ -2128,3 +2138,33 @@ document.documentElement.classList.add('js-ready');
     mine.innerHTML = fresh.innerHTML;             // 整段换成最新生成的（DOM 方式，不拼字符串）
   }).catch(function () { /* 拉不到就保持快照，静默 */ });
 })();
+
+
+/* ---------- 提问记录（2026-09-26 新增）----------
+   每收到一个提问就匿名记一条，用来回答「大家最常问分身什么」（QUESTIONS.md）。
+   为什么挂在**前端**而不是后端：后端只看得见「走云端」的提问 —— 余额护栏触发、断网、
+   以及纯离线兜底的那些提问它根本收不到，而那些同样是真实提问。
+   四条硬约束：
+     ① **只记问题文字**：不记身份、不记回答、不记多轮对话（那些仍只留在访客自己的浏览器里）；
+     ② **失败绝不影响聊天**：网络断了 / 被拦截 / 表不在 —— 一律静默吞掉，聊天照常；
+     ③ **不阻塞**：fire-and-forget（`keepalive` 让它在页面被关掉时也送得出去）；
+     ④ 配置取自 `window.MYPAGE_CLOUD_CONFIG`（**只有一份**，在反馈抽屉那个模块里定义）；
+        读不到配置就整个不动 —— 没联网也能照常聊天。
+   ⚠️ 镜像站（github.io）上这条会被跨域拦住 —— 与反馈表单同一个限制，属预期。 */
+window.__mypageLogQuestion = function (text) {
+  var cfg = window.MYPAGE_CLOUD_CONFIG;
+  var q = String(text == null ? '' : text).trim().slice(0, 500);   // 与表中 500 字约束一致
+  if (!cfg || !cfg.endpoint || !cfg.publishableKey || !q) return;
+  try {
+    fetch(cfg.endpoint + '/.cloud/database/rest/chat_questions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-wb-webapp-access-key': cfg.publishableKey,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ question: q }),
+      keepalive: true
+    }).catch(function () { /* 记不上就算了，不打扰访客 */ });
+  } catch (e) { /* fetch 不可用也一样静默 */ }
+};
