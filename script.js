@@ -2100,3 +2100,27 @@ document.documentElement.classList.add('js-ready');
   }
   updateCount();
 })();
+
+
+// ---------- 每日推荐的「保鲜层」（2026-09-26，用户拍板的方案②） ----------
+// 正式地址是「发布时的快照」：小票内容在发布那天就定格了，而自动任务每天只更新 GitHub 仓库。
+// 这里从 GitHub 原始文件拉**最新生成**的整段每日推荐（由同一个 build-daily.py 生成，零模板漂移），
+// 比快照新就整段换上；拉不到 / 内容不比快照新，就保持快照 —— 最坏情况 = 现状，不会更差。
+// ⚠️ 分支名写死 v3：开 V4 分支时这里要跟着改（与 sync-version 跟随当前分支是同一个维护点）。
+(function () {
+  if (!window.fetch || !window.DOMParser) return;
+  var RAW = 'https://raw.githubusercontent.com/TaiVerdus/mypage/v3/index.html';
+  fetch(RAW, { cache: 'no-cache' }).then(function (r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.text();
+  }).then(function (html) {
+    var doc = new DOMParser().parseFromString(html, 'text/html');
+    var fresh = doc.querySelector('.daily.reveal');
+    var mine  = document.querySelector('.daily.reveal');
+    if (!fresh || !mine) return;
+    var fd = (fresh.innerHTML.match(/AS OF (\d{4}-\d{2}-\d{2})/) || [])[1];
+    var od = (mine.innerHTML.match(/AS OF (\d{4}-\d{2}-\d{2})/) || [])[1];
+    if (!fd || fd === od) return;                 // 快照已是最新（同一天）就不折腾
+    mine.innerHTML = fresh.innerHTML;             // 整段换成最新生成的（DOM 方式，不拼字符串）
+  }).catch(function () { /* 拉不到就保持快照，静默 */ });
+})();
