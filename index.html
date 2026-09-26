@@ -57,7 +57,6 @@
         <a class="nav-link" href="#photos">照片</a>
         <a class="nav-link" href="#music">音乐</a>
         <a class="nav-link" href="#chat">数字分身</a>
-        <a class="nav-link" href="#feedback">反馈</a>
         <a class="nav-link" href="#contact">联系</a>
       </div>
     </div>
@@ -193,11 +192,11 @@
               <p>纯静态 · 无框架 · 自己的一套设计系统</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v3 分支 98 条 + main 分支 2 条（V1.0 / V1.1）
+                   N = 整个 MYPAGE 仓库的全部提交 = v3 分支 99 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
               <!-- ⚠️ 这一行带提交数，由 tools/sync-version.py 自动写 ——
                    别手改数字，改完在提交前跑一次那个脚本。 -->
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 → V3.0 · 截至 2026-09-26 共 100 次提交</p>
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 → V3.0 · 截至 2026-09-26 共 101 次提交</p>
               <a class="item-link" href="ai-log.html">这个页面是怎么做出来的 →</a>
             </div>
             <!-- ⚠️ 这里原来是 CarbonBrain（写着「课程 / 比赛项目 · 已有可演示版本」）——
@@ -478,85 +477,9 @@
       </div>
     </section>
 
-    <!-- ========== 区块：反馈专区（V3.1，2026-09-26 用户要求） ==========
-         与右下角抽屉的分工：
-           · 抽屉（交互十）= 随时私密说一句，是 V3 课件的交付物，保留；
-           · 这里 = 一块看得见的「留言墙」，访客自己选公开或私密。
-         ⚠️ 只有「公开 + 本人确认过（status='approved'）」的反馈才会挂出来 ——
-            页面读的是 feedback_public 视图，私密内容连视图都不含（基础表另有 RLS 锁着）。
-            权限是逐条实测过的，见 tools/test-feedback-visibility.js。 -->
-    <section id="feedback">
-      <div class="section-head">
-        <span class="eyebrow reveal">05 — 反馈</span>
-        <h2 class="section-title" data-lines>留句话给我</h2>
-        <p class="section-note reveal">哪里没看懂、哪里不好找、想对我说什么都行。这条给谁看，你自己选。</p>
-      </div>
-
-      <div class="fbz-zone reveal">
-        <!-- 左：写一条 -->
-        <form class="fbz-form" id="fbzForm" novalidate>
-          <div class="fbz-fields" id="fbzFields">
-            <label class="fbz-field">
-              <span class="fbz-label">怎么称呼你<em>（可留空，留空就显示「匿名」）</em></span>
-              <input class="fbz-input" id="fbzName" type="text" maxlength="24"
-                     autocomplete="nickname" placeholder="同学 / 老师 / 家人…">
-            </label>
-
-            <label class="fbz-field">
-              <span class="fbz-label">想说什么</span>
-              <textarea class="fbz-input fbz-input--area" id="fbzMsg" rows="5" maxlength="1000"
-                        placeholder="哪里没看懂、哪里不好找，或者随便聊两句…"></textarea>
-            </label>
-            <p class="fbz-count" id="fbzCount">0 / 1000</p>
-
-            <!-- 可见性是「单选」而不是开关：两条路差别很大，写清楚比好看重要 -->
-            <fieldset class="fbz-vis">
-              <legend class="fbz-label">这条给谁看</legend>
-              <label class="fbz-radio">
-                <input type="radio" name="fbzVis" value="private" checked>
-                <span><strong>私密</strong> —— 只有我能看到（默认）</span>
-              </label>
-              <label class="fbz-radio">
-                <input type="radio" name="fbzVis" value="public">
-                <span><strong>公开</strong> —— 立刻挂到这一页，大家都能看到</span>
-              </label>
-            </fieldset>
-
-            <div class="fbz-actions">
-              <button class="btn btn--primary" id="fbzSubmit" type="submit">提交反馈</button>
-              <p class="fbz-hint">不会公开你的联系方式；公开的那条会立刻出现在这一页，我随时可以撤下。</p>
-            </div>
-            <p class="fb-error" id="fbzError" role="alert" hidden></p>
-          </div>
-
-          <div class="fbz-done" id="fbzDone" hidden>
-            <span class="fbz-done-mark" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="none"
-                   stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                   stroke-linejoin="round" focusable="false">
-                <path d="M20 6 9 17l-5-5"/>
-              </svg>
-            </span>
-            <h3>收到了，谢谢</h3>
-            <p class="fbz-done-text" id="fbzDoneText"></p>
-            <button class="btn btn--ghost" id="fbzAgain" type="button">再写一条</button>
-          </div>
-        </form>
-
-        <!-- 右：公开反馈墙 -->
-        <div class="fbz-wall">
-          <p class="fbz-wall-k">大家说的<span class="fbz-wall-n" id="fbzWallN"></span></p>
-          <ul class="fbz-list" id="fbzList" role="list">
-            <li class="fbz-empty" id="fbzEmpty">还没有公开的反馈 —— 你可以是第一个。</li>
-          </ul>
-          <p class="fbz-wall-note" id="fbzWallNote" hidden></p>
-        </div>
-      </div>
-    </section>
-
     <!-- ========== 区块：联系我 ========== -->
     <section id="contact">
-      <span class="eyebrow eyebrow--center reveal">06 — 联系</span>
+      <span class="eyebrow eyebrow--center reveal">05 — 联系</span>
       <h2 class="contact-title" data-lines>有什么想法？</h2>
 
       <!-- 液态玻璃名片（V2.7 续二十三）：三个联系方式落在这张会折射背景的玻璃卡上。
