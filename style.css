@@ -3580,12 +3580,6 @@ html.js-ready .fb-trigger {
   border-radius: var(--r-md);
 }
 
-/* 「待我确认」的占位条：只在访客自己提交公开反馈后本地出现，不进数据库 */
-.fbz-item--pending {
-  border-style: dashed;
-  opacity: .75;
-}
-
 .fbz-item-head {
   display: flex;
   justify-content: space-between;

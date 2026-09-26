@@ -2205,9 +2205,9 @@ document.documentElement.classList.add('js-ready');
   function hideErr() { if (errEl) { errEl.hidden = true; errEl.textContent = ''; } }
   function updateCount() { if (countEl && msgEl) countEl.textContent = msgEl.value.length + ' / ' + MAX; }
 
-  function itemEl(name, text, dateText, pending) {
+  function itemEl(name, text, dateText) {
     var li = document.createElement('li');
-    li.className = 'fbz-item' + (pending ? ' fbz-item--pending' : '');
+    li.className = 'fbz-item';
     li.innerHTML = '<p class="fbz-item-head">' +
       '<span class="fbz-item-name">' + esc(name || '匿名') + '</span>' +
       '<span class="fbz-item-date">' + esc(dateText) + '</span></p>' +
@@ -2222,7 +2222,7 @@ document.documentElement.classList.add('js-ready');
       if (emptyEl) listEl.appendChild(emptyEl);
       return;
     }
-    rows.forEach(function (r) { listEl.appendChild(itemEl(r.name, r.message, fmtDate(r.created_at), false)); });
+    rows.forEach(function (r) { listEl.appendChild(itemEl(r.name, r.message, fmtDate(r.created_at))); });
   }
 
   function loadWall() {
@@ -2278,14 +2278,12 @@ document.documentElement.classList.add('js-ready');
       if (doneEl) doneEl.hidden = false;
       if (doneTxt) {
         doneTxt.textContent = (vis === 'public')
-          ? '你选了公开 —— 我确认之后，它会出现在右边的墙上。'
+          ? '你选了公开 —— 已经挂到右边的墙上了，随时可以再来一条。'
           : '你选了私密 —— 这条只有我能看到，谢谢你说实话。';
       }
-      // 公开的：本地先插一条「待我确认」占位，让访客知道自己那条去哪了（不进数据库）
-      if (vis === 'public' && listEl) {
-        if (emptyEl && emptyEl.parentNode === listEl) listEl.removeChild(emptyEl);
-        listEl.insertBefore(itemEl(who, msg, '待我确认', true), listEl.firstChild);
-      }
+      // 公开的是**即时上墙**（用户 2026-09-26 定的），所以直接重拉一次墙 ——
+      // 让访客看到的是数据库里真实那条（真时间戳、真数量），而不是本地拼的假占位。
+      if (vis === 'public') loadWall();
     });
   });
 
