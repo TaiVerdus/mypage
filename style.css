@@ -3398,3 +3398,239 @@ html.js-ready .fb-trigger {
   .fb-count {
     align-self: flex-end;
   }
+
+/* ---------- 15b. 反馈专区（V3.1，2026-09-26）----------
+   桌面两栏（写反馈 | 反馈墙），≤640px 叠成一栏。
+   ⚠️ 类名用 fbz- 前缀，跟右下角抽屉（.fb-*）分开：两处视觉语言一致，但互不牵连。
+   ⚠️ 颜色 / 间距 / 圆角一律走 token，不新增色值（项目规矩）。 */
+
+.section-note {
+  margin-top: var(--sp-3);
+  max-width: 34em;
+  font-size: var(--fs-sm);
+  line-height: 1.7;
+  color: var(--color-muted);
+}
+
+.fbz-zone {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  align-items: start;
+  gap: var(--sp-6);
+  margin-top: var(--sp-6);
+}
+
+.fbz-form,
+.fbz-wall {
+  padding: var(--sp-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--r-lg);
+}
+
+.fbz-field {
+  display: block;
+  margin-bottom: var(--sp-5);
+}
+
+.fbz-label {
+  display: block;
+  margin-bottom: var(--sp-2);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.fbz-label em {
+  font-style: normal;
+  font-weight: 400;
+  color: var(--color-muted);
+}
+
+.fbz-input {
+  display: block;
+  width: 100%;
+  padding: var(--sp-3) var(--sp-4);
+  font: inherit;
+  font-size: var(--fs-sm);
+  color: var(--color-ink);
+  background: var(--color-bg);
+  border: 1px solid var(--color-line);
+  border-radius: var(--r-md);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.fbz-input:focus-visible {
+  outline: none;
+  border-color: var(--color-brand);
+}
+
+.fbz-input--area {
+  min-height: 7.5em;
+  line-height: 1.65;
+  resize: vertical;
+}
+
+.fbz-count {
+  margin: calc(var(--sp-2) * -1) 0 var(--sp-5);
+  font-size: var(--fs-xs);
+  color: var(--color-muted);
+  text-align: right;
+}
+
+.fbz-vis {
+  margin: 0 0 var(--sp-5);
+  padding: 0;
+  border: 0;
+}
+
+/* 可见性选项：两条路差别很大，做成「能一眼看出选了哪个」的卡片式单选 */
+.fbz-radio {
+  display: flex;
+  gap: var(--sp-3);
+  align-items: flex-start;
+  padding: var(--sp-3) var(--sp-4);
+  margin-top: var(--sp-2);
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  color: var(--color-ink);
+  background: var(--color-bg);
+  border: 1px solid var(--color-line);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.fbz-radio input {
+  flex: none;
+  margin-top: .28em;
+  accent-color: var(--color-brand);
+}
+
+.fbz-radio:has(input:checked),
+.fbz-radio--on {
+  border-color: var(--color-brand);
+}
+
+.fbz-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-4);
+}
+
+.fbz-hint {
+  flex: 1 1 12em;
+  margin: 0;
+  font-size: var(--fs-xs);
+  line-height: 1.6;
+  color: var(--color-muted);
+}
+
+.fbz-done {
+  padding: var(--sp-4) 0;
+  text-align: center;
+}
+
+.fbz-done-mark {
+  display: inline-flex;
+  color: var(--color-brand);
+}
+
+.fbz-done h3 {
+  margin: var(--sp-3) 0 var(--sp-2);
+  font-size: var(--fs-h3);
+  color: var(--color-ink);
+}
+
+.fbz-done-text {
+  margin: 0 0 var(--sp-5);
+  font-size: var(--fs-sm);
+  line-height: 1.7;
+  color: var(--color-muted);
+}
+
+.fbz-wall-k {
+  margin: 0 0 var(--sp-4);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.fbz-wall-n {
+  margin-left: var(--sp-2);
+  font-weight: 400;
+  color: var(--color-muted);
+}
+
+.fbz-list {
+  display: grid;
+  gap: var(--sp-4);
+  max-height: 26em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+}
+
+.fbz-item {
+  padding: var(--sp-4);
+  background: var(--color-bg);
+  border: 1px solid var(--color-line);
+  border-radius: var(--r-md);
+}
+
+/* 「待我确认」的占位条：只在访客自己提交公开反馈后本地出现，不进数据库 */
+.fbz-item--pending {
+  border-style: dashed;
+  opacity: .75;
+}
+
+.fbz-item-head {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin: 0 0 var(--sp-2);
+}
+
+.fbz-item-name {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.fbz-item-date {
+  font-size: var(--fs-xs);
+  color: var(--color-muted);
+}
+
+.fbz-item-text {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.7;
+  color: var(--color-ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.fbz-empty,
+.fbz-wall-note {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.7;
+  color: var(--color-muted);
+}
+
+@media (max-width: 640px) {
+  .fbz-zone {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--sp-5);
+  }
+  .fbz-form,
+  .fbz-wall {
+    padding: var(--sp-5);
+  }
+  .fbz-list {
+    max-height: none;
+  }
+}

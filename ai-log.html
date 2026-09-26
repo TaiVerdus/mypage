@@ -41,7 +41,7 @@
       </p>
 
       <ul class="log-meta">
-        <li><span class="log-meta-k">交互条目</span><span class="log-meta-v">112 条，其中 <b>71 条待补</b></span></li>
+        <li><span class="log-meta-k">交互条目</span><span class="log-meta-v">113 条，其中 <b>72 条待补</b></span></li>
         <li><span class="log-meta-k">时间跨度</span><span class="log-meta-v">2026-09-04 → 09-17</span></li>
         <li><span class="log-meta-k">时间戳来源</span><span class="log-meta-v">git 提交时间，一条命令可复现</span></li>
       </ul>
@@ -153,6 +153,7 @@
 <p>| 110 | 「今天没有进行每日推荐自动更新」 | ⚠️ <strong>它先核对仓库再下结论</strong>（09-25 正常、09-26 无记录 ⇒ 任务确实没跑），查任务配置（ACTIVE、规则没坏）⇒ 结论「最可能 09:00 电脑在睡眠」而不是瞎怪平台 ✓ ⚠️ <strong>手动补跑走的是脚本原路</strong>（--advance --count 3，不自己造抽签）✓ ⚠️ <strong>顺手拆了一颗雷</strong>：任务提示词还写「push origin v2」—— 开 v3 后是错的，已改 v3 ✓ ⚠️ <strong>它还发现了一个上线后的结构性缺口并摊开来让我选</strong>：正式地址是发布快照，自动任务只更新 GitHub ⇒ 线上推荐会过期（三个方案含利弊）✓ | 🟡 待我补：任务时间挪 21:00 是我定的 | <code>每日推荐补跑+任务检修</code>（哈希见 <code>git log</code>） |</p>
 <p>| 111 | 「选二，自动任务时间挪到21:00吧 现在可以重新发布一次」 | ⚠️ <strong>保鲜层的实现选了「零模板漂移」路线</strong>：不把小票渲染器重写成 JS，而是拉取<strong>同一个生成器</strong>产出的最新 HTML 整段替换（比对 AS OF 日期，同天不动；拉不到保持快照 —— 最坏=现状）✓✓ ⚠️ 拉取源写明分支名 v3 并标注「开 V4 要跟着改」（与 sync-version 同一维护点）✓ ⚠️ 改完一次性重新发布并线上核对（AS OF 今天 ✓ 保鲜层在 ✓）✓ | 🟡 待我补：明天 21:00 第一次跑新时间，看它准不准 | <code>保鲜层</code>（哈希见 <code>git log</code>） |</p>
 <p>| 112 | （截图）「摄影中这两张重复了删掉一张吧」（附 grill-me） | ⚠️ <strong>它没有看到截图就删</strong>：先查证 02/04 是<strong>两个不同文件</strong>（MD5 不同 —— 同场景的 Live 帧 vs 静态照），并查了引用面（首屏玻璃无关、04 无锚点、球体有独立缩略图）⇒ 推荐删 04 留 02（02 挂着「旅游」锚点）✓✓ ⚠️ <strong>删一张照片牵出一串连带</strong>：三联改两联（CSS 一行）、编号 05–10 前移（01–09）、git rm、球体「夜市」卡保留、注释修正 —— 全部列出确认后动手 ✓ ⚠️ <strong>过程中它自己的脚本把注释 <code>//</code> 弄丢造成语法错</strong> —— 断言失败救了场（整次不写盘），最终改用「保留原行前缀」的按行重写修复 ✓（踩坑已记）⚠️ 发布后线上终验全绿（7.jpg 引用 0 / 编号 01–09 / 两联 / 保鲜层 / 触屏模式都在）✓ | 🟡 待我补：两联观感我看一眼；3 人反馈邀请发了没 | <code>摄影墙去重</code>（哈希见 <code>git log</code>） |</p>
+<p>| 113 | 「新增一个独立的反馈区域，让访客自己选公开还是私密；公开的对访客可见，私密的仅我能查看」 | ⚠️ <strong>它先做权限设计再动界面</strong>：加 <code>visibility</code>/<code>status</code> 两列 → 建<strong>视图 <code>feedback_public</code></strong>（只含公开+已确认、<strong>只暴露 4 个字段</strong>）→ 只给视图 SELECT、把视图写权限收回 ✓✓ ⚠️ <strong>它自己决定加了一层「人工确认」并说明理由</strong>：这是给 HR 看的页面，公开区若能任意写入 = 给自己开一个匿名留言板；用 <code>status</code> 一层确认换掉风险（想即时显示改一处即可，也告诉了我）✓ ⚠️ <strong>它顺手纠正了一个容易误判的认知</strong>：查权限时 <code>anon</code> 对基础表<strong>也有 SELECT 授权</strong>（平台默认给的），但真正挡数据的是 <strong>RLS</strong>（无读策略 ⇒ 空数组）——「别看 GRANT，要看策略」✓✓ ⚠️ <strong>两个验收脚本都跑到数据库层</strong>：私密不可读 / 未审核不显示 / 审核后出现 / 基础表空数组 / 视图字段集正确，全过 ✓ ⚠️ <strong>界面用卡片式单选 + 文案把两条路的差别写清楚</strong>（默认私密），公开提交后本地插「待我确认」占位 ✓ ⚠️ 过程中它自己踩了两次同类坑（bash 里反引号被命令替换吃掉），第二次按自己记下的规矩改用临时脚本文件 ✓ | 🟡 待我补：新板块的观感我看一眼；公开反馈的审核要不要即时显示也是我定 | <code>反馈专区 V3.1</code>（哈希见 <code>git log</code>） |</p>
 <hr class="log-hr">
 <h2 id="sec-7">三、关键决策记录（Critical Evaluation 汇总，标准 ② 与 ③）</h2>
 <p>这几条是「我没有照单全收 AI 建议」的证据，准备在 Demo Day 口头答辩时展开：</p>
