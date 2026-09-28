@@ -8,12 +8,20 @@
     python tools/build-daily.py            只按当前数据重生成页面
     python tools/build-daily.py --advance  从歌单里**随机抽**今天的一批，记进 history 再重生成
     python tools/build-daily.py --advance --count 3   一天随机抽三首
+    python tools/build-daily.py --ensure-today   **幂等版**：今天已有就不动；没有才补一批
+                                                （自动任务用这个 —— 见下）
     python tools/build-daily.py --check    只检查页面与数据是否一致，不一致退出码 1
 
 ⚠️ 生成物不手改：改内容要改 data/daily-picks.json，然后重跑本脚本。
 ⚠️ 版权口径：只存事实（歌名 / 歌手 / 专辑 / 年份）。不放音频、不放歌词、不复刻封面。
 ⚠️ 「歌单」是长期不消耗的来源（用户 2026-09-22 定）：每天从 pool 里**随机**抽 3 首写进
    history，pool 本身**不会减少** —— 所以「每天更新」能一直成立，不会第五天就见底。
+⚠️ **「漏了就补」怎么理解**（用户 2026-09-28 追问过一次，这里写死口径）：
+   本脚本永远按**今天**抽签（`date.today()`），所以**之前漏掉的那一天不会补** ——
+   补历史等于给那天编一批「当时其实没挑过」的歌，是假内容，不做。
+   真正的「补」是**幂等**：不管任务是按时跑、还是电脑关着拖到第二天早上才跑，
+   只要它跑起来，就保证**今天有且只有一批**。
+   ⇒ 自动任务用 `--ensure-today`（跑两次也不会变成 6 首）；手动想再加一批才用 `--advance`。
 """
 import io
 import json
@@ -182,6 +190,10 @@ def main():
     args = sys.argv[1:]
     check_only = "--check" in args
     advance = "--advance" in args
+    # 「漏了就补」= 幂等（见文件头说明）：今天已有就什么都不做。
+    # ⚠️ 与 --advance 的区别只有一点：--advance 会**再追加**一批（手动想多要几首时用），
+    #    --ensure-today 一天只认一批（自动任务用，跑几次都不会堆成 6 首）。
+    ensure = "--ensure-today" in args
     count = 3                                  # 用户 2026-09-22 定：一天**随机**抽 3 首（原来是 1）
     if "--count" in args:
         count = int(args[args.index("--count") + 1])
@@ -190,10 +202,16 @@ def main():
     page = io.open(PAGE, encoding="utf-8").read()
 
     moved = []
-    if advance and not check_only:
+    if (advance or ensure) and not check_only:
         pool = data.get("pool") or []
         if not pool:
             print("歌单是空的 —— 今天跳过（页面保持原样，history 里最后一条继续显示）")
+            return 0
+        today_iso = date.today().isoformat()
+        hist = data.get("history") or []
+        if ensure and hist and hist[0].get("date") == today_iso:
+            print("今天（%s）已经推过 %d 首 —— ensure-today 保持原样，不做任何改动"
+                  % (today_iso, len(hist[0].get("items") or [])))
             return 0
         # ⚠️ 取歌方式（用户 2026-09-22 明确）：**每天从歌单里随机抽 3 首**。
         #    原来是「按顺序取前 3 条、取走就删」——那样第 5 天歌单就见底了 ✗。
@@ -205,9 +223,8 @@ def main():
         # 一次性把今天的这一批放进去 —— ⚠️ **保持 take 的顺序**。
         #    原来是「逐条 prepend、再把同一天的合并起来」，一份 3 首的批次会被**倒过来** ✗
         #    （一首歌的时候看不出来；2026-09-22 改成一天 3 首才露出来）。
-        #    今天已经推过就**接着往后加**：不覆盖、也不重排已有的。
-        today_iso = date.today().isoformat()
-        hist = data.get("history") or []
+        #    今天已经推过就**接着往后加**：不覆盖、也不重排已有的 ——
+        #    ⚠️ 这条只对 --advance 成立；--ensure-today 在上面的早退里就拦住了（一天只认一批）。
         if hist and hist[0].get("date") == today_iso:
             hist[0]["items"] = (hist[0].get("items") or []) + list(take)
         else:
@@ -225,7 +242,7 @@ def main():
         return 0 if ok else 1
 
     io.open(PAGE, "w", encoding="utf-8", newline="").write(new_page)
-    if advance:
+    if advance or ensure:
         io.open(DATA, "w", encoding="utf-8", newline="").write(
             json.dumps(data, ensure_ascii=False, indent=2) + "\n")
         print("今天推荐：%s" % "、".join(i.get("title", "") for i in (moved or [])))
