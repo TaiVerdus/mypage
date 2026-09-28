@@ -66,8 +66,21 @@
   --fs-xs:      calc(13px * var(--scale));
   --fs-caption: calc(12px * var(--scale));
   --fs-eyebrow: calc(12px * var(--scale));
+  /* 2026-09-28（排版收敛 A 轮）：这一档原来**不在体系里** —— 全站直接用 11px 写了 16 处，
+     而且一半乘 --scale、一半不乘 ⇒ 同一个"微字"级别在总尺寸旋钮下表现不一致。立成 token 收口。 */
+  --fs-micro:   calc(11px * var(--scale));
   --lh-tight: 1.18;
   --lh-body: 1.7;
+  /* UI 密集区（表单 / 提示 / 小票 / 标签）：2026-09-28 把原来 1.5 / 1.55 / 1.6 / 1.7 四个散值收成一档。
+     ⚠️ 另有一处 `line-height: 1`（.zoom-btn / .fb-error::before）**刻意保留**：那是给图标/徽章
+        定盒子高度用的"零行距"，属于尺寸控制，不是排版节奏。 */
+  --lh-ui: 1.55;
+
+  /* 字距：2026-09-28 把原来 13 个散值收成 4 档（大标题 / 中文小标 / 拉丁小标 / 极宽装饰） */
+  --ls-tight: -.01em;
+  --ls-label: .06em;
+  --ls-caps:  .14em;
+  --ls-wide:  .2em;
 
   /* ---- 间距（基准仍是 4px，整体随 --scale 放大）
      ⚠️ 一个 token 一行：项目里所有检查脚本都按「行首 --token: 值」来找定义，
@@ -238,7 +251,7 @@ main,
 
 .nav-logo {
   font-weight: 700;
-  letter-spacing: calc(2px * var(--scale));
+  letter-spacing: var(--ls-caps);
   color: var(--color-brand);
   font-size: calc(14px * var(--scale));
   text-decoration: none;
@@ -272,15 +285,15 @@ main,
   font-size: var(--fs-caption);
   font-weight: 400;
   color: var(--color-muted);
-  letter-spacing: .02em;
+  letter-spacing: var(--ls-label);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .nav-vow-src {
-  font-size: calc(11px * var(--scale));
-  letter-spacing: .06em;
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
 }
 
 /* ⚠️ ≤900px 把整条引语隐藏：64px 高的导航条里，「站名 + 引语 + 6 个导航项」放不下。
@@ -353,7 +366,7 @@ main,
   margin-top: var(--sp-5);
   font-size: var(--fs-display);
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--ls-tight);
   line-height: var(--lh-tight);
   /* 入场交给逐行系统（见 12.5），这里不再叠加整块淡入 */
 }
@@ -404,9 +417,9 @@ main,
 
 .meta-k {
   display: block;
-  font-size: 11px;
+  font-size: var(--fs-micro);
   font-weight: 500;
-  letter-spacing: .16em;
+  letter-spacing: var(--ls-caps);
   text-transform: uppercase;
   color: var(--color-muted);
 }
@@ -414,7 +427,7 @@ main,
 .meta-v {
   display: block;
   margin-top: var(--sp-1);
-  font-size: 15px;
+  font-size: var(--fs-body);
   font-weight: 600;
   color: var(--color-brand);
 }
@@ -549,7 +562,7 @@ section {
   display: inline-block;
   font-size: var(--fs-eyebrow);
   font-weight: 500;
-  letter-spacing: .18em;
+  letter-spacing: var(--ls-wide);
   text-transform: uppercase;
   color: var(--color-brand);
   margin-bottom: var(--sp-3);
@@ -573,7 +586,7 @@ section {
 .section-title {
   font-size: var(--fs-h2);
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--ls-tight);
   line-height: var(--lh-tight);
 }
 
@@ -738,9 +751,9 @@ section {
 }
 
 .item-idx {
-  font-size: 11px;
+  font-size: var(--fs-micro);
   font-weight: 500;
-  letter-spacing: .1em;
+  letter-spacing: var(--ls-caps);
   color: var(--color-brand);   /* 11px 小字要够 4.5:1，不能用更浅的青 */
   font-variant-numeric: tabular-nums;
 }
@@ -758,9 +771,9 @@ section {
 
 .item-badge {
   flex-shrink: 0;
-  font-size: 11px;
+  font-size: var(--fs-micro);
   font-weight: 500;
-  letter-spacing: .08em;
+  letter-spacing: var(--ls-label);
   color: var(--color-brand);
   background: rgb(var(--c-brand-rgb) / .16);
   border-radius: var(--r-pill);
@@ -769,8 +782,8 @@ section {
 
 .bento-item .item-track {
   margin-top: calc(6px * var(--scale));
-  font-size: 11px;
-  letter-spacing: .04em;
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
   color: var(--color-brand);
   font-variant-numeric: tabular-nums;
 }
@@ -949,7 +962,7 @@ section {
   padding: calc(10px * var(--scale)) calc(14px * var(--scale));
   border-radius: var(--r-md);
   font-size: var(--fs-sm);
-  line-height: 1.6;
+  line-height: var(--lh-ui);
   animation: bubbleIn 0.25s ease-out;
 }
 
@@ -1166,7 +1179,7 @@ section {
   color: #1c1a17;
   font-family: var(--font-mono);
   font-size: calc(13px * var(--scale));
-  line-height: 1.55;
+  line-height: var(--lh-ui);
   /* 上下齿孔：热敏小票撕下来那两道痕 */
   border-top: 2px dashed rgba(28, 26, 23, .28);
   border-bottom: 2px dashed rgba(28, 26, 23, .28);
@@ -1174,8 +1187,8 @@ section {
 }
 
 .receipt-kicker {
-  font-size: calc(11px * var(--scale));
-  letter-spacing: .28em;
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-wide);
   text-align: center;
   color: rgba(28, 26, 23, .55);
 }
@@ -1185,7 +1198,7 @@ section {
   font-family: var(--font-mono);
   font-size: calc(26px * var(--scale));
   font-weight: 700;
-  letter-spacing: -.01em;
+  letter-spacing: var(--ls-tight);
   text-align: center;
 }
 
@@ -1197,8 +1210,8 @@ section {
 }
 
 .receipt-date {
-  font-size: calc(11px * var(--scale));
-  letter-spacing: .1em;
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-caps);
   color: rgba(28, 26, 23, .7);
 }
 
@@ -1228,8 +1241,8 @@ section {
 
 .receipt-store {
   margin-top: 4px;
-  font-size: calc(11px * var(--scale));
-  letter-spacing: .1em;
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-caps);
   color: rgba(28, 26, 23, .7);
 }
 
@@ -1246,8 +1259,8 @@ section {
   margin-top: var(--sp-4);
   padding-bottom: 4px;
   border-bottom: 1px solid rgba(28, 26, 23, .45);
-  font-size: calc(11px * var(--scale));
-  letter-spacing: .14em;
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-caps);
   color: rgba(28, 26, 23, .6);
 }
 
@@ -1300,14 +1313,14 @@ section {
   justify-content: space-between;
   font-size: calc(14px * var(--scale));
   font-weight: 700;
-  letter-spacing: .06em;
+  letter-spacing: var(--ls-label);
 }
 
 .receipt-foot {
   margin-top: var(--sp-4);
-  font-size: calc(11px * var(--scale));
-  line-height: 1.7;
-  letter-spacing: .06em;
+  font-size: var(--fs-micro);
+  line-height: var(--lh-ui);
+  letter-spacing: var(--ls-label);
   color: rgba(28, 26, 23, .6);
 }
 
@@ -1324,8 +1337,8 @@ section {
 }
 
 .receipt-thanks {
-  font-size: calc(11px * var(--scale));
-  letter-spacing: .22em;
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-wide);
   text-align: center;
   color: rgba(28, 26, 23, .6);
 }
@@ -1469,7 +1482,7 @@ section {
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgb(var(--c-brand-rgb) / .18);
   font-size: var(--fs-caption);
-  letter-spacing: .18em;
+  letter-spacing: var(--ls-wide);
   color: var(--color-brand);
   white-space: nowrap;
 }
@@ -1580,7 +1593,7 @@ section {
   color: var(--color-brand);
   font-size: var(--fs-caption);
   font-weight: 600;
-  letter-spacing: .08em;
+  letter-spacing: var(--ls-label);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   box-shadow: 0 2px 8px rgb(var(--c-brand-rgb) / .18);
@@ -1590,7 +1603,7 @@ section {
 .photo-credit {
   color: var(--color-ink);
   font-weight: 500;
-  letter-spacing: .02em;
+  letter-spacing: var(--ls-label);
 }
 
 /* 照片墙的窄屏：**每条带都变成两列**（带与带的高低关系不变）
@@ -1620,7 +1633,7 @@ section {
 .contact-title {
   font-size: var(--fs-hero2);
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--ls-tight);
   color: var(--color-brand);
   line-height: var(--lh-tight);
 }
@@ -1659,7 +1672,7 @@ section {
 .marquee-track span {
   font-size: calc(42px * var(--scale));
   font-weight: 800;
-  letter-spacing: 2px;
+  letter-spacing: var(--ls-label);
   padding-right: calc(48px * var(--scale));
   color: transparent;
   -webkit-text-stroke: 1px rgb(var(--c-brand-rgb) / .55);
@@ -1818,7 +1831,7 @@ section {
 .log-title {
   font-size: var(--fs-h2);
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--ls-tight);
   line-height: var(--lh-tight);
 }
 
@@ -1836,7 +1849,7 @@ section {
 .log-lead {
   margin-top: var(--sp-5);
   font-size: var(--fs-h3);
-  line-height: 1.75;
+  line-height: var(--lh-body);
   color: var(--color-muted);
 }
 
@@ -1859,9 +1872,9 @@ section {
 }
 
 .log-meta-k {
-  font-size: 11px;
+  font-size: var(--fs-micro);
   font-weight: 500;
-  letter-spacing: .16em;
+  letter-spacing: var(--ls-caps);
   text-transform: uppercase;
   color: var(--color-muted);
 }
@@ -1895,7 +1908,7 @@ section {
 .log-toc-title {
   font-size: var(--fs-caption);
   font-weight: 500;
-  letter-spacing: .16em;
+  letter-spacing: var(--ls-caps);
   text-transform: uppercase;
   color: var(--color-brand);
 }
@@ -1937,7 +1950,7 @@ section {
   /* 介于 --fs-h3(17px) 与 --fs-h2(26px+) 之间的文档级小标题 */
   font-size: clamp(calc(19px * var(--scale)), 2.4vw, calc(22px * var(--scale)));
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--ls-tight);
   margin: var(--sp-8) 0 var(--sp-5);
   padding-top: var(--sp-6);
   border-top: 1px solid var(--color-line);
@@ -1991,7 +2004,7 @@ section {
   background: var(--color-mint);
   color: var(--color-ink);
   font-size: .92em;
-  font-family: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  font-family: ui-monospace, Consolas, monospace;
 }
 
 .log-hr {
@@ -2161,7 +2174,7 @@ section {
   font-family: inherit;
   font-size: 15px;          /* SVG 用户单位，会随 viewBox 缩放 */
   font-weight: 500;
-  letter-spacing: .02em;
+  letter-spacing: var(--ls-label);
   fill: var(--color-brand);
   dominant-baseline: middle; /* 让文字沿路径居中，不然会浮在路径上方 */
 }
@@ -2312,7 +2325,7 @@ body {
 .contact-title {
   font-family: var(--font-serif);
   font-weight: 500;
-  letter-spacing: -0.02em;
+  letter-spacing: var(--ls-tight);
 }
 
 /* ⚠️ 原「数字：衬线大数字是编辑排版里的经典记忆点」那条 .stat-num 已随数据条一起删除
@@ -2327,14 +2340,14 @@ body {
 .eyebrow,
 .meta-k {
   text-transform: uppercase;
-  letter-spacing: .22em;
+  letter-spacing: var(--ls-wide);
   font-weight: 600;
-  font-size: 11px;
+  font-size: var(--fs-micro);
 }
 
 /* 导航：轻微字距，保持易读、不用大写 */
 .nav-link {
-  letter-spacing: .04em;
+  letter-spacing: var(--ls-label);
 }
 
 /* ---------- 20.5 兴趣 ↔ 照片 联动（V2.7 续五） ---------- */
@@ -2469,7 +2482,7 @@ body {
 .daily-today-k {
   font-size: var(--fs-caption);
   font-weight: 600;
-  letter-spacing: .14em;
+  letter-spacing: var(--ls-caps);
   color: var(--color-brand);
 }
 
@@ -2494,7 +2507,7 @@ body {
   font-family: var(--font-serif);
   font-size: var(--fs-h3);
   font-weight: 500;
-  line-height: 1.25;
+  line-height: var(--lh-tight);
 }
 
 .daily-meta {
@@ -2523,7 +2536,7 @@ body {
   border-bottom: 1px solid var(--color-line-strong);
   font-size: var(--fs-caption);
   font-weight: 600;
-  letter-spacing: .14em;
+  letter-spacing: var(--ls-caps);
   color: var(--color-muted);
 }
 
@@ -2581,8 +2594,8 @@ body {
     display: block;
     max-height: calc(420px * var(--scale));
     overflow: hidden;
-    font-size: calc(11px * var(--scale));
-    line-height: 1.5;
+    font-size: var(--fs-micro);
+    line-height: var(--lh-ui);
     color: rgb(var(--c-brand-rgb) / .34);
     -webkit-mask-image: linear-gradient(#000 58%, transparent 100%);
     mask-image: linear-gradient(#000 58%, transparent 100%);
@@ -2790,7 +2803,7 @@ body {
 .card-row dt {
   font-size: var(--fs-eyebrow);
   font-weight: 500;
-  letter-spacing: .18em;
+  letter-spacing: var(--ls-wide);
   text-transform: uppercase;
   color: var(--color-muted);
 }
@@ -2829,7 +2842,7 @@ body {
   display: block;
   margin-top: var(--sp-2);
   font-size: var(--fs-sm);
-  letter-spacing: .02em;      /* 中文小句加一点字距更好读 */
+  letter-spacing: var(--ls-label);  /* 中文小句加一点字距更好读 */
   color: var(--color-ink);
 }
 
@@ -3142,7 +3155,7 @@ html.js-ready .fb-trigger {
   margin-bottom: var(--sp-4);
   padding: var(--sp-2) var(--sp-3);
   font-size: var(--fs-caption);
-  line-height: 1.55;
+  line-height: var(--lh-ui);
   color: var(--color-ink);
   background: var(--color-bg);
   border: 1px dashed var(--color-line-strong);
@@ -3181,9 +3194,9 @@ html.js-ready .fb-trigger {
 .fb-tag {
   display: inline-block;
   padding: 1px var(--sp-2);
-  font-size: 11px;
+  font-size: var(--fs-micro);
   font-weight: 500;
-  line-height: 1.6;
+  line-height: var(--lh-ui);
   white-space: nowrap;
   border-radius: var(--r-pill);
 }
@@ -3206,7 +3219,7 @@ html.js-ready .fb-trigger {
   padding: var(--sp-3) var(--sp-4);
   font-family: inherit;
   font-size: var(--fs-body);
-  line-height: 1.5;
+  line-height: var(--lh-ui);
   color: var(--color-ink);
   background: var(--color-bg);
   border: 1px solid var(--color-line);
@@ -3310,7 +3323,7 @@ html.js-ready .fb-trigger {
 
 .fb-hint {
   font-size: var(--fs-caption);
-  line-height: 1.5;
+  line-height: var(--lh-ui);
   color: var(--color-muted);
 }
 
@@ -3337,7 +3350,7 @@ html.js-ready .fb-trigger {
   padding: var(--sp-3) var(--sp-4);
   font-size: var(--fs-sm);
   font-weight: 500;
-  line-height: 1.5;
+  line-height: var(--lh-ui);
   color: var(--color-ink);
   background: var(--color-mint);
   border-left: 3px solid var(--color-brand);
@@ -3354,7 +3367,7 @@ html.js-ready .fb-trigger {
   width: 16px;
   height: 16px;
   margin-top: 1px;
-  font-size: 11px;
+  font-size: var(--fs-micro);
   font-weight: 700;
   line-height: 1;
   color: var(--color-surface);
