@@ -1564,7 +1564,14 @@ window.addEventListener('resize', function () {
   if (!card || !outBtn || !inBtn || !value) return;
 
   var MIN = 0.85, MAX = 1.30, STEP = 0.05;
-  var scale = 1;
+
+  // 初始大小（2026-09-28 · 用户要求「把最后联系卡片初始大小增大」）：**宽屏 1.15，窄屏仍是 1**。
+  // 为什么窄屏不跟着放大：名片是 `width: min(100%, 380px)`，手机上是满宽 —— `zoom` 会把百分比宽度
+  // 一起放大 ⇒ 1.15 就是 115% 容器宽，直接横向溢出。范围仍是 0.85~1.30，手机想放大照样点「+」。
+  // ⚠️ 要改初始值只动这一处；**必须落在 STEP 的格子上**（1.10 / 1.15 / 1.20 / 1.25），否则百分比会显示成 117% 这类怪数。
+  // ⚠️ 没动 CSS 里那个 380px 宽度上限 —— 它来自折射滤镜的性能约束（见 style.css §22），不是手感参数。
+  var WIDE = !!(window.matchMedia && window.matchMedia('(min-width: 641px)').matches);
+  var scale = WIDE ? 1.15 : 1;
 
   function render() {
     card.style.setProperty('--card-scale', scale.toFixed(2));
