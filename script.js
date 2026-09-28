@@ -896,6 +896,21 @@ if (fxCanvas && (fxCanHover || fxTouchMode) && !fxReduced && fxCanvas.getContext
   var FX_IN_SEC     = 0.30;       // 放大到位的时间（pen 是 speedIn 0.5）
   var FX_OUT_SEC    = 0.42;       // 缩回去的时间（pen 是 speedOut 0.6）
 
+  // ---- 闪烁的强度与频率（2026-09-28 · 反馈 F6「有点闪眼睛👀」）----
+  // 访客原话只有六个字，所以先把「闪」的来源数清楚。这片场一共三处在动：
+  //   ① **环境波**：鼠标不动时整片也在呼吸 —— 原来振幅 10%、频率 1.15 rad/s（≈5.5 秒一次），
+  //      而每个格子的相位是随机的 ⇒ 看上去就是「满屏细碎地在闪」；
+  //   ② **指针扫过**：附近的点鼓到 3 倍、透明度冲到满 ⇒ 那一下亮得最狠；
+  //   ③ **进出阈值 0.05**：在阈值上下反复进出会重掷大小与角度 ⇒ 那是「跳」不是「鼓」。
+  // ⇒ 下面三个数把 ①② 各降一档，两个迟滞数治 ③。
+  //    **只降幅度、不删动作**：场还是那片场，色板、形状、跟随指针的行为一个没动。
+  // ⚠️ 想恢复原来的手感：改回 1.15 / 0.10 / 0.45，并把下面两个阈值都写成 0.05。
+  var FX_AMBIENT_FREQ = 0.45;     // 环境波频率（原 1.15 ⇒ 呼吸从 ≈5.5 秒放慢到 ≈14 秒）
+  var FX_AMBIENT_AMP  = 0.04;     // 环境波振幅（原 0.10 ⇒ 幅度四折，静止时几乎看不出在动）
+  var FX_PEAK_ALPHA   = 0.32;     // 扫过时的透明度增量（原 0.45 ⇒ 峰值 1.0 落到 0.87，不再「炸白」）
+  var FX_HOVER_IN     = 0.06;     // 进入膨胀的阈值（原 0.05）
+  var FX_HOVER_OUT    = 0.02;     // 退出的阈值（原 0.05）—— 与上一个不同即「迟滞」，专治反复跳闪
+
   // 内容让位：这些区块下面的形状**不允许鼓起来** —— 就是 pen 的 [data-shape-mask] 机制。
   // ⚠️ 这里只做「不让膨胀」，不做「让形状消失」。原因：静止的小点本来就只有 3 像素左右，
   //    压不着字；真正会压字的是鼠标扫过时鼓到几十像素的那一下。
@@ -1110,8 +1125,9 @@ if (fxCanvas && (fxCanHover || fxTouchMode) && !fxReduced && fxCanvas.getContext
     for (var i = 0; i < fxCells.length; i++) {
       var cell = fxCells[i];
 
-      // 环境波：鼠标不动时整片也在缓慢呼吸 —— 「全屏形状场」该有的样子
-      var ambient = Math.sin(cell.x * 0.014 + cell.y * 0.011 + t * 1.15 + cell.phase);
+      // 环境波：鼠标不动时整片也在缓慢呼吸 —— 「全屏形状场」该有的样子。
+      // 2026-09-28（反馈 F6）：频率 1.15 → FX_AMBIENT_FREQ(0.45) 把呼吸放慢，别再像在闪
+      var ambient = Math.sin(cell.x * 0.014 + cell.y * 0.011 + t * FX_AMBIENT_FREQ + cell.phase);
 
       // ① 鼠标：越近越强，平方衰减，再乘上动量 —— 只有「手在动」的时候才鼓起来
       var hover = 0;
@@ -1125,12 +1141,12 @@ if (fxCanvas && (fxCanHover || fxTouchMode) && !fxReduced && fxCanvas.getContext
       }
 
       // 扫进 / 扫出：进圈时重掷放大上限与角度（星形顺带换一款）—— 取自 pen 的 hovered 逻辑
-      if (hover > 0.05 && !cell.hovered) {
+      if (hover > FX_HOVER_IN && !cell.hovered) {
         cell.hovered = true;
         cell.maxScale = FX_MIN_SCALE + Math.random() * (FX_MAX_SCALE - FX_MIN_SCALE);
         cell.angle = Math.random() * Math.PI * 2;
         if (cell.shape >= FX_STAR_FIRST) cell.shape = fxStarIndex();
-      } else if (hover <= 0.05 && cell.hovered) {
+      } else if (hover < FX_HOVER_OUT && cell.hovered) {   // 迟滞：退出要更干脆，避免反复重掷
         cell.hovered = false;
       }
 
@@ -1158,14 +1174,14 @@ if (fxCanvas && (fxCanHover || fxTouchMode) && !fxReduced && fxCanvas.getContext
       }
 
       var target = (FX_REST_SCALE + peak * (cell.maxScale - FX_REST_SCALE))
-                 * (1 + 0.10 * ambient);                 // 静止时叠一层呼吸，不是死板的一片
+                 * (1 + FX_AMBIENT_AMP * ambient);      // 静止时叠一层呼吸（振幅见上面的旋钮）
       cell.scale += (target - cell.scale) * (target > cell.scale ? kIn : kOut);
 
       var r = fxBaseR * cell.base * cell.scale;
       if (r < 0.14) continue;                            // 太小就不画，省一次 drawImage
 
       // 黑底上要「彩色得起来」：静止的小点也看得出颜色，扫过时接近满不透明
-      var alpha = 0.55 + 0.45 * peak;
+      var alpha = 0.55 + FX_PEAK_ALPHA * peak;   // 2026-09-28：峰值从 1.0 收到 ≈0.87
       if (alpha > 1) alpha = 1;
 
       var spr = fxSprites[cell.shape][cell.c];
