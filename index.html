@@ -11,14 +11,6 @@
   <meta name="description" content="王释贤的个人主页 —— 脑机接口方向。">
   <meta name="theme-color" content="#000000">
 
-  <!-- 深色主题的「首帧」防护（2026-09-28 · 反馈 F6「有点闪眼睛」）：
-       style.css 是**外部文件** —— 在它解析之前，浏览器会先按 UA 默认画一层**白底**，
-       手机上冷启动 / 慢网时就是「开屏白闪一下」。这里内联声明 color-scheme 与页面底色，
-       让**第一帧就是黑的**（#000 与 style.css 里深色主题的 --c-bg 一致，见 §1.5）。
-       ⚠️ 想切回浅色主题：删掉 <html data-theme="dark"> 时，这两行也要一起删或改。 -->
-  <meta name="color-scheme" content="dark">
-  <style>html{background:#000;color-scheme:dark}</style>
-
   <!-- 社交分享卡片：把链接发给同学 / HR 时会显示标题和缩略图 -->
   <!-- 部署上线后，记得把 og:image 和 og:url 换成你的真实网址 -->
   <meta property="og:type" content="profile">
@@ -200,11 +192,11 @@
               <p>纯静态 · 无框架 · 自己的一套设计系统</p>
               <!-- 发版时同步本行：版本号 + 「截至 <日期> 共 N 次提交」。
                    用日期锚定，这样数字永远不会因为后续提交而过时。
-                   N = 整个 MYPAGE 仓库的全部提交 = v3 分支 115 条 + main 分支 2 条（V1.0 / V1.1）
+                   N = 整个 MYPAGE 仓库的全部提交 = v3 分支 117 条 + main 分支 2 条（V1.0 / V1.1）
                    （仓库分两条没有共同祖先的分支，说明见 README「仓库与分支」一节） -->
               <!-- ⚠️ 这一行带提交数，由 tools/sync-version.py 自动写 ——
                    别手改数字，改完在提交前跑一次那个脚本。 -->
-              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 → V3.0 · 截至 2026-09-28 共 117 次提交</p>
+              <p class="item-track">V1 → V1.1 → V2.0 → V2.7 → V3.0 · 截至 2026-09-28 共 119 次提交</p>
               <a class="item-link" href="ai-log.html">这个页面是怎么做出来的 →</a>
             </div>
             <!-- ⚠️ 这里原来是 CarbonBrain（写着「课程 / 比赛项目 · 已有可演示版本」）——
