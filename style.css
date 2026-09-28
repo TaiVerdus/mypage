@@ -62,13 +62,19 @@
   --fs-h2:      clamp(calc(26px * var(--scale)), calc(3.6vw * var(--scale)), calc(34px * var(--scale)));
   --fs-h3:      calc(17px * var(--scale));
   --fs-body:    calc(15px * var(--scale));
-  --fs-sm:      calc(14px * var(--scale));
-  --fs-xs:      calc(13px * var(--scale));
+  --fs-sm:      calc(13.5px * var(--scale));
+  /* 2026-09-28（排版 B 轮）：`--fs-xs`（13px）**这一档删掉了** —— 它和 sm 只差 1px、全站又只用过 3 处
+     （`.bento-item p` / `.chat-note` / `.log-table`），属于「有档位、没有层级」。原来用它那 3 处并进了 `--fs-sm`。
+     ⚠️ 想恢复：把这一行还原成 `  --fs-xs:      calc(13px * var(--scale));`，并把那 3 处的 `--fs-sm` 改回来。 */
   --fs-caption: calc(12px * var(--scale));
   --fs-eyebrow: calc(12px * var(--scale));
   /* 2026-09-28（排版收敛 A 轮）：这一档原来**不在体系里** —— 全站直接用 11px 写了 16 处，
      而且一半乘 --scale、一半不乘 ⇒ 同一个"微字"级别在总尺寸旋钮下表现不一致。立成 token 收口。 */
-  --fs-micro:   calc(11px * var(--scale));
+  --fs-micro:   calc(10.5px * var(--scale));
+  /* ⚠️ 2026-09-28（排版 B 轮）：`h3` 以下**只留四档**，台阶等距 ——
+     body 15 / sm 13.5 / caption 12 / micro 10.5（基准），实际渲染 17.4 / 15.7 / 13.9 / 12.2px。
+     改前是五档、相邻只差 1.2px（7~8%），有档位却没有层级感；现在是 1.7~1.8px（约 11%），一眼能分。
+     ⚠️ 要再拉开：只动这几个基准值，别在别处写死 px（见 DESIGN-SYSTEM.md §4）。 */
   --lh-tight: 1.18;
   --lh-body: 1.7;
   /* UI 密集区（表单 / 提示 / 小票 / 标签）：2026-09-28 把原来 1.5 / 1.55 / 1.6 / 1.7 四个散值收成一档。
@@ -808,7 +814,7 @@ section {
 }
 
 .bento-item p {
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
   color: var(--color-muted);
   margin-top: calc(2px * var(--scale));
 }
@@ -845,7 +851,7 @@ section {
 /* ---------- 7. 数字分身聊天区 ---------- */
 .chat-note {
   margin-top: var(--sp-3);
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
   color: var(--color-muted);
 }
 
@@ -2057,7 +2063,7 @@ section {
 .log-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
 }
 
 .log-table th,
