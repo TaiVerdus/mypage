@@ -126,7 +126,13 @@ def build(data):
                          % (total // 60, total % 60))
         parts.append('          </div>')
         parts.append('          <div class="receipt-foot">')
-        parts.append('            <p>PICKED: %s · 选自备选池</p>' % esc(iso))
+        # ⚠️ 2026-09-28（反馈 F2）：页脚补上备选池的总数 —— 右侧那层歌单索引是**装饰**（aria-hidden），
+        #    「一共多少首」这个事实必须有**真文本**交代，不能只活在装饰层里。
+        pool_n = len(data.get("pool") or [])
+        foot = 'PICKED: %s · 选自备选池' % esc(iso)
+        if pool_n:
+            foot += ' %d 首' % pool_n
+        parts.append('            <p>%s</p>' % foot)
         parts.append('            <p>EDITED BY: 释贤</p>')
         parts.append('          </div>')
         parts.append('          <!-- 条码纯装饰（CSS 画的，扫不出东西）⇒ 对读屏隐藏 -->')
@@ -140,12 +146,17 @@ def build(data):
         parts.append('          <p class="daily-empty">备选池一开张，这里每天换一首。</p>')
         parts.append('        </article>')
 
-    # ---------- 最近几天（不含今天那条） ----------
+    # ---------- 右栏：最近几天 + 歌单索引（2026-09-28 · 反馈 F2）----------
+    # 宽屏下这两块并到小票右边（票保持窄身量：窄是小票的身份），窄屏仍是上下堆叠。
+    # 索引层是**装饰**（aria-hidden）：它的作用是「质感与层次」，不是给人逐条读的；
+    # 「共 N 首」那个事实已经写在票脚的真文本里（见上）。
+    side = []
+
     recent = hist[1:7]
     if recent:
-        parts.append('        <div class="daily-recent">')
-        parts.append('          <p class="daily-recent-k">最近几天</p>')
-        parts.append('          <ul class="daily-recent-list">')
+        side.append('          <div class="daily-recent">')
+        side.append('            <p class="daily-recent-k">最近几天</p>')
+        side.append('            <ul class="daily-recent-list">')
         for row in recent:
             iso = row.get("date", "")
             names = "、".join(it.get("title", "") for it in (row.get("items") or []))
@@ -157,22 +168,35 @@ def build(data):
             y = iso.split("-")[0] if iso else ""
             now_y = str(date.today().year)
             shown = zh_date(iso) if (y and y != now_y) else zh_date(iso, long_form=False)
-            parts.append('            <li><time datetime="%s">%s</time>'
-                         '<span class="daily-recent-main">%s</span></li>'
-                         % (esc(iso), esc(shown), esc(label)))
-        parts.append('          </ul>')
+            side.append('              <li><time datetime="%s">%s</time>'
+                        '<span class="daily-recent-main">%s</span></li>'
+                        % (esc(iso), esc(shown), esc(label)))
+        side.append('            </ul>')
+        side.append('          </div>')
+
+    pool_all = data.get("pool") or []
+    if pool_all:
+        side.append('          <aside class="pool-index" aria-hidden="true">')
+        side.append('            <ol class="pool-index-list">')
+        for it in pool_all:
+            side.append('              <li><span class="pi-n">%s</span>'
+                        '<span class="pi-name">%s</span>'
+                        '<span class="pi-a">%s</span></li>'
+                        % (esc('%03d' % (it.get("no") or 0)),
+                           esc(it.get("title", "")), esc(it.get("artist", ""))))
+        side.append('            </ol>')
+        side.append('          </aside>')
+
+    if side:
+        parts.append('        <div class="daily-side">')
+        parts.extend(side)
         parts.append('        </div>')
 
-    # ---------- 常听的：**不在这里渲染了**（V2.7 续四十四）----------
-    # ⚠️ 2026-09-22 起，「常听的」改由 tools/build-receipt.py 渲染成一张**小票**
-    #    （用户给了一张 QQ音乐 的歌单小票截图做模板）。所以：
-    #      · data/daily-picks.json 的 classics 现在归 build-receipt.py 用，
-    #        字段是平铺的 {title, artist, duration}（不再是这里的「按歌手分组」形状）
-    #      · 原来那段 <details class="daily-classics"> 的渲染已删除，
-    #        它配套的样式也早在 2026-09-21 就移除了 ⇒ 留着只会输出没样式的裸标签
-    #    本函数现在只管 pool / history（每日推荐那部分）。
-    #    两个生成器各管一段、互不写入：daily 管 <!-- daily:begin..end -->，
-    #    receipt 管 <!-- receipt:begin..end -->。
+    # ---------- 常听的：不在这里，而且**它现在哪都不在**（2026-09-28 核实并更正）----------
+    # 这段注释原来写「已交给 tools/build-receipt.py 渲染成小票」—— 那个脚本**已经不存在了**，
+    # index.html 里也没有 <!-- receipt:begin --> 标记（都删了，注释没跟上）。
+    # 所以音乐区现在实际只有两块：今日推荐小票 + 右栏（最近几天 / 歌单索引）。
+    # ⚠️ 以后再有人想恢复「常听的小票」，先确认它到底是被有意删的还是丢了 —— 别照旧注释复活它。
 
     parts.append('      </div>')
     return "\n".join(parts)

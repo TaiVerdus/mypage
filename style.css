@@ -2548,8 +2548,82 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-.daily-recent-main {
-  color: var(--color-ink);
+.daily-recent-main {
+  color: var(--color-ink);
+}
+
+/* ---- 歌单索引（宽屏的「背景层」，2026-09-28 · 反馈 F2 的一种修法）----
+   思路：**小票保持窄**（窄是它的身份，拉宽它等于毁掉这张票），把原来空着的右侧
+   铺成一层**歌单索引**当质感与层次。三条纪律：
+     ① **只在宽屏出现**（<1100px 直接 display:none）—— 手机上铺 276 行纯粹白费流量；
+     ② **它是装饰不是内容**：aria-hidden、不可点、不参与交互；颜色压到很低。
+        ⚠️ 不写 user-select:none —— 全站 0 处（见 DESIGN-SYSTEM.md 的约定）。
+        ⚠️ 「一共 276 首」这个事实写在**小票页脚的真文本**里，不让信息只活在装饰层里；
+     ③ **底边渐隐**（mask）：它要像「从页面里退下去的一层」，不能有一条硬截断线。 */
+.daily-side {
+  display: grid;
+  gap: var(--sp-7);
+  align-content: start;
+}
+
+.pool-index {
+  display: none;                      /* 窄屏不出，见 ① */
+}
+
+@media (min-width: 1100px) {
+  /* 宽屏：票在左、右栏在右 —— 复用既有断点（DESIGN-SYSTEM.md §7），不新造 */
+  .daily {
+    grid-template-columns: calc(460px * var(--scale)) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .pool-index {
+    display: block;
+    max-height: calc(420px * var(--scale));
+    overflow: hidden;
+    font-size: calc(11px * var(--scale));
+    line-height: 1.5;
+    color: rgb(var(--c-brand-rgb) / .34);
+    -webkit-mask-image: linear-gradient(#000 58%, transparent 100%);
+    mask-image: linear-gradient(#000 58%, transparent 100%);
+  }
+
+  .pool-index-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    columns: 2;                       /* 两列：更像「索引」，也把右栏的宽度用起来 */
+    column-gap: var(--sp-6);
+  }
+
+  .pool-index-list li {
+    display: flex;
+    gap: .55em;
+    min-width: 0;
+  }
+
+  .pi-n {
+    flex: 0 0 2.8em;
+    opacity: .72;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pi-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .pi-a {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    opacity: .62;
+  }
 }
 
 /* ---- 「常听的」折叠区样式已移除（V2.7 续三十二）----
