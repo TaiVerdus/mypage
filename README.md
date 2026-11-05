@@ -1,8 +1,8 @@
 # MYPAGE · 王释贤的个人主页
 
-一个纯静态的个人主页。无框架、无构建工具、无依赖——**双击 `index.html` 就能打开**。
+王释贤的个人主页，前端使用原生 HTML、CSS 和 JavaScript，数字分身与反馈由 Node.js 服务提供。
 
-> 目前处于 V2 阶段（视觉打磨 + 内容升级）。V3 计划：反馈表单 + 后台数据库 + 部署上线。
+本地浏览页面可直接打开 `index.html`。用 `npm start` 启动服务后，按 [期末版部署说明](DEPLOY.md#期末版--render-免费版) 配置聊天和反馈。
 
 ---
 
@@ -18,10 +18,10 @@
 
 | | |
 |---|---|
-| 形态 | 纯静态三文件：`index.html` + `style.css` + `script.js` |
-| 框架 | 无。不用 React / Vue / Tailwind，不用 npm 与打包器 |
+| 形态 | 静态页面 + Node.js 同源 API |
+| 框架 | 原生 HTML、CSS 和 JavaScript，前端无需构建 |
 | 字体 | 系统字体（PingFang SC / 微软雅黑），不加载外部字体 |
-| 第三方 | 无 CDN、无追踪脚本。页面数据不联网上传 |
+| 服务 | DeepSeek 官方 API 生成聊天回复，CloudBase 文档数据库接收反馈 |
 | 浏览器要求 | 现代浏览器；关闭 JS 或开启「减少动效」时内容仍可正常阅读 |
 
 ## 目录结构
@@ -32,6 +32,9 @@ MYPAGE-V2.0/
 ├── ai-log.html         AI 使用日志（**生成物，勿手改**，由 tools/ 生成）
 ├── style.css           全部样式（设计 token 集中在 :root，两个页面共用）
 ├── script.js           主页交互：滚动显现、逐行入场、光标形状场、球体画廊、名片缩放等
+├── server.js           静态页面、DeepSeek 聊天代理和 CloudBase 反馈接口
+├── render.yaml         Render 免费版部署配置
+├── Dockerfile          CloudBase 云托管备选构建配置
 ├── images/             摄影 **10 张**（`1–9.jpg` + `entry-street.jpg`，合计 2647 KB）
 │                       ⚠️ **原图一律按原始像素入库**：不缩放、不重编码、不裁切
 │                       （需要小尺寸时另存**生成物**，如 `sphere/` 的缩略图，绝不覆盖原图）
@@ -58,15 +61,14 @@ MYPAGE-V2.0/
 │   ├── openai-stub.py  本地联调桩：最小 OpenAI 兼容端点（零依赖、含 CORS），验证「换大脑」链路
 │   ├── probe-openai-endpoint.js 探测某个端点页面能不能用（响应形状 / CORS / 耗时）
 │   ├── test-chat-proxy.js 「云端代理」的回归测试（锁人设 / 限长 / 限速 + 整条公网链路）
-│   ├── test-feedback-db.js V3 反馈后台的**真机验收**：匿名能插入 / 匿名读不到（权限生效）/ 空内容被拒
-│   └── test-question-log.js 提问记录的回归：抽 script.js 里那段**真身代码**在 node 里跑，验请求形状
-├── server.js           线上入口：托管页面 + 代理 /api/chat（零依赖 Node，公网部署用）
+│   └── test-feedback-db.js 反馈接口回归：本地模拟 CloudBase 写入、重复提交、拒绝读取和异常处理
+├── server.js           线上入口：托管页面 + /api/chat + /api/feedback（零依赖 Node）
 ├── package.json        npm start / npm test（发布沙箱按它识别这是个 Node 项目）
 ├── .env                ⚠️ **机密，不进 git**：DEEPSEEK_API_KEY（怎么建见 DEPLOY.md §2）
 ├── DESIGN-SYSTEM.md    设计系统：配色 / 字体尺度 / 间距 / 组件 / 无障碍底线
 ├── DEPLOY.md           部署到公网：拿 DeepSeek key、为什么 key 不能进前端、上线检查清单、**GitHub Pages 发布（§8）**
-├── FEEDBACK.md         **V3 反馈后台**：数据流、表结构、建表脚本逐句、RLS 与两种密钥、你的操作步骤与排查
-├── QUESTIONS.md        **提问记录**：记什么/不记什么、为什么挂在前端、怎么读、FAQ 回流到人设的流程
+├── FEEDBACK.md         期末反馈入口与 V3 反馈后台历史
+├── QUESTIONS.md        早期提问统计与资料迭代历史
 ├── V4-DECISIONS.md     **V4 反馈决策表**：目标尺子、反馈分类与真问题、Impact×Effort、逐条决策（Accept/Modify/Delay/Reject）
 ├── WECLONE.md          把分身的「大脑」换成自建微调模型（WeClone）的完整链路与坑
 └── PROJECT.md          项目进度大脑：进度记录、迭代日志、版本说明、提交历史

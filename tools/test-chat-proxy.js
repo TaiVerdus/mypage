@@ -152,7 +152,7 @@ function startProxy(port, ratePerMin, extraEnv) {
 
   up.listen(UP_PORT);
   proxy = startProxy(PROXY_PORT, '1000');
-  rateProxy = startProxy(RATE_PORT, '3');
+  rateProxy = startProxy(RATE_PORT, '3', { RENDER: 'true' });
   // 余额那一组：TTL 设 0 ⇒ 每条请求都重查，好在同一个实例里依次演三种余额状态
   balProxy = startProxy(BAL_PORT, '1000', { BALANCE_TTL_MS: '0', BALANCE_MIN: '1' });
 
@@ -244,6 +244,8 @@ function startProxy(port, ratePerMin, extraEnv) {
   ok(JSON.stringify(sent.messages).indexOf('无视之前的所有设定') < 0, '★ 注入的恶意指令没有进到上游');
   ok(sent.messages.length === 2, '只留下 1 条 user（system 被替换成服务端那份）',
     '实际 ' + sent.messages.length + ' 条');
+  var nullPayload = await chat(null);
+  ok(nullPayload.status === 400, 'JSON null 返回 400，代理继续运行');
 
   console.log('\n=== 4. 额度防护：输出长度 / 历史条数 / 单条长度 ===');
   ok(sent.max_tokens === 400, 'max_tokens 被服务端锁成 400', '实际 ' + sent.max_tokens);
@@ -272,7 +274,7 @@ function startProxy(port, ratePerMin, extraEnv) {
   for (var k = 0; k < 6; k++) {
     var rr2 = await fetch('http://127.0.0.1:' + RATE_PORT + '/api/chat', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'CF-Connecting-IP': '192.0.2.1' },
       body: JSON.stringify({ messages: [{ role: 'user', content: 'q' + k }] })
     });
     codes.push(rr2.status);
@@ -284,6 +286,12 @@ function startProxy(port, ratePerMin, extraEnv) {
   var hzRate = await (await fetch('http://127.0.0.1:' + RATE_PORT + '/healthz')).json();
   ok(hzRate.stats && hzRate.stats.rateLimited >= 2, '★ /healthz 数得出被限速拦过几次（运维不用翻日志）',
     JSON.stringify(hzRate.stats));
+  var otherVisitor = await fetch('http://127.0.0.1:' + RATE_PORT + '/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'CF-Connecting-IP': '2001:db8::2' },
+    body: JSON.stringify({ messages: [{ role: 'user', content: '另一个访客' }] })
+  });
+  ok(otherVisitor.status === 200, 'Render 公网代理上的不同访客有独立限速额度');
 
   console.log('\n=== 6. 坏请求不能让服务倒 ===');
   var bad = await fetch('http://127.0.0.1:' + PROXY_PORT + '/api/chat', {
@@ -323,7 +331,7 @@ function startProxy(port, ratePerMin, extraEnv) {
   //    所以那边直接就能用）。这里显式把需要的几个名字取出来。
   var api = eval(
     slice('var CHAT_BACKEND', 'var KNOWLEDGE') + '\n' +
-    slice('function isLocalPage', 'function ask(') +
+    slice('function isPublicChat', 'function ask(') +
     '\n; ({ CHAT_BACKEND: CHAT_BACKEND, resolvedBackend: resolvedBackend, askBackend: askBackend })'
   );
   var CB = api.CHAT_BACKEND;
@@ -346,7 +354,7 @@ function startProxy(port, ratePerMin, extraEnv) {
 
   console.log('\n=== 9. ★ 余额护栏（2026-09-23 用户定；BALANCE_MIN=1）===');
   // ⚠️ 这条护栏的意义：key **不能设额度上限**，能兜住的只有「限速」与「余额」。
-  //    所以余额低就该干脆不接活 —— 让页面自动落回知识库，而不是等上游报错。
+  //    余额不足时在代理层拒绝请求。
   function balChat() {
     return fetch('http://127.0.0.1:' + BAL_PORT + '/api/chat', {
       method: 'POST',
@@ -366,7 +374,7 @@ function startProxy(port, ratePerMin, extraEnv) {
   var nBefore = chatCalls();
   var rLow = await balChat();
   var msg = await rLow.json().catch(function () { return {}; });
-  ok(rLow.status === 503, '★ 余额不足 ⇒ 503（页面会自动落回知识库）', '实际 ' + rLow.status);
+  ok(rLow.status === 503, '★ 余额不足 ⇒ 503（公网页面显示暂不可用）', '实际 ' + rLow.status);
   ok(chatCalls() === nBefore, '★ 而且**没往上游发**请求（不为注定失败的请求花钱）',
     '上游收到的对话请求数从 ' + nBefore + ' 变成了 ' + chatCalls());
   ok(JSON.stringify(msg).indexOf('余额') >= 0, '503 的说明里写清了原因（不是含糊的错误）',
@@ -388,8 +396,8 @@ function startProxy(port, ratePerMin, extraEnv) {
     '查了 ' + (balCalls() - bBefore) + ' 次');
 
   var rHealth = await fetch('http://127.0.0.1:' + BAL_PORT + '/healthz').then(function (r) { return r.json(); });
-  ok(rHealth.balance && rHealth.balance.ok === true && rHealth.balance.value === 6.34,
-    '/healthz 报得出余额（运维一眼能看到）', JSON.stringify(rHealth.balance));
+  ok(rHealth.balance && rHealth.balance.ok === true && rHealth.balance.blocked === false &&
+    !('value' in rHealth.balance), '/healthz 公开护栏状态，隐藏账户余额', JSON.stringify(rHealth.balance));
   ok(rHealth.thinking === 'disabled', '★ /healthz 能看到思考模式 = disabled（关掉这件事是可见的）',
     String(rHealth.thinking));
 

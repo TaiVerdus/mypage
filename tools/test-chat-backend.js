@@ -26,11 +26,7 @@ function slice(from, to) {
 }
 
 var cfg = slice('var CHAT_BACKEND', 'var KNOWLEDGE');            // 配置 + 三个状态变量
-// ⚠️ 切片起点必须是 `isLocalPage`，**不能**从 `backendUsable` 开始：
-//    本机 ollama 那条路加进来之后，`backendUsable` 依赖它前面定义的
-//    `isLocalPage` / `resolvedBackend` —— 从它开始切就会把那两个漏掉，
-//    跑起来是 `ReferenceError: resolvedBackend is not defined`（这个坑已经踩过一次）。
-var fns = slice('function isLocalPage', 'function ask(');   // 选后端 / 可用性 / 记账 / 落回标记 / 请求
+var fns = slice('function isPublicChat', 'function ask(');  // 选后端 / 可用性 / 记账 / 请求
 
 // 桩：addOfflineNote 会碰 document 与 messagesEl
 var stubs =
@@ -59,7 +55,7 @@ function sseChunksLen() {
     'data: {"choices":[{"delta":{},"finish_reason":"length"}]}\n\ndata: [DONE]\n\n'
   ];
 }
-function sseResponse(chunks) {
+function sseResponse(chunks, breakAtEnd) {
   var i = 0;
   return {
     ok: true,
@@ -68,7 +64,9 @@ function sseResponse(chunks) {
       getReader: function () {
         return {
           read: function () {
-            if (i >= chunks.length) return Promise.resolve({ done: true });
+            if (i >= chunks.length) {
+              return breakAtEnd ? Promise.reject(new Error('连接断开')) : Promise.resolve({ done: true });
+            }
             return Promise.resolve({ done: false, value: new TextEncoder().encode(chunks[i++]) });
           }
         };
@@ -110,6 +108,14 @@ global.fetch = function (url, init) {
   }
   if (fetchMode === 'stream') { return Promise.resolve(sseResponse(sseChunks())); }
   if (fetchMode === 'streamLen') { return Promise.resolve(sseResponse(sseChunksLen())); }
+  if (fetchMode === 'streamClosed' || fetchMode === 'streamBroken') {
+    return Promise.resolve(sseResponse(sseChunksLen().slice(0, 1), fetchMode === 'streamBroken'));
+  }
+  if (fetchMode === 'streamAborted') {
+    return Promise.resolve(sseResponse(sseChunksLen().map(function (chunk) {
+      return chunk.replace('"length"', '"aborted"');
+    })));
+  }
   if (fetchMode === 'ignoresStream') {      // 端点不认 stream ⇒ 回整包 JSON（页面按 content-type 分流）
     return Promise.resolve({
       ok: true,
@@ -272,9 +278,9 @@ function reset() {
     '★★ 公网解析出的地址里**没有任何本机地址**（不会去连访客自己的电脑）',
     JSON.stringify(bCloud));
 
-  // 9.3b 云端也没配（＝还没部署代理）⇒ 公网老实走知识库
+  // 9.3b 云端没配时没有在线候选
   CHAT_BACKEND.cloudUrl = '';
-  ok(resolvedBackend() === null, '公网 + 没配云端 ⇒ null（走知识库，页面照常能用）');
+  ok(resolvedBackend() === null, '公网 + 没配云端 ⇒ 没有候选');
   CHAT_BACKEND.cloudUrl = CLOUD_URL_DEFAULT;
 
   // 9.3c 本机打开时：本机 ollama **优先于**云端（本机开发用本地模型，免费又快）
@@ -316,16 +322,16 @@ function reset() {
   //    直接 eval 会重新声明 `CHAT_BACKEND`，让「eval 出来的函数」和「测试里引用的变量」
   //    变成**两组绑定** —— 后面几节就会拿着两个不同的 CHAT_BACKEND 在比对，结论全是假的。
   //    （这个坑当场踩了：第 11 节因此整节全红。）
-  function parseCfg(search) {
+  function parseCfg(search, page) {
     return new Function('location', cfg + '\n; return CHAT_BACKEND;')(
-      { protocol: 'file:', hostname: '', search: search }
+      Object.assign({ protocol: 'file:', hostname: '', search: search }, page)
     );
   }
 
   var c1 = parseCfg('?model=deepseek-r1:7b');
   ok(c1.localModel === 'deepseek-r1:7b', '?model= ⇒ localModel 被覆盖（本机 ollama 换模型）',
     '实际：' + c1.localModel);
-  ok(c1.model === 'deepseek-r1:7b', '?model= ⇒ model 一起覆盖（本机与公网语义一致）');
+  ok(c1.model === 'deepseek-r1:7b', '?model= ⇒ 本机显式端点的模型名一起覆盖');
 
   var c2 = parseCfg('');
   ok(c2.localModel === defaultModel, '不带 ?model= ⇒ 保持默认（' + defaultModel + '）',
@@ -341,6 +347,10 @@ function reset() {
     '?chat= 与 ?model= 能并用', 'url=' + c4.url + ' model=' + c4.localModel);
   ok(c4.localUrl === '' && c4.cloudUrl === '',
     '?chat= 出现 ⇒ 本机与云端都关掉（显式指定了就别自作主张回落）');
+
+  var cPublic = parseCfg('?chat=https://example.test/api&model=custom', { protocol: 'https:', hostname: 'mypage.example' });
+  ok(cPublic.cloudUrl === '/api/chat' && cPublic.url === '' && cPublic.cloudModel === 'deepseek-flash',
+    '公网的查询参数不能覆盖同源端点或模型');
 
   console.log('\n=== 11. ★ 依次降级：前一个后端不通，就自动试下一个 ===');
   // 这条是修一个**真踩过的坑**：以前是「选中一个、失败就直接落回知识库」，
@@ -366,23 +376,24 @@ function reset() {
   ok(calls === 2, '确实依次试了两个后端', '实际调了 ' + calls + ' 次');
   ok(backendFails === 0, '★ 有后端成功 ⇒ 不算失败（断路器不该乱跳）');
 
-  // 11.3 两个都不通 ⇒ 才算「失败一次」（不是两次）
+  // 11.3 公网故障后可立即重试，由代理限制频率
   reset();
   CHAT_BACKEND.url = '';
   global.location = { protocol: 'https:', hostname: 'x.test', search: '' };
   fetchMode = 'http500';
   var ans4 = await askBackend('y');
-  ok(ans4 === null, '公网 + 云端也挂 ⇒ null（落回知识库）');
-  ok(backendFails === 1, '★ 全部候选都不通 ⇒ 只计 1 次失败（不是按候选数算）',
+  ok(ans4 === null, '公网代理失败 ⇒ 没有模型回答');
+  ok(backendFails === 0, '★ 本机断路器不干涉公网请求',
     '实际 ' + backendFails);
+  ok(lastUrl === '/api/chat' && lastInit.redirect === 'error' && !lastInit.headers.Authorization,
+    '公网只向同源代理发请求，拒绝重定向');
 
   // 11.4 公网时不该出现本机候选
   reset();
-  CHAT_BACKEND.url = '';
+  CHAT_BACKEND.url = 'https://example.test/api';
   global.location = { protocol: 'https:', hostname: 'x.test', search: '' };
   var pub = backendCandidates();
-  ok(pub.every(function (c) { return !/127\.0\.0\.1|localhost|\[::1\]/.test(c.url); }),
-    '★★ 公网的候选列表里**没有任何本机地址**', JSON.stringify(pub));
+  ok(pub.length === 1 && pub[0].url === '/api/chat', '★★ 公网只保留同源代理', JSON.stringify(pub));
 
   fetchMode = 'ok';
   delete global.location;
@@ -422,6 +433,15 @@ function reset() {
   fetchMode = 'ok';
   await askBackend('q');
   ok(lastInit.body.indexOf('"stream":false') >= 0, '★ 不给 onDelta ⇒ stream = false（与以前一致）', lastInit.body);
+
+  for (const mode of ['streamClosed', 'streamBroken', 'streamAborted']) {
+    reset();
+    fetchMode = mode;
+    var interrupted = null;
+    var partial = await askBackend('q', { onDelta: function () {}, onDone: function (info) { interrupted = info; } });
+    ok(partial === '长话被截' && interrupted && interrupted.interrupted === true,
+      mode + ' ⇒ 保留已收到的内容并标记为中断', JSON.stringify(interrupted));
+  }
 
   fetchMode = 'ok';
 

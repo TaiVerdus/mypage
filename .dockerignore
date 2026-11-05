@@ -1,0 +1,11 @@
+**
+!Dockerfile
+!package.json
+!server.js
+!index.html
+!style.css
+!script.js
+!ai-log.html
+!favicon.svg
+!images/
+!images/**

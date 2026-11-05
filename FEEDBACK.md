@@ -1,4 +1,8 @@
-# 反馈后台（V3）：它怎么工作、你在哪看数据
+# 反馈后台
+
+期末版由同源 `POST /api/feedback` 接收表单，服务端校验后写入 CloudBase 的私有 `feedback` 集合。部署配置和上线验收见 [DEPLOY.md](DEPLOY.md)，本地用 `node tools/test-feedback-db.js` 模拟云服务回归。
+
+## V3 历史记录
 
 > 面向两件事：**课程验收**（能解释清楚表 / SQL / 权限 / 密钥）和**以后自己回看**。
 > 后端 = **WorkBuddy 云服务**（托管 PostgreSQL + PostgREST 接口 + 行级安全 RLS），
@@ -92,11 +96,7 @@ CREATE POLICY feedback_insert_anyone ON feedback               -- 第二道门�
 
 ## 6. 怎么自己验后台（不用高权限凭据）
 
-```bash
-NODE_PATH=<隔离的 node 工作区>/node_modules node tools/test-feedback-db.js
-```
-
-它用**和浏览器同款的官方 SDK**、以及从 `script.js` 现读的公开配置，问数据库三件事：
+当时的直连脚本已归档。它用**和浏览器同款的官方 SDK**、以及从 `script.js` 现读的公开配置，问数据库三件事：
 
 | 检查 | 期待 | 为什么这条重要 |
 | --- | --- | --- |

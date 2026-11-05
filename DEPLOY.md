@@ -1,5 +1,54 @@
 # 部署到公网：让任何人都能和数字分身聊
 
+## 期末版 · Render 免费版
+
+主页、`POST /api/chat` 和 `POST /api/feedback` 运行在同一个 Render Web Service。聊天调用 DeepSeek 官方 API，反馈写入腾讯云 CloudBase 文档数据库。
+
+1. 将期末源码同步到 GitHub 的 `final-render` 分支。在 [Render 控制台](https://dashboard.render.com/) 连接该仓库，选择 **New → Blueprint**，用 `final-render` 分支根目录的 `render.yaml` 创建服务。配置指定了 **Singapore**、**Free** 和 Node.js 24。
+2. 在 [CloudBase 控制台](https://console.cloud.tencent.com/tcb) 创建上海的免费体验环境。在文档数据库默认实例及默认数据库中建 `feedback` 集合，禁止客户端直接读写。若使用 PG 模式，先启用文档数据库功能。在环境配置的 API Key 管理页创建服务端密钥。
+3. 在 Render 填写以下变量。密钥填写在 Render 控制台，源码只包含变量名。若先建立服务测试页面，可在服务的 **Environment** 页面补齐变量后重新部署。
+
+   | 环境变量 | 值 |
+   | --- | --- |
+   | `DEEPSEEK_API_KEY` | 有效的 DeepSeek API 密钥 |
+   | `CLOUDBASE_ENV_ID` | CloudBase 免费环境的环境 ID |
+   | `CLOUDBASE_APIKEY` | CloudBase 环境的服务端 API Key |
+
+4. 也可以选择 **New → Web Service** 手动配置。同一仓库选 `final-render`，Runtime 选 Node，Region 选 Singapore，Instance Type 选 Free，Build Command 填 `node --check server.js && node --check script.js`，Start Command 填 `npm start`，Health Check Path 填 `/healthz`，并设置 `NODE_VERSION` 为 `>=24 <25`。
+5. 部署后使用 Render 分配的 `.onrender.com` 地址验收。用国内手机流量和校园网打开首页，实际提问确认流式回答，提交一条「期末验收」反馈并在 CloudBase 控制台核对。免费实例闲置 15 分钟后休眠，记录冷启动的实际等待时间。
+
+官方指引：[Render Web Services](https://render.com/docs/web-services) · [环境变量](https://render.com/docs/configure-environment-variables) · [免费实例限制](https://render.com/docs/free) · [CloudBase API Key](https://docs.cloudbase.net/http-api/basic/apikey)
+
+---
+
+## 早期备选 · 腾讯云 CloudBase 云托管
+
+新站将主页、`POST /api/chat` 和 `POST /api/feedback` 部署在同一个 CloudBase 云托管服务中。本文后面的 WorkBuddy 和 GitHub Pages 内容保留为 V4 过程记录。
+
+从零开户时先核对套餐与备案条件。腾讯云文档列出的 CloudBase 环境备案条件为个人版或以上、有效期剩余至少六个月、已开启云托管固定 IP。云托管还需开启超限按量。请在购买前以控制台显示的条件和价格为准。 [CloudBase 备案条件](https://docs.cloudbase.net/en/icp/) · [云托管使用限制](https://docs.cloudbase.net/run/limitation)
+
+1. 在 [CloudBase 控制台](https://console.cloud.tencent.com/tcb) 开通环境。在文档数据库的默认实例及默认数据库中创建 `feedback` 集合，将客户端读写均设为禁止。使用 PG 模式时先启用文档数据库功能。站主通过控制台读取反馈。
+2. 在环境设置的 ApiKey 管理中生成服务端 CloudBase API Key。在 [DeepSeek 平台](https://platform.deepseek.com/) 生成有效密钥并确认 API 账户可用。
+3. 在云托管创建 Node 服务，选择「本地代码部署」。解压期末源码包，选择包含 Dockerfile 的目录上传。Dockerfile 位于根目录，容器端口为 `8080`，启动命令由 Dockerfile 提供。用服务环境变量设置以下值。
+
+   | 环境变量 | 值 |
+   | --- | --- |
+   | `DEEPSEEK_API_KEY` | 新的 DeepSeek API 密钥 |
+   | `CHAT_MODEL` | `deepseek-flash` |
+   | `CLOUDBASE_ENV_ID` | 当前 CloudBase 环境 ID |
+   | `CLOUDBASE_APIKEY` | 当前环境的服务端 API Key |
+
+   只在云托管环境变量中配置生产密钥。上传目录中的 `Dockerfile`、`package.json`、`server.js`、主页文件及 `images/` 足够启动服务。源码包不含 `.env`、Git 历史或反馈数据。
+
+4. 先在云托管默认测试地址联调。首页应可打开，实际提问应流式返回。提交一条含「期末验收」的反馈，在文档数据库查到记录。若聊天返回上游 401，先检查密钥是否生效。若反馈提交失败，先核对环境 ID、API Key、集合及权限。
+5. 在 CloudBase 绑定已备案自定义域名，按控制台指引配置 DNS 和 HTTPS。若控制台采用 HTTP 网关，启用根路径转发并关闭访问鉴权，让老师能匿名打开主页。通过国内手机流量和校园网复测。默认域名仅用于测试。
+
+官方指引：[本地源码部署](https://docs.cloudbase.net/en/run/deploy/deploy/deploying-source-code) · [自定义域名](https://docs.cloudbase.net/run/deploy/networking/custom-domains) · [API Key](https://docs.cloudbase.net/http-api/basic/apikey)
+
+---
+
+## V4 历史部署记录
+
 > **目标**：访客打开网页就能聊，**不需要你的电脑开着**。
 > **做法**：页面 + 一层薄代理一起部署。代理保管 API key，并在服务端锁死分身的人设。
 

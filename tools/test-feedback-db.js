@@ -1,100 +1,121 @@
 #!/usr/bin/env node
-/**
- * 反馈后台的「真机验收」（V3 · 2026-09-24 改走 WorkBuddy 云服务）
- *
- * 为什么要有它：课件第 28 页说得很清楚 —— **不能只看网页提示「提交成功」**；
- * 第 18 页又说「页面隐藏不等于安全」，权限必须由**数据库层真的拒绝**才算数。
- * 这个脚本就用**公开配置**（endpoint + publishableKey，都从 script.js 里现读）去问三件事：
- *
- *   ① 匿名访客能插入一条反馈吗？          → 期待成功
- *   ② 匿名访客能读回反馈吗？              → 期待被拒（GRANT 只给了 INSERT + RLS 没有读策略）
- *   ③ 空内容会被数据库拒绝吗？            → 期待失败（建表时的 CHECK 约束在干活）
- *
- * 用法（先装官方 SDK，再跑）：
- *   npm install --prefix <隔离的 node 工作区> @tencent-ai/workbuddy-cloud-sdk@dev
- *   NODE_PATH=<隔离的 node 工作区>/node_modules node tools/test-feedback-db.js
- *
- * ⚠️ 用的是浏览器同款 SDK（不是手写 fetch）—— 手写 /.cloud/** 请求是错的。
- * ⚠️ 只需要公开配置；高权限凭据（数据库密码 / 平台密钥）不进这个脚本、也不进任何前端文件。
- * ⚠️ 它会真往表里写一条测试记录（带唯一标记），可在数据库管理界面删掉，也可以留着当证据。
- */
+// 本地回归测试：经过真实 HTTP 路由，用模拟的 CloudBase 响应检验入库协议。
+'use strict';
 
-var fs = require('fs');
-var path = require('path');
+const assert = require('node:assert/strict');
+const { randomBytes } = require('node:crypto');
+const { once } = require('node:events');
+const { test } = require('node:test');
 
-// ---- 配置从 script.js 现读，保证「验的就是线上用的那份」----
-var scriptPath = path.join(__dirname, '..', 'script.js');
-var src = fs.readFileSync(scriptPath, 'utf8');
-var mEndpoint = src.match(/endpoint:\s*'([^']+)'/);
-var mKey = src.match(/publishableKey:\s*'([^']+)'/);
-if (!mEndpoint || !mKey) {
-  console.log('✗ 没能从 script.js 里读到 CLOUD_CONFIG（改了写法？）');
-  process.exit(2);
-}
-var ENDPOINT = mEndpoint[1];
-var KEY = mKey[1];
+const cloudUrl = 'https://feedback-test.api.tcloudbasegateway.com/v1/database/instances/(default)/databases/(default)/collections/feedback/documents';
+const rows = new Map();
+const nativeFetch = global.fetch;
+let cloudFailure = false;
+const newId = () => randomBytes(16).toString('hex');
 
-var sdk;
-try {
-  sdk = require('@tencent-ai/workbuddy-cloud-sdk');
-} catch (e) {
-  console.log('✗ 没找到官方 SDK。先装再跑：');
-  console.log('   npm install --prefix <隔离的 node 工作区> @tencent-ai/workbuddy-cloud-sdk@dev');
-  console.log('   NODE_PATH=<隔离的 node 工作区>/node_modules node tools/test-feedback-db.js');
-  process.exit(2);
-}
-
-var cloud = sdk.createWorkBuddyCloud({ endpoint: ENDPOINT, publishableKey: KEY });
-var MARK = '自查-' + Math.random().toString(36).slice(2, 6).toUpperCase();
-var pass = 0, fail = 0;
-
-function ok(cond, label, detail) {
-  if (cond) { pass++; console.log('  OK   ' + label); }
-  else { fail++; console.log('  FAIL ' + label + (detail ? '  → ' + detail : '')); }
-}
-
-(async function () {
-  console.log('后台：' + ENDPOINT);
-  console.log('标记：' + MARK + '（用它在数据库里认出这条测试记录）');
-  console.log('');
-
-  console.log('=== ① 匿名访客能不能插入一条反馈 ===');
-  var ins = await cloud.database.from('feedback').insert({
-    name: '自查脚本',
-    relation: '其他',
-    device: '电脑',
-    message: MARK + ' 这条是验收脚本自动写的，用来确认「能收到、能存下」。',
-    version: 'V3.0'
-  });
-  ok(!ins.error, '插入成功（能收到、能存下）',
-    ins.error ? (ins.error.code + ' ' + ins.error.message) : '');
-
-  console.log('\n=== ② 匿名访客能不能读回反馈（权限是否真的挡住） ===');
-  var sel = await cloud.database.from('feedback').select('id, message').limit(5);
-  var rows = sel.data;
-  if (sel.error) {
-    ok(true, '读取被拒（' + (sel.error.code || '') + ' ' + (sel.error.message || '').slice(0, 60) + '）');
-  } else {
-    ok(Array.isArray(rows) && rows.length === 0,
-      '读回来是空数组（没有读策略 ⇒ 看不到任何人的反馈）',
-      JSON.stringify(rows).slice(0, 120));
+process.env.PORT = '0';
+process.env.DEEPSEEK_API_KEY = '';
+process.env.CLOUDBASE_ENV_ID = 'feedback-test';
+process.env.CLOUDBASE_APIKEY = 'fake-server-key';
+global.fetch = async (url, options) => {
+  assert.equal(url, cloudUrl);
+  assert.equal(options.method, 'POST');
+  assert.equal(options.headers.Authorization, 'Bearer fake-server-key');
+  assert.equal(options.redirect, 'error');
+  const { data } = JSON.parse(options.body);
+  assert.equal(data.length, 1);
+  const [row] = data;
+  if (cloudFailure) return Response.json({ message: 'provider detail' }, { status: 500 });
+  if (rows.has(row._id)) {
+    return Response.json({ code: 'DATABASE_DUPLICATE_WRITE' }, { status: 409 });
   }
+  rows.set(row._id, row);
+  return Response.json({ insertedIds: [row._id] }, { status: 201 });
+};
 
-  console.log('\n=== ③ 数据库层约束（空内容应当被拒） ===');
-  var bad = await cloud.database.from('feedback').insert({
-    message: '', relation: '其他', device: '电脑', version: 'V3.0'
+test('反馈 HTTP 路由', async (t) => {
+  const server = require('../server.js');
+  t.after(() => {
+    server.closeAllConnections();
+    server.close();
+    global.fetch = nativeFetch;
   });
-  ok(!!bad.error, '空 message 被数据库拒绝（不只是靠前端拦）',
-    bad.error ? (bad.error.code + ' ' + bad.error.message) : '竟然成功了');
+  await once(server, 'listening');
+  const url = 'http://127.0.0.1:' + server.address().port + '/api/feedback';
+  const data = {
+    id: newId(),
+    name: ' 试用昵称 ',
+    relation: '老师',
+    device: '手机',
+    message: ' 正常的验收反馈 ',
+    version: 'forged',
+    extra: 'discarded'
+  };
 
-  console.log('\n通过 ' + pass + ' / 失败 ' + fail);
-  if (!fail) {
-    console.log('\n⇒ 三条都过：后台真的在收、权限真的在挡、约束真的在管。');
-    console.log('  去云服务的数据管理界面搜「' + MARK + '」，应该正好能看到那一条。');
-  }
-  process.exit(fail ? 1 : 0);
-})().catch(function (e) {
-  console.log('跑挂了：' + (e && e.message ? e.message : e));
-  console.log('先确认：endpoint / publishableKey 对不对、网络能不能到后台。');
-  process.exit(1);
+  const submit = (body, extraHeaders = {}) => nativeFetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...extraHeaders },
+    body: JSON.stringify(body)
+  });
+
+  await t.test('写入后才返回成功，筛掉多余字段并使用服务端版本和时间', async () => {
+    const res = await submit(data);
+    assert.equal(res.status, 201);
+    assert.deepEqual(await res.json(), { ok: true });
+    const row = rows.get(data.id);
+    assert.deepEqual(row, {
+      _id: data.id,
+      name: '试用昵称',
+      relation: '老师',
+      device: '手机',
+      message: '正常的验收反馈',
+      version: 'Final',
+      created_at: row.created_at
+    });
+    assert.ok(Number.isFinite(Date.parse(row.created_at)));
+  });
+
+  await t.test('重试相同 ID 时只保存一条', async () => {
+    const res = await submit(data);
+    assert.equal(res.status, 201);
+    assert.deepEqual(await res.json(), { ok: true });
+    assert.equal(rows.size, 1);
+  });
+
+  await t.test('禁止公开读取、跨站提交和错误的内容类型', async () => {
+    assert.equal((await nativeFetch(url)).status, 405);
+    assert.equal((await submit(data, { 'Sec-Fetch-Site': 'cross-site' })).status, 403);
+    assert.equal((await submit(data, { 'Content-Type': 'text/plain' })).status, 415);
+    assert.equal(rows.size, 1);
+  });
+
+  await t.test('拒绝无效字段与过大的请求', async () => {
+    assert.equal((await submit({ ...data, relation: '未提供' })).status, 400);
+    assert.equal((await submit({ ...data, message: '   ' })).status, 400);
+    assert.equal((await submit({ ...data, message: '字'.repeat(3000) })).status, 413);
+    assert.equal(rows.size, 1);
+  });
+
+  await t.test('CloudBase 写入失败时不报成功，也不透出上游详情', async () => {
+    cloudFailure = true;
+    const res = await submit({ ...data, id: newId() });
+    assert.equal(res.status, 502);
+    const body = await res.json();
+    assert.equal(body.error.message, '反馈暂时无法保存，请稍后重试');
+    assert.equal(rows.size, 1);
+  });
+
+  await t.test('反馈请求有独立的限速额度', async () => {
+    cloudFailure = false;
+    for (let i = 0; i < 17; i++) {
+      assert.equal((await submit(data)).status, 201);
+    }
+    assert.equal((await submit(data)).status, 429);
+    const chat = await nativeFetch(new URL('/api/chat', url), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: [{ role: 'user', content: '你好' }] })
+    });
+    assert.equal(chat.status, 503);
+  });
 });

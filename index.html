@@ -74,7 +74,7 @@
       <!-- ⚠️ 原先这句开头还有「曾经发过的誓，会是未来发生的事。」——
            2026-09-22 按用户要求**挪进了导航栏**（紧挨站名，见 .nav-vow）。
            这里只留引导语，不要把那句再加回来（否则同一句话会出现两次）。 -->
-      <p class="hero-intro" data-lines>想更了解我？去下面问问我什么都不知道的数字分身。</p>
+      <p class="hero-intro" data-lines>想更了解我？去下面问问我的数字分身。</p>
       <a class="btn btn--primary hero-btn" href="#chat">问问我的数字分身</a>
       <ul class="hero-meta">
         <li><span class="meta-k">MBTI</span><span class="meta-v">ENFJ</span></li>
@@ -265,6 +265,7 @@
       <div class="section-head">
         <span class="eyebrow reveal">02 — 照片</span>
         <h2 class="section-title" data-lines>摄影</h2>
+        <p class="photo-section-note"><span class="photo-sphere-hint">滚动转动球体，</span>点照片查看原图，也可以<a href="#photo-album">直接打开照片集</a>。</p>
       </div>
 
       <!-- ========== 球体画廊（V2.7 续三十四） ==========
@@ -275,14 +276,13 @@
            ⚠️ 原版从 cdnjs 加载 GSAP + ScrollTrigger；**本站不用** ——
               全站 0 个外部依赖，引 CDN 会破掉「纯静态、自己实现」这条。理由详见 script.js 同名注释。
            ⚠️ 图片列表在 script.js 的 SPHERE_PHOTOS —— **换素材只改那一处**（现在是 9 张）。
-           ⚠️ 整块 `aria-hidden` —— 同样的照片在下面的照片墙里有 alt 描述，
-              球体是 3D 装饰，读屏念它两遍没有意义（可访问的那份在下面）。 -->
-      <div class="sphere-gallery" id="sphereGallery" aria-hidden="true">
+           球体与照片集共用原图浏览窗。 -->
+      <div class="sphere-gallery" id="sphereGallery" role="group" aria-label="照片球">
         <!-- 用 200vh 拉出可滚动的距离，里面 sticky 住一屏：
              不劫持滚动，只是「滚过它就转」。想更短改 .sphere-gallery 的高度即可。 -->
         <div class="sphere-scene">
           <div class="sphere" id="sphere"></div>
-          <p class="sphere-label" id="sphereLabel"></p>
+          <p class="sphere-label" id="sphereLabel" aria-hidden="true"></p>
         </div>
       </div>
       <!-- ========== 照片墙：4 条「带」拼成的一面墙（V2.7 续五十六 重排）==========
@@ -302,12 +302,13 @@
            ⚠️ **编号跟着墙的顺序重排成 01–09**（原来编号=文件名序号，重排后会乱跳）。
               编号是这套照片的「骨架」，读起来要顺 —— 文件名与编号的对应见样式表/PROJECT.md。
            ⚠️ `id` 一个没动：那是兴趣标签的锚点（photo-travel / drums / calligraphy / …）。 -->
-      <div class="photo-wall reveal">
+      <details class="photo-wall photo-album" id="photo-album">
+        <summary class="photo-album-summary">照片集 <span>01–09</span></summary>
 
         <!-- 带 1 · 开篇主图：日落（横构图里最宽的一张，配全宽最自然） -->
         <div class="wall-band band-hero">
           <figure class="photo-item ar-4x3" id="photo-photography">
-            <img src="images/3.jpg" alt="日落时望向远处，山丘、城市与水" loading="lazy" decoding="async">
+            <a class="photo-view" href="images/3.jpg"><img src="images/3.jpg" alt="日落时望向远处，山丘、城市与水" loading="lazy" decoding="async"></a>
             <figcaption><span class="photo-no">01</span></figcaption>
           </figure>
         </div>
@@ -319,18 +320,16 @@
                   **按项目既有口径不做后处理**：不修图、不裁掉别人的商标；水印本身也是「用什么拍的」的线索。
                ⚠️ **按原件尺寸入库（1706×1279），不缩放、不重编码** ——
                   用户 2026-09-22 明确要求「以后不要改尺寸」；入库曾是 1534×1150，同日已换回原件 ✓
-               ⚠️ 这张单独存成 images/entry-street.jpg（4:3 横拍，没挤进 1–9 的编号文件里），
-                  也暂时**没有做球体缩略图**（球体是一整圈竖版 3:4 卡片，混一张横的会显歪）。 -->
+               这张单独存为 images/entry-street.jpg。球体的夜市缩略图与照片集都链接到这张。 -->
           <figure class="photo-item ar-4x3" id="photo-travel">
-            <img src="images/entry-street.jpg" alt="从台阶高处俯看夜晚的街边夜市：成排的餐桌、人群与灯箱，画面下方是伸出去的鞋" loading="lazy" decoding="async">
+            <a class="photo-view" href="images/entry-street.jpg"><img src="images/entry-street.jpg" alt="从台阶高处俯看夜晚的街边夜市：成排的餐桌、人群与灯箱，画面下方是伸出去的鞋" loading="lazy" decoding="async"></a>
             <figcaption><span class="photo-no">02</span></figcaption>
           </figure>
           <figure class="photo-item ar-4x3" id="photo-basketball">
-            <img src="images/5.jpg" alt="日落时的篮球架与篮板，一颗球停在半空，背后是城市高楼和一棵树" loading="lazy" decoding="async">
+            <a class="photo-view" href="images/5.jpg"><img src="images/5.jpg" alt="日落时的篮球架与篮板，一颗球停在半空，背后是城市高楼和一棵树" loading="lazy" decoding="async"></a>
             <figcaption><span class="photo-no">03</span></figcaption>
           </figure>
-          <!-- 04（images/7.jpg，与上一张同场景的静态照）2026-09-26 按用户要求删除：三联改两联。
-               这件作品的裁水印版仍在球体画廊（sphere/7.jpg，标签「夜市」）；原图已 git rm（历史可找回）。 -->
+          <!-- 2026-09-26 照片墙去掉了同一画面的另一份编码（images/7.jpg）。 -->
         </div>
 
         <!-- 带 3 · 四联竖图（全站最密的一段：每张约四分之一宽）
@@ -339,19 +338,19 @@
              ⚠️ 这四张没有 id：目前没有任何链接指向它们（id 是给兴趣标签做锚点的）。 -->
         <div class="wall-band band-quartet">
           <figure class="photo-item ar-3x4" id="photo-calligraphy">
-            <img src="images/1.jpg" alt="书法课上，几个人围着一张长桌练字" loading="lazy" decoding="async">
+            <a class="photo-view" href="images/1.jpg"><img src="images/1.jpg" alt="书法课上，几个人围着一张长桌练字" loading="lazy" decoding="async"></a>
             <figcaption><span class="photo-no">04</span></figcaption>
           </figure>
           <figure class="photo-item ar-3x4">
-            <img src="images/6.jpg" alt="清晨的站台，太阳从侧面照过来，栏杆外是一片绿" loading="lazy" decoding="async">
+            <a class="photo-view" href="images/6.jpg"><img src="images/6.jpg" alt="清晨的站台，太阳从侧面照过来，栏杆外是一片绿" loading="lazy" decoding="async"></a>
             <figcaption><span class="photo-no">05</span></figcaption>
           </figure>
           <figure class="photo-item ar-3x4">
-            <img src="images/8.jpg" alt="演唱会现场，舞台大屏上一位表演者在唱歌，屏边有一行竖排字幕" loading="lazy" decoding="async">
+            <a class="photo-view" href="images/8.jpg"><img src="images/8.jpg" alt="演唱会现场，舞台大屏上一位表演者在唱歌，屏边有一行竖排字幕" loading="lazy" decoding="async"></a>
             <figcaption><span class="photo-no">06</span></figcaption>
           </figure>
           <figure class="photo-item ar-3x4">
-            <img src="images/9.jpg" alt="草地上的步道指示牌，牌面是列车线描造型，背后是绿树与城市高楼" loading="lazy" decoding="async">
+            <a class="photo-view" href="images/9.jpg"><img src="images/9.jpg" alt="草地上的步道指示牌，牌面是列车线描造型，背后是绿树与城市高楼" loading="lazy" decoding="async"></a>
             <figcaption><span class="photo-no">07</span></figcaption>
           </figure>
         </div>
@@ -361,11 +360,11 @@
              ⚠️ 改列划分必须同时改比例类，算式写在样式表 §15 里。 -->
         <div class="wall-band band-pair">
           <figure class="photo-item ar-14x15" id="photo-drums">
-            <img src="images/2.jpg" alt="有人坐在电子鼓前，一只手抬起" loading="lazy" decoding="async">
+            <a class="photo-view" href="images/2.jpg"><img src="images/2.jpg" alt="有人坐在电子鼓前，一只手抬起" loading="lazy" decoding="async"></a>
             <figcaption><span class="photo-no">08</span></figcaption>
           </figure>
           <figure class="photo-item ar-2x3" id="photo-performance">
-            <img src="images/4.jpg" alt="红光下的舞台，表演者的剪影张开双臂" loading="lazy" decoding="async">
+            <a class="photo-view" href="images/4.jpg"><img src="images/4.jpg" alt="红光下的舞台，表演者的剪影张开双臂" loading="lazy" decoding="async"></a>
             <figcaption>
               <span class="photo-no">09</span>
               <span class="photo-credit">摄影：活动主办方</span>
@@ -373,7 +372,26 @@
           </figure>
         </div>
 
-      </div>
+      </details>
+
+      <dialog class="photo-lightbox" id="photo-lightbox" aria-labelledby="photo-lightbox-title">
+        <div class="photo-lightbox-header">
+          <h3 id="photo-lightbox-title">照片集</h3>
+          <button type="button" class="btn photo-lightbox-close" autofocus>关闭</button>
+        </div>
+        <figure>
+          <img class="photo-lightbox-image" alt="">
+          <figcaption class="photo-lightbox-caption" aria-live="polite" aria-atomic="true">
+            <span class="photo-no"></span>
+            <span class="photo-lightbox-description"></span>
+            <span class="photo-credit" hidden></span>
+          </figcaption>
+        </figure>
+        <div class="photo-lightbox-controls">
+          <button type="button" class="btn photo-lightbox-prev">← 上一张</button>
+          <button type="button" class="btn photo-lightbox-next">下一张 →</button>
+        </div>
+      </dialog>
     </section>
 
     <!-- ========== 区块：每日推荐（原「反复在听」三张歌单，V2.7 续三十一改成每日推荐） ==========
@@ -731,7 +749,7 @@
       <div class="section-head section-head--center">
         <span class="eyebrow reveal">04 — 数字分身</span>
         <h2 class="section-title" data-lines>和我的数字分身聊聊</h2>
-        <p class="chat-note reveal">它只知道我告诉过它的事——不知道的时候，它会直说。</p>
+        <p class="chat-note reveal">它用 DeepSeek 和我提供的资料回答关于我的问题，遇到不清楚的事会直说。</p>
       </div>
       <div class="chat-window reveal">
         <div class="chat-header">
@@ -741,7 +759,7 @@
           <span class="chat-avatar"><img src="images/avatar.jpg" alt="" width="76" height="76"></span>
           <div>
             <strong>释贤的数字分身</strong>
-            <small>· AI 分身</small>
+            <small id="chatStatus" role="status">· DeepSeek 对话</small>
           </div>
           <!-- 清空记忆（V2.7 续六十八，用户 2026-09-23 定）：
                记忆存在**访客自己的浏览器**里（localStorage），所以「清空」这件事由访客自己掌控。
@@ -755,9 +773,10 @@
              ⚠️ 别再顺手加回来 —— 用户原话是「页面不放置任何按钮，只保留一个对话框」。
              引导改由开场白那句话承担（见 script.js 末尾）；样式与绑定也一起删了，要恢复看 git 历史。 -->
         <div class="chat-input-row">
-          <input type="text" id="chatInput" placeholder="问我点什么…" maxlength="100">
-          <button id="chatSend" class="btn btn--primary">发送</button>
+          <input type="text" id="chatInput" aria-label="向数字分身提问" placeholder="问我点什么…" maxlength="100">
+          <button id="chatSend" class="btn btn--primary" type="button">发送</button>
         </div>
+        <p class="chat-privacy" id="chatPrivacy">提问和近期对话上下文会发送给 DeepSeek 生成回复。本站的聊天记录保存在此浏览器，可清空。请勿输入敏感信息。</p>
       </div>
     </section>
 
@@ -857,7 +876,7 @@
   <footer id="footer">
     <p>© 2026 王释贤 · MYPAGE V3.0</p>
     <p><a class="footer-link" href="ai-log.html">AI 使用日志</a></p>
-    <p class="copyright">反馈会存进我的后台（只有我能看到）；向分身的提问也会匿名记一条，用来统计大家最关心什么（不记身份、不记回答）。回答由在线模型或本地预设问答生成，整段对话只留在你自己的浏览器里</p>
+    <p class="copyright">访客反馈仅供我查看。<a class="footer-link" href="#chatPrivacy">查看数字分身的对话隐私说明</a>。</p>
   </footer>
 
   <!-- ============================================================
@@ -908,9 +927,9 @@
       </button>
     </div>
 
-    <!-- 后台还没接上时的提示。接上 Supabase 后 JS 会把它藏起来 -->
+    <!-- 静态预览和旧镜像没有同源反馈接口。 -->
     <p class="fb-notice" id="fbNotice" hidden>
-      后台还没接入——现在提交只是走一遍界面，不会发给任何人。
+      请在正式主页提交反馈。此页面无法发送反馈。
     </p>
 
     <form class="fb-form" id="fbForm" novalidate>
@@ -1001,10 +1020,6 @@
   </div>
 
 
-  <!-- WorkBuddy 云服务的官方客户端库（CDN 形式：这是个纯静态页，没有构建步骤）：
-       全局变量是 WorkBuddyCloud，客户端在 script.js 里用 endpoint + publishableKey 初始化。
-       ⚠️ 用 @dev 通道，别改成 @latest（它还没维护，指向的是旧构建）。 -->
-  <script src="https://cdn.jsdelivr.net/npm/@tencent-ai/workbuddy-cloud-sdk@dev/lib/index.global.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

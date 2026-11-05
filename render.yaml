@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: shixian-homepage-final
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: node --check server.js && node --check script.js
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: ">=24 <25"
+      - key: NODE_ENV
+        value: production
+      - key: CHAT_MODEL
+        value: deepseek-flash
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: CLOUDBASE_ENV_ID
+        sync: false
+      - key: CLOUDBASE_APIKEY
+        sync: false

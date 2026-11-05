@@ -1040,7 +1040,15 @@ section {
 .chat-input-row {
   display: flex;
   gap: calc(10px * var(--scale));
-  padding: calc(12px * var(--scale)) calc(18px * var(--scale)) calc(16px * var(--scale));
+  padding: calc(12px * var(--scale)) calc(18px * var(--scale));
+}
+
+.chat-privacy {
+  margin: 0;
+  padding: 0 calc(18px * var(--scale)) calc(16px * var(--scale));
+  color: var(--color-muted);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-ui);
 }
 
 #chatInput {
@@ -1063,6 +1071,12 @@ section {
 #chatSend {
   padding: calc(10px * var(--scale)) calc(22px * var(--scale));
   font-size: var(--fs-body);
+}
+
+#chatSend:disabled,
+.chat-clear:disabled {
+  cursor: wait;
+  opacity: 0.65;
 }
 
 /* ---------- 8. 页脚 ---------- */
@@ -1385,10 +1399,43 @@ section {
       · 日落 1.4229 → 4:3（格子更"窄高"）⇒ **裁左右**各 ~3.2%
       · 架子鼓 0.8661 → 14:15（格子更"宽扁"）⇒ **裁上下**各 ~3.6%
       其余 8 张差 ≤0.8%（看不见）。⚠️ 这是**渲染层裁切**，原图文件一个字节没动。 */
-.photo-wall {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-4);              /* 带与带的间距 —— 与带内同一个值，间距只有一种 */
+.photo-section-note {
+  margin-top: var(--sp-3);
+  color: var(--color-muted);
+  font-size: var(--fs-sm);
+}
+
+.photo-section-note a {
+  color: var(--color-brand);
+  text-underline-offset: .18em;
+}
+
+.photo-album {
+  scroll-margin-top: calc(88px * var(--scale));
+}
+
+.photo-album-summary {
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--r-md);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.photo-album-summary::marker {
+  color: var(--color-brand);
+}
+
+.photo-album-summary span {
+  margin-inline-start: var(--sp-2);
+  color: var(--color-muted);
+  font-size: var(--fs-caption);
+}
+
+.photo-wall > .wall-band {
+  margin-top: var(--sp-4);
 }
 
 .wall-band {
@@ -1454,6 +1501,7 @@ section {
   border-radius: var(--r-md);
   box-shadow: var(--sh-2);
   backface-visibility: hidden;
+  cursor: zoom-in;
   /* 非正面：压暗 + 降饱和。正面那张恢复 —— 这就是原版的「正面高亮」机制 */
   filter: grayscale(.75) brightness(.55);
   opacity: .7;
@@ -1472,6 +1520,12 @@ section {
   box-shadow: 0 0 0 1px rgb(var(--c-brand-rgb) / .3), var(--sh-3);
   filter: none;
   opacity: 1;
+}
+
+.sphere-card:focus-visible {
+  outline-color: var(--color-brand);
+  outline-offset: 3px;
+  border-radius: var(--r-md);
 }
 
 /* 球形旁边那行短标题（用户要的是「只要短标题」，不写长描述）。
@@ -1512,7 +1566,7 @@ section {
     flex-wrap: wrap;
     gap: var(--sp-4);
     justify-content: center;
-    width: auto;
+    width: 100%;
     height: auto;
     transform: none !important;
   }
@@ -1520,19 +1574,21 @@ section {
   .sphere-card {
     position: static;
     margin: 0;
-    width: calc(128px * var(--scale));
-    height: calc(168px * var(--scale));
+    width: min(calc(128px * var(--scale)), calc((100% - var(--sp-4)) / 2));
+    height: auto;
+    aspect-ratio: 3 / 4;
     transform: none !important;
     filter: none;
     opacity: 1;
   }
 
-  .sphere-label {
+  .sphere-label,
+  .photo-sphere-hint {
     display: none;
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 640px) and (prefers-reduced-motion: no-preference) {
   .sphere-gallery {
     height: 160vh;
   }
@@ -1552,6 +1608,18 @@ section {
   background: var(--color-mint);   /* 图没加载出来时的占位底色 */
   box-shadow: var(--sh-1);
   transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+
+.photo-view {
+  position: absolute;
+  inset: 0;
+  display: block;
+  cursor: zoom-in;
+}
+
+.photo-view:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: -4px;
 }
 
 /* ⚠️ 高度 100% + cover：图填满「比例类」定下来的格子。
@@ -1595,21 +1663,96 @@ section {
   height: calc(30px * var(--scale));
   padding: 0 calc(10px * var(--scale));
   border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, .92);
-  color: var(--color-brand);
+  border: 1px solid var(--color-line-strong);
+  background: var(--color-surface);
+  color: var(--color-ink);
   font-size: var(--fs-caption);
   font-weight: 600;
   letter-spacing: var(--ls-label);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
   box-shadow: 0 2px 8px rgb(var(--c-brand-rgb) / .18);
 }
 
-/* 署名胶囊：字号与序号一致，颜色改用 ink —— 读起来像说明，而不是标签 */
 .photo-credit {
-  color: var(--color-ink);
   font-weight: 500;
-  letter-spacing: var(--ls-label);
+}
+
+.photo-credit[hidden] {
+  display: none;
+}
+
+.photo-lightbox {
+  position: fixed;
+  inset: 0;
+  width: min(58rem, calc(100% - 2 * var(--sp-4)));
+  max-width: none;
+  max-height: calc(100% - 2 * var(--sp-4));
+  margin: auto;
+  padding: var(--sp-4);
+  overflow: auto;
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--r-md);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  box-shadow: var(--sh-3);
+}
+
+.photo-lightbox::backdrop {
+  background: rgb(var(--c-scrim-rgb) / .86);
+}
+
+html:has(.photo-lightbox[open]) {
+  overflow: hidden;
+}
+
+.photo-lightbox-header,
+.photo-lightbox-controls,
+.photo-lightbox-caption {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.photo-lightbox-header,
+.photo-lightbox-controls {
+  justify-content: space-between;
+}
+
+.photo-lightbox-header h3 {
+  font-size: var(--fs-h3);
+}
+
+.photo-lightbox-controls,
+.photo-lightbox-caption {
+  margin-top: var(--sp-3);
+}
+
+.photo-lightbox-caption {
+  flex-wrap: wrap;
+  font-size: var(--fs-sm);
+  line-height: var(--lh-ui);
+}
+
+.photo-lightbox-description {
+  flex: 1 1 14rem;
+}
+
+.photo-lightbox-image {
+  display: block;
+  max-width: 100%;
+  max-height: 62vh;
+  max-height: 62dvh;
+  margin: var(--sp-3) auto 0;
+  border-radius: var(--r-sm);
+  object-fit: contain;
+}
+
+.photo-lightbox .btn {
+  min-height: 44px;
+  padding: 0 var(--sp-3);
+  background: var(--color-mint);
+  color: var(--color-ink);
+  font-size: var(--fs-sm);
+  white-space: nowrap;
 }
 
 /* 照片墙的窄屏：**每条带都变成两列**（带与带的高低关系不变）
